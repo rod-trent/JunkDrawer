@@ -1,4 +1,4 @@
-
+# Intune_Apps_Assignment.ps1
 
 PowerShell script that adds an assignment to a list of Microsoft Intune apps:
 
