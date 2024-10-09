@@ -86,11 +86,8 @@ SecurityEvent
 ---
 ```
 //SLIDE 42 - let STATEMENT EXAMPLE
-let suspiciousAccounts = datatable(account: string) [
-	@"\administrator", 
-	@"NT AUTHORITY\SYSTEM“
-];
-SecurityEvent | where Account in (suspiciousAccounts)  
+let suspiciousAccounts = datatable(account: string) [@"\administrator", @"NT AUTHORITY\SYSTEM"];
+SecurityEvent | where Account in (suspiciousAccounts)    
 ```
 ---
 ```
