@@ -43,11 +43,11 @@ SecurityEvent
 ```
 //SLIDE 29 - distinct EXAMPLE
 SecurityEvent
-| where EventID = 4625
+| where EventID == 4624
 | distinct Computer
 
 ThreatIntelligenceIndicator
-| where ThreatType contains “BotNet”
+| where ThreatType contains "BotNet"
 | distinct NetworkSourceIP
 ```
 ---
