@@ -37,7 +37,7 @@ SecurityEvent
 | where TimeGenerated > ago(1h)
 | where EventID == 4624
 | summarize count() by Account
-| top 10 by _count
+| top 10 by count_
 ```
 ---
 ```
