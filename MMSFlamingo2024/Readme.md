@@ -4,7 +4,7 @@
 
 ```
 //SLIDE 13 - Successful logins by count
-SecurityEvent 
+SecurityEvent
 | where TimeGenerated  > ago (1h)
 | where EventID == 4624
 | summarize count() by Account
