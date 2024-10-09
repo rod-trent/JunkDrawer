@@ -55,8 +55,8 @@ ThreatIntelligenceIndicator
 //SLIDE 32 - summarize EXAMPLE
 //Logons with clear text password by target account
 SecurityEvent
-| where EventID == 4624 and Logontype == 8
-| summarize count() by TargetComputer
+| where EventID == 4624 and LogonType == 8
+| summarize count() by Computer
 ```
 ---
 ```
