@@ -176,10 +176,10 @@ SecurityEvent
 ```
 //LAB 5
 // Find the encoded PowerShell command that was ran on a computer that endswith 3EX for the past 60 days.
-
-VMProcess| where TimeGenerated >= ago(90d)
-| where Computer endswith “CSK”
-| where CommandLine contains “encoded”  
+VMProcess
+| where TimeGenerated >= ago(90d)
+| where Computer endswith "CSK"
+| where CommandLine contains "encoded"
 ```
 ---
 ```
