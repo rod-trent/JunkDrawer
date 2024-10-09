@@ -3,6 +3,16 @@
 ## MMS Flamingo Edition 2024: https://mmsmoa.com/mms2024fll
 
 ```
+//SLIDE 13 - Successful logins by count
+SecurityEvent 
+| where TimeGenerated  > ago (1h)
+| where EventID == 4624
+| summarize count() by Account
+| order by Account asc 
+| project Account , SuccessfulLogons = count_ 
+```
+---
+```
 //SLIDE 20 - where EXAMPLE
 SecurityEvent
 | where TimeGenerated > ago(1h)
