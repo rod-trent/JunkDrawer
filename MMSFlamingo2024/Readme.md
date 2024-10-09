@@ -63,10 +63,7 @@ SecurityEvent
 //SLIDE 35 - project EXAMPLE
 Perf
 | where CounterName == "Free Megabytes" 
-| extend FreeKB = CounterValue * 1024
-| extend FreeGB = CounterValue / 1024
-| extend FreeMB = CounterValue 
-| project Computer, CounterName, FreeGB, FreeMB, FreeKB 
+| project Computer, CounterName
 ```
 ---
 ```
