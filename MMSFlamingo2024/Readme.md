@@ -90,7 +90,6 @@ let suspiciousAccounts = datatable(account: string) [@"\administrator", @"NT AUT
 SecurityEvent | where Account in (suspiciousAccounts)
 
 //EXTRA: Query to show events in just the workweek
-
 let workweek = datatable(dayOfWeekTimespan:int, dayOfWeekDayDisplayName:string, firstH:int, lastH:int) [ 0, "Sunday", 9, 18, 1, "Monday", 9, 18, 2, "Tuesday", 9, 18, 3, "Wednesday", 9, 18, 4, "Thursday", 9, 18, 5, "Friday", 9, 18, 6, "Saturday", 9, 18, ];
 let startDate = ago(60d); let endDate = now();
 SecurityEvent
