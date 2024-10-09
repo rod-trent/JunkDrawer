@@ -13,6 +13,22 @@ SecurityEvent
 ```
 ---
 ```
+//SLIDE 15 - getschema Operator
+SecurityEvent
+| getschema 
+```
+---
+```
+//SLIDE 16/17 - search Operator
+search "SQL01$"
+
+search "SQL01$"
+| distinct $table
+
+search in (SecurityEvent) "SQL01$" 
+```
+---
+```
 //SLIDE 20 - where EXAMPLE
 SecurityEvent
 | where TimeGenerated > ago(1h)
