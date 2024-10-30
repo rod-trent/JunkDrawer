@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80%;
+            height: 80%;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .title {
+            margin-bottom: 20px;
+        }
+        .panes {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+        .pane {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+        }
+        .pane textarea {
+            width: 100%;
+            height: calc(100% - 40px); /* Adjust height to account for heading */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: none;
+            font-family: monospace;
+        }
+        .pane pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            height: calc(100% - 40px); /* Adjust height to account for heading */
+            overflow: auto;
+        }
+        .pane.left {
+            border-right: 1px solid #ccc;
+        }
+        .pane h2 {
+            margin: 0 0 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Single Line JSON Converter</h1>
+        <div class="panes">
+            <div class="pane left">
+                <h2>Paste JSON here</h2>
+                <textarea id="json-input" placeholder="Paste your single line JSON here..."></textarea>
+            </div>
+            <div class="pane right">
+                <h2>Formatted JSON</h2>
+                <pre id="json-output"></pre>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('json-input').addEventListener('input', function() {
+            const input = this.value;
+            try {
+                const json = JSON.parse(input);
+                const formattedJson = JSON.stringify(json, null, 4);
+                document.getElementById('json-output').textContent = formattedJson;
+            } catch (e) {
+                document.getElementById('json-output').textContent = 'Invalid JSON';
+            }
+        });
+    </script>
+</body>
+</html>
