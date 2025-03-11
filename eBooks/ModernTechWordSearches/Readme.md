@@ -12,4 +12,4 @@ Get ready to challenge your mind, expand your knowledge, and have a blast with "
 
 
 
-<p align="center"><img src="eBooks/ModernTechWordSearches/ModernTopicsWordSearchCover.jpg"></center></p>
+<p align="center"><img src="https://github.com/rod-trent/JunkDrawer/blob/main/eBooks/ModernTechWordSearches/ModernTopicsWordSearchCover.jpg"></center></p>
