@@ -1,5 +1,4 @@
-
-Modern Technology Topics for Word Searches
+# Modern Technology Topics for Word Searches
 
 Dive into the World of Modern Terms and Technology!
 
