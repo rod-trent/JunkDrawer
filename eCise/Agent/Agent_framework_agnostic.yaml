@@ -1,0 +1,315 @@
+version: "1.0"
+
+agent:
+  name: "eCise Coach"
+  description: "A smart, self-updating workout generator that fetches enriched exercise data from GitHub, caches it locally, and produces balanced routines with trainer-level details."
+  goals:
+    - Generate workouts by number of exercises or time available
+    - Always try to use the freshest exercise data from GitHub
+    - Work offline using local cache or built-in fallback
+    - Print enriched details (equipment, muscles, how_to, difficulty, reps, injury considerations, video)
+  persona: >
+    You are a concise, encouraging fitness coach with a developer’s precision. You explain
+    choices briefly, cite assumptions, and return clean, scannable output.
+
+capabilities:
+  network: ["read"]   # HTTP GET to fetch JSON
+  filesystem: ["read", "write"]  # cache JSON + metadata locally
+  randomness: true    # for random workout selection
+  templating: true    # to render the final plan nicely
+
+environment:
+  variables:
+    DATA_URL: "https://raw.githubusercontent.com/rod-trent/JunkDrawer/main/eCise/exercises_enriched_v2.json"
+    CACHE_PATH: "./exercises_cache.json"
+    META_PATH: "./exercises_cache.meta.json"
+  python:
+    version: "3.10"
+    requirements:
+      - requests>=2.31.0
+
+memory:
+  strategy: "ephemeral"   # agent doesn’t store PII; only uses on-disk cache files
+  cache_files:
+    - path: "${CACHE_PATH}"
+      description: "Cached exercise data"
+    - path: "${META_PATH}"
+      description: "ETag/Last-Modified metadata for conditional requests"
+
+inputs:
+  - name: "mode"
+    type: "enum"
+    enum: ["by_exercises", "by_time"]
+    required: true
+    description: "Choose to specify a number of exercises or time in minutes."
+  - name: "value"
+    type: "integer"
+    required: true
+    description: "If mode=by_exercises → number of exercises. If mode=by_time → minutes."
+  - name: "refresh"
+    type: "boolean"
+    required: false
+    default: false
+    description: "If true, bypass cache and force a fresh download."
+
+outputs:
+  - name: "text"
+    type: "markdown"
+    description: "A formatted workout plan with enriched fields and demo links."
+
+commands:
+  - name: "by_exercises"
+    description: "Generate a workout with a specific number of exercises."
+    parameters:
+      - name: "count"
+        type: "integer"
+        required: true
+      - name: "refresh"
+        type: "boolean"
+        required: false
+        default: false
+  - name: "by_time"
+    description: "Generate a workout based on time available (minutes)."
+    parameters:
+      - name: "minutes"
+        type: "integer"
+        required: true
+      - name: "refresh"
+        type: "boolean"
+        required: false
+        default: false
+
+workflows:
+  - name: "generate_plan"
+    entrypoint: true
+    when:
+      any:
+        - "${mode} == 'by_exercises'"
+        - "${mode} == 'by_time'"
+    steps:
+      - id: load_exercises
+        run: python
+        code: |
+          import os, json, requests, random, pathlib
+          from collections import defaultdict
+
+          DATA_URL = os.environ["DATA_URL"]
+          CACHE_PATH = pathlib.Path(os.environ["CACHE_PATH"])
+          META_PATH = pathlib.Path(os.environ["META_PATH"])
+
+          FALLBACK = {
+            "Chest":[{"name":"Flat Barbell Bench Press","description":"Lie on a flat bench holding a barbell. Lower to chest; press back up.","youtube_link":"https://www.youtube.com/watch?v=rT7DgCr-3pg"},
+                     {"name":"Push-Ups","description":"Plank position; lower chest near floor; push back up.","youtube_link":"https://www.youtube.com/watch?v=IODxDxX7oi4"}],
+            "Back":[{"name":"Pull-Ups","description":"Hang from bar; pull until chin passes bar; lower with control.","youtube_link":"https://www.youtube.com/watch?v=eGo4IYlbE5g"}],
+            "Legs":[{"name":"Barbell Squats","description":"Bar on back; squat to parallel; stand tall.","youtube_link":"https://www.youtube.com/watch?v=Dy28eq2PjcY"}],
+            "Arms":[{"name":"Barbell Curls","description":"Underhand grip; curl to chest; lower slowly.","youtube_link":"https://www.youtube.com/watch?v=kwG2ipFRgfo"}],
+            "Core":[{"name":"Plank","description":"Forearms + toes; body straight; hold.","youtube_link":"https://www.youtube.com/watch?v=pSHjTRCQxIw"}]
+          }
+
+          def _read_json(p):
+            try:
+              return json.loads(p.read_text(encoding="utf-8"))
+            except Exception:
+              return None
+
+          def _write_json(p, data):
+            try:
+              p.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+              return True
+            except Exception:
+              return False
+
+          def _conditional_headers():
+            meta = _read_json(META_PATH)
+            if not isinstance(meta, dict):
+              return {}
+            h = {}
+            if "ETag" in meta: h["If-None-Match"] = meta["ETag"]
+            if "Last-Modified" in meta: h["If-Modified-Since"] = meta["Last-Modified"]
+            return h
+
+          def _save_cache(data, headers):
+            if not isinstance(data, dict) or not data: return
+            _write_json(CACHE_PATH, data)
+            meta = {}
+            if "ETag" in headers: meta["ETag"] = headers["ETag"]
+            if "Last-Modified" in headers: meta["Last-Modified"] = headers["Last-Modified"]
+            if meta: _write_json(META_PATH, meta)
+
+          def _normalize(raw):
+            if isinstance(raw, dict):
+              return {k: v for k, v in raw.items() if isinstance(v, list)}
+            if isinstance(raw, list):
+              keys = ["group","muscle_group","muscleGroup","category","bodypart","body_part"]
+              buckets = defaultdict(list)
+              for item in raw:
+                if not isinstance(item, dict): continue
+                g = None
+                for k in keys:
+                  if k in item and item[k]:
+                    g = str(item[k]); break
+                buckets[g or "Misc"].append(item)
+              return dict(buckets)
+            return {}
+
+          force_refresh = bool(${refresh})
+
+          data = None
+          if force_refresh:
+            try:
+              r = requests.get(DATA_URL, timeout=10)
+              r.raise_for_status()
+              data = _normalize(r.json())
+              if data: _save_cache(data, r.headers)
+            except Exception:
+              pass
+          else:
+            try:
+              headers = _conditional_headers()
+              r = requests.get(DATA_URL, headers=headers, timeout=10)
+              if r.status_code == 304:
+                data = _read_json(CACHE_PATH)
+              else:
+                r.raise_for_status()
+                data = _normalize(r.json())
+                if data: _save_cache(data, r.headers)
+            except Exception:
+              data = _read_json(CACHE_PATH)
+
+          if not data:
+            data = FALLBACK
+
+          # export to workflow context
+          output = {"exercises_by_group": data}
+      - id: choose_mode
+        run: python
+        code: |
+          import random, math
+          data = ${load_exercises.output.exercises_by_group}
+          groups = list(data.keys())
+          if not groups:
+            output = {"workout": []}
+          else:
+            mode = "${mode}"
+            value = int(${value})
+            # determine target number of exercises
+            if mode == "by_time":
+              time_per = 10
+              target = max(len(groups), value // time_per)
+            else:
+              target = max(1, value)
+
+            workout = []
+            if target < len(groups):
+              picks = random.sample(groups, target)
+              workout = [random.choice(data[g]) for g in picks if data[g]]
+            else:
+              workout = [random.choice(data[g]) for g in groups if data[g]]
+              while len(workout) < target:
+                g = random.choice(groups)
+                if data[g]:
+                  workout.append(random.choice(data[g]))
+            random.shuffle(workout)
+            output = {"workout": workout}
+      - id: render_markdown
+        run: python
+        code: |
+          import json
+
+          def fmt(v):
+            if v is None or v == "": return "N/A"
+            if isinstance(v, list):
+              # support list of strings or list of dicts with label keys
+              if v and isinstance(v[0], dict):
+                keys = ["name","muscle","label","title"]
+                parts = []
+                for d in v:
+                  if not isinstance(d, dict): parts.append(str(d)); continue
+                  chosen = None
+                  for k in keys:
+                    if k in d and d[k]:
+                      chosen = d[k]; break
+                  parts.append(str(chosen) if chosen is not None else json.dumps(d, ensure_ascii=False))
+                return ", ".join(parts)
+              return ", ".join(str(x) for x in v)
+            if isinstance(v, dict):
+              return json.dumps(v, ensure_ascii=False)
+            return str(v)
+
+          workout = ${choose_mode.output.workout}
+
+          lines = []
+          lines.append("# Your Custom Workout Routine")
+          lines.append("")
+          lines.append("_Perform 3 sets of 8–12 reps for each exercise unless otherwise specified._")
+          lines.append("")
+          if not workout:
+            lines.append("> No exercises available.")
+          else:
+            for idx, ex in enumerate(workout, 1):
+              name = ex.get("name", "Unknown Exercise")
+              desc = ex.get("how_to") or ex.get("description") or "No description available."
+              video = ex.get("youtube_link") or ex.get("video") or "N/A"
+              equipment = ex.get("equipment")
+              primary = ex.get("primary_muscles")
+              secondary = ex.get("secondary_muscles")
+              how_to = ex.get("how_to")
+              difficulty = ex.get("difficulty")
+              reps = ex.get("recommended_rep_scheme")
+              injuries = ex.get("injury_considerations")
+
+              lines.append(f"## {idx}. {name}")
+              lines.append("")
+              lines.append(f"- **Description:** {fmt(desc)}")
+              lines.append(f"- **YouTube/Video:** {fmt(video)}")
+              if equipment is not None:
+                lines.append(f"- **Equipment:** {fmt(equipment)}")
+              if primary is not None:
+                lines.append(f"- **Primary Muscles:** {fmt(primary)}")
+              if secondary is not None:
+                lines.append(f"- **Secondary Muscles:** {fmt(secondary)}")
+              if how_to is not None and how_to != desc:
+                lines.append(f"- **How To:** {fmt(how_to)}")
+              if difficulty is not None:
+                lines.append(f"- **Difficulty:** {fmt(difficulty)}")
+              if reps is not None:
+                lines.append(f"- **Recommended Rep Scheme:** {fmt(reps)}")
+              if injuries is not None:
+                lines.append(f"- **Injury Considerations:** {fmt(injuries)}")
+              lines.append("")
+
+          output = {"markdown": "\n".join(lines)}
+
+responses:
+  success:
+    content_type: "markdown"
+    template: |
+      {{ render_markdown.output.markdown }}
+
+examples:
+  - name: "Generate by number of exercises"
+    input:
+      mode: "by_exercises"
+      value: 10
+      refresh: false
+  - name: "Generate by time"
+    input:
+      mode: "by_time"
+      value: 45
+      refresh: false
+  - name: "Force refresh"
+    input:
+      mode: "by_exercises"
+      value: 8
+      refresh: true
+
+error_handling:
+  network_failure: "If GitHub fetch fails, read local cache; if cache missing, use built-in minimal dataset."
+  empty_result: "Return a markdown note indicating no exercises available."
+  invalid_input: "If mode/value invalid, instruct user to supply mode in ['by_exercises','by_time'] and a positive integer value."
+
+security:
+  pii_handling: "No user PII stored. Only non-sensitive exercise data cached on disk."
+  allowed_hosts:
+    - "raw.githubusercontent.com"
+    - "githubusercontent.com"
