@@ -1,5 +1,5 @@
 
-# 🧠 Deploying the eCise CrewAI Agent  
+# 🧠 Deploying and using the eCise CrewAI Agent  
 ### *“Because even your Python agents need to lift.”*
 
 ---
