@@ -65,7 +65,7 @@ If you’re traveling, disconnected, or GitHub is down, eCise automatically fall
 Want to force an update? Run:
 
 ```bash
-python eCise.py --refresh
+python eCise.py --download
 ```
 
 This wipes the cache and downloads the freshest data.
@@ -129,7 +129,7 @@ python eCise.py
 Optional flags:
 
 ```bash
---refresh    # Force a fresh download
+--download    # Force a fresh download
 ```
 
 Default behavior uses cached or fallback data.
