@@ -192,6 +192,42 @@ def load_exercises(force_download=False):
     print("➡️ Falling back to built-in dataset.")
     return FALLBACK_EXERCISES
 
+# ===== Equipment helpers =====
+def get_unique_equipment(exercises_by_group):
+    equipments = set()
+    for group, exs in exercises_by_group.items():
+        for ex in exs:
+            eq = ex.get("equipment")
+            if eq is None or not eq:
+                continue
+            if isinstance(eq, list):
+                temp_set = {str(e).strip().lower() for e in eq if str(e).strip()}
+            else:
+                temp_set = {str(eq).strip().lower()} if str(eq).strip() else set()
+            for e in temp_set:
+                if e != "bodyweight":
+                    equipments.add(e)
+    return sorted(list(equipments))
+
+def filter_exercises_by_equipment(exercises_by_group, selected_eq):
+    if selected_eq is None:
+        return {k: v[:] for k, v in exercises_by_group.items()}
+    new_data = defaultdict(list)
+    for group, exs in exercises_by_group.items():
+        for ex in exs:
+            eq = ex.get("equipment")
+            if eq is None:
+                eq_set = set()
+            elif isinstance(eq, list):
+                eq_set = {str(e).strip().lower() for e in eq if str(e).strip()}
+            else:
+                eq_set = {str(eq).strip().lower()} if str(eq).strip() else set()
+            if eq_set == {"bodyweight"}:
+                eq_set = set()
+            if eq_set.issubset(selected_eq):
+                new_data[group].append(ex)
+    return dict(new_data)
+
 # ===== Workout generation =====
 def generate_workout(exercises_by_group, num_exercises=None, time_available=None):
     groups = list(exercises_by_group.keys())
@@ -304,6 +340,41 @@ def main():
 
     if not exercises_by_group:
         print("❌ Unable to load exercises.")
+        sys.exit(1)
+
+    # Prompt for equipment
+    unique_eq = get_unique_equipment(exercises_by_group)
+    if unique_eq:
+        print("\nAvailable equipment options:")
+        for i, eq in enumerate(unique_eq, 1):
+            print(f"{i}. {eq.capitalize()}")
+        user_input = input("Enter the equipment you have available (comma-separated numbers or names, or 'none' for bodyweight only, or 'all' for any): ").strip().lower()
+    else:
+        user_input = 'none'  # Default to none if no equipment found
+        print("\nNo specific equipment found in data. Using bodyweight only.")
+
+    if user_input == 'all':
+        selected_eq = None
+    elif user_input == 'none':
+        selected_eq = set()
+    else:
+        parts = [p.strip() for p in user_input.split(',') if p.strip()]
+        selected_eq = set()
+        for p in parts:
+            if p.isdigit():
+                try:
+                    idx = int(p) - 1
+                    if 0 <= idx < len(unique_eq):
+                        selected_eq.add(unique_eq[idx])
+                except ValueError:
+                    pass
+            elif p in unique_eq:
+                selected_eq.add(p)
+
+    exercises_by_group = filter_exercises_by_equipment(exercises_by_group, selected_eq)
+
+    if not exercises_by_group:
+        print("❌ No exercises available with the selected equipment.")
         sys.exit(1)
 
     choice = input("Select mode: (1) Number of exercises, (2) Time available (in minutes): ").strip()
