@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Grok Disinformation Checker",
+  "version": "1.0",
+  "description": "Analyzes the current page for disinformation using the Grok API.",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["https://api.x.ai/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Check for Disinformation"
+  }
+}
