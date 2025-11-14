@@ -1,5 +1,5 @@
 
-# Automating Your Job Hunt: Introducing JobAgent.py – A Python Script for Scouring X for Opportunities
+# Automating Your Job Hunt: Introducing JobAgent.py – A Python Agent for Scouring X for Opportunities
 
 In today's fast-paced job market, staying on top of new openings can feel like a full-time job itself. Platforms like LinkedIn and Indeed are go-tos for many, but what about X (formerly Twitter)? It's a goldmine for real-time job postings, especially from startups, tech companies, and niche industries where opportunities are shared via threads, announcements, or viral posts. However, manually sifting through X's feed is inefficient and overwhelming.
 
