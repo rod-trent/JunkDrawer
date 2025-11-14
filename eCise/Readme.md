@@ -85,6 +85,8 @@ Enter time available (in minutes): 45
 
 Each workout is randomly drawn from all muscle groups, ensuring balance across your program.
 
+It will also prompt for the equipment you have available.
+
 ### Example Output
 
 ```text
