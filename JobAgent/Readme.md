@@ -66,6 +66,10 @@ x_results = json.loads(content)
 
 This uses Grok's semantic search for smarter matching beyond basic keywords.
 
+Here's an example of the output:
+
+![JobAgent Output Example](https://github.com/rod-trent/JunkDrawer/blob/main/JobAgent/JobAGentexample.jpg "JobAgent Output Example")
+
 ## Implementing JobAgent.py: Setup Guide
 
 Ready to try it? Here's how to get it running. You'll need Python 3.6+ and some libraries.
