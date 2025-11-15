@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Grok Persona Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chat-message { max-width: 80%; word-wrap: break-word; }
+        .grok-loading { display: none; }
+        .grok-loading.active { display: flex; }
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #9333ea; border-radius: 3px; }
+        .share-btn { opacity: 0; transition: opacity 0.2s; }
+        .chat-message:hover .share-btn { opacity: 1; }
+        .share-menu { animation: fadeIn 0.2s ease-out; transform-origin: bottom right; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 text-white min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-black bg-opacity-50 backdrop-blur-md border-b border-purple-700 p-4">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-robot text-3xl text-purple-400"></i>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    Grok Persona Chat
+                </h1>
+            </div>
+            <div class="text-sm text-gray-300">
+                Powered by <span class="font-semibold text-purple-400">Grok API</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="flex-1 flex flex-col lg:flex-row max-w-6xl mx-auto w-full p-4 gap-4">
+
+        <!-- Sidebar -->
+        <aside class="lg:w-80 w-full bg-black bg-opacity-40 backdrop-blur-lg rounded-2xl p-6 border border-purple-700 shadow-2xl">
+            <h2 class="text-xl font-semibold mb-4 flex items-center">
+                <i class="fas fa-user-cog mr-2 text-purple-400"></i> Active Persona
+            </h2>
+
+            <!-- Current Persona -->
+            <div id="current-persona" class="mb-6 p-4 bg-gradient-to-r from-purple-800 to-pink-800 rounded-xl text-center">
+                <div class="text-3xl mb-2" id="persona-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3 id="persona-name" class="font-bold text-lg">Default Assistant</h3>
+                <p id="persona-desc" class="text-sm text-gray-300">Helpful AI assistant powered by Grok.</p>
+            </div>
+
+            <!-- Persona Presets -->
+            <div class="space-y-3 mb-6">
+                <h3 class="text-sm font-medium text-gray-300 uppercase tracking-wider">Choose a Persona</h3>
+                <div class="grid grid-cols-1 gap-2">
+                    <button class="persona-btn p-3 rounded-lg bg-gray-800 hover:bg-purple-700 transition-all text-left flex items-center space-x-3" 
+                            data-name="Tech Guru" 
+                            data-icon="fa-laptop" 
+                            data-source="https://news.ycombinator.com" 
+                            data-prompt="You are a tech expert from Hacker News. Be concise, witty, and reference startups/tech trends.">
+                        <i class="fas fa-laptop text-2xl text-purple-400"></i>
+                        <div><div class="font-medium">Tech Guru</div><div class="text-xs text-gray-400">Hacker News Style</div></div>
+                    </button>
+
+                    <button class="persona-btn p-3 rounded-lg bg-gray-800 hover:bg-purple-700 transition-all text-left flex items-center space-x-3" 
+                            data-name="Philosopher" 
+                            data-icon="fa-brain" 
+                            data-source="https://plato.stanford.edu" 
+                            data-prompt="You are a modern philosopher inspired by Stanford Encyclopedia. Be reflective, use logic, and explore deep questions.">
+                        <i class="fas fa-brain text-2xl text-purple-400"></i>
+                        <div><div class="font-medium">Philosopher</div><div class="text-xs text-gray-400">Stanford Philosophy</div></div>
+                    </button>
+
+                    <button class="persona-btn p-3 rounded-lg bg-gray-800 hover:bg-purple-700 transition-all text-left flex items-center space-x-3" 
+                            data-name="News Anchor" 
+                            data-icon="fa-newspaper" 
+                            data-source="https://www.reuters.com" 
+                            data-prompt="You are a neutral news anchor from Reuters. Be factual, balanced, and cite sources when possible.">
+                        <i class="fas fa-newspaper text-2xl text-purple-400"></i>
+                        <div><div class="font-medium">News Anchor</div><div class="text-xs text-gray-400">Reuters Style</div></div>
+                    </button>
+
+                    <button class="persona-btn p-3 rounded-lg bg-gray-800 hover:bg-purple-700 transition-all text-left flex items-center space-x-3" 
+                            data-name="Creative Writer" 
+                            data-icon="fa-feather-alt" 
+                            data-source="https://www.gutenberg.org" 
+                            data-prompt="You are a literary writer inspired by Project Gutenberg classics. Use rich, descriptive language and metaphors.">
+                        <i class="fas fa-feather-alt text-2xl text-purple-400"></i>
+                        <div><div class="font-medium">Creative Writer</div><div class="text-xs text-gray-400">Gutenberg Classics</div></div>
+                    </button>
+
+                    <button class="persona-btn p-3 rounded-lg bg-gray-800 hover:bg-purple-700 transition-all text-left flex items-center space-x-3" 
+                            data-name="Humorist" 
+                            data-icon="fa-laugh" 
+                            data-source="https://www.theonion.com" 
+                            data-prompt="You are a satirical writer from The Onion. Be absurd, ironic, and hilariously over-the-top.">
+                        <i class="fas fa-laugh text-2xl text-purple-400"></i>
+                        <div><div class="font-medium">Humorist</div><div class="text-xs text-gray-400">The Onion Satire</div></div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Model Selector -->
+            <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-300 uppercase tracking-wider mb-2">Model (Real-Time Data)</h3>
+                <select id="model-select" class="w-full px-3 py-2 bg-gray-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <option value="grok-4">grok-4 (Latest, Real-Time)</option>
+                    <option value="grok-4-fast-reasoning">grok-4-fast-reasoning</option>
+                    <option value="grok-3">grok-3</option>
+                    <option value="grok-3-mini">grok-3-mini (Free Tier)</option>
+                </select>
+            </div>
+
+            <!-- Custom Source -->
+            <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-300 uppercase tracking-wider mb-2">Custom Source</h3>
+                <div class="flex gap-2">
+                    <input type="url" id="custom-url" placeholder="https://example.com" class="flex-1 px-3 py-2 bg-gray-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"/>
+                    <button id="apply-custom" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium transition">Apply</button>
+                </div>
+                <p class="text-xs text-gray-400 mt-2">Enter a website to inspire the chatbot's knowledge style.</p>
+            </div>
+
+            <!-- API Key -->
+            <div class="p-4 bg-yellow-900 bg-opacity-30 border border-yellow-600 rounded-lg">
+                <label class="block text-sm font-medium mb-2">Grok API Key</label>
+                <input type="password" id="api-key" placeholder="xai-..." class="w-full px-3 py-2 bg-gray-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"/>
+                <p class="text-xs text-yellow-300 mt-2">
+                    Get your key at <a href="https://console.x.ai" target="_blank" class="underline">console.x.ai</a> (paste cleanly!)
+                </p>
+            </div>
+        </aside>
+
+        <!-- Chat Area -->
+        <main class="flex-1 flex flex-col bg-black bg-opacity-40 backdrop-blur-lg rounded-2xl border border-purple-700 shadow-2xl overflow-hidden">
+            <div id="chat-messages" class="flex-1 p-6 space-y-4 overflow-y-auto scrollbar-thin">
+                <div class="text-center text-gray-400 text-sm">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Select a persona and enter your API key to begin.
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-purple-700 bg-black bg-opacity-50">
+                <div class="flex gap-2">
+                    <input 
+                        type="text" 
+                        id="user-input" 
+                        placeholder="Type your message..." 
+                        class="flex-1 px-4 py-3 bg-gray-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-500"
+                        autocomplete="off"
+                    />
+                    <button id="send-btn" class="px-5 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-xl font-medium transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div id="grok-loading" class="grok-loading justify-center items-center mt-3 space-x-2">
+                    <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                    <div class="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
+                    <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+                    <span class="text-sm text-gray-400 ml-2">Grok is thinking...</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="text-center py-4 text-xs text-gray-500">
+        <p>Built by <a href="https://x.com/rodtrent" target="_blank" class="text-purple-400 hover:underline">@rodtrent</a> • Nov 15, 2025</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // === Configuration ===
+            const GROK_API_URL = 'https://api.x.ai/v1/chat/completions';
+            const MODEL_OPTIONS = ['grok-4', 'grok-4-fast-reasoning', 'grok-3', 'grok-3-mini'];
+            const SHARE_BASE_URL = window.location.href.split('?')[0];
+            const USER_HANDLE = '@rodtrent';
+
+            // === DOM Elements ===
+            const chatMessages   = document.getElementById('chat-messages');
+            const userInput      = document.getElementById('user-input');
+            const sendBtn        = document.getElementById('send-btn');
+            const apiKeyInput    = document.getElementById('api-key');
+            const customUrlInput = document.getElementById('custom-url');
+            const applyCustomBtn = document.getElementById('apply-custom');
+            const loadingIndicator = document.getElementById('grok-loading');
+            const personaButtons   = document.querySelectorAll('.persona-btn');
+            const modelSelect      = document.getElementById('model-select');
+            const currentPersona = {
+                name: document.getElementById('persona-name'),
+                icon: document.getElementById('persona-icon'),
+                desc: document.getElementById('persona-desc')
+            };
+
+            // === State ===
+            let currentPrompt = "You are a helpful and friendly AI assistant powered by Grok.";
+            let conversationHistory = [];
+
+            // === Validate API Key ===
+            function validateApiKey(key) {
+                const trimmed = key.trim();
+                if (trimmed.includes('\n') || trimmed.includes('\r') || /[^\x20-\x7E]/.test(trimmed)) {
+                    return { valid: false, error: 'API key contains invalid characters. Paste cleanly.' };
+                }
+                return { valid: true, cleaned: trimmed };
+            }
+
+            // === Truncate for Share ===
+            function truncate(text, max = 140) {
+                return text.length > max ? text.slice(0, max - 3) + '...' : text;
+            }
+
+            // === Create Share Menu ===
+            function createShareMenu(text, msgId) {
+                const cleanText = text.replace(/<[^>]*>/g, '').trim();
+                const preview = truncate(cleanText);
+                const shareText = `"${preview}"\n\n— Grok ${USER_HANDLE}\n${SHARE_BASE_URL}#msg-${msgId}`;
+                const encodedText = encodeURIComponent(shareText);
+                const encodedUrl = encodeURIComponent(SHARE_BASE_URL);
+
+                return `
+                    <div class="share-menu absolute bottom-full right-0 mb-2 bg-gray-900 border border-purple-600 rounded-lg shadow-2xl p-3 w-48 z-20">
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <button onclick="share('email','${encodedText}')" class="flex items-center gap-2 p-2 hover:bg-purple-800 rounded">
+                                <i class="fas fa-envelope text-purple-400"></i> Email
+                            </button>
+                            <button onclick="share('x','${encodedText}')" class="flex items-center gap-2 p-2 hover:bg-purple-800 rounded">
+                                <i class="fab fa-x-twitter text-purple-400"></i> X
+                            </button>
+                            <button onclick="share('facebook','${encodedUrl}')" class="flex items-center gap-2 p-2 hover:bg-purple-800 rounded">
+                                <i class="fab fa-facebook text-blue-500"></i> FB
+                            </button>
+                            <button onclick="share('linkedin','${encodedText}')" class="flex items-center gap-2 p-2 hover:bg-purple-800 rounded">
+                                <i class="fab fa-linkedin text-blue-400"></i> LinkedIn
+                            </button>
+                            <button onclick="share('bluesky','${encodedText}')" class="flex items-center gap-2 p-2 hover:bg-purple-800 rounded col-span-2">
+                                <i class="fas fa-cloud text-sky-400"></i> Bluesky
+                            </button>
+                        </div>
+                    </div>`;
+            }
+
+            window.share = function(platform, data) {
+                const urls = {
+                    email: `mailto:?subject=Grok%20Response&body=${data}`,
+                    x: `https://twitter.com/intent/tweet?text=${data}`,
+                    facebook: `https://www.facebook.com/sharer/sharer.php?u=${data}`,
+                    linkedin: `https://www.linkedin.com/shareArticle?mini=true&url=${SHARE_BASE_URL}&summary=${data}`,
+                    bluesky: `https://bsky.app/intent/compose?text=${data}`
+                };
+                window.open(urls[platform], '_blank', 'width=600,height=400');
+            };
+
+            // === Add Message with Share Button ===
+            function addMessage(content, sender = 'user') {
+                const msgId = Date.now();
+                const div = document.createElement('div');
+                div.className = `chat-message flex ${sender === 'user' ? 'justify-end' : 'justify-start'} relative`;
+                div.id = `msg-${msgId}`;
+
+                const bubble = document.createElement('div');
+                bubble.className = `px-4 py-3 rounded-2xl max-w-xs lg:max-w-md ${
+                    sender === 'user'
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
+                        : 'bg-gray-800 text-gray-100'
+                }`;
+
+                bubble.innerHTML = content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/`(.*?)`/g, '<code class="bg-gray-700 px-1 rounded text-xs">$1</code>')
+                    .replace(/\n/g, '<br>');
+
+                div.appendChild(bubble);
+
+                if (sender === 'bot') {
+                    const shareBtn = document.createElement('button');
+                    shareBtn.innerHTML = '<i class="fas fa-share-alt"></i>';
+                    shareBtn.className = 'share-btn absolute -right-8 top-2 text-gray-400 hover:text-purple-400 p-1 text-sm';
+                    shareBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        const menu = div.querySelector('.share-menu');
+                        if (menu) menu.remove();
+                        else div.insertAdjacentHTML('beforeend', createShareMenu(content, msgId));
+                    };
+                    div.appendChild(shareBtn);
+                }
+
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                if (window.location.hash === `#msg-${msgId}`) {
+                    div.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+
+            // === Send to Grok ===
+            async function sendToGrok(message) {
+                const validation = validateApiKey(apiKeyInput.value);
+                if (!validation.valid) {
+                    addMessage(`API Key Error: ${validation.error}`, 'bot');
+                    return;
+                }
+                const apiKey = validation.cleaned;
+                const model  = modelSelect.value;
+                if (!MODEL_OPTIONS.includes(model)) {
+                    addMessage(`Model <code>${model}</code> is not supported.`, 'bot');
+                    return;
+                }
+
+                loadingIndicator.classList.add('active');
+                sendBtn.disabled = true;
+
+                try {
+                    const resp = await fetch(GROK_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model,
+                            messages: [
+                                { role: 'system', content: currentPrompt },
+                                ...conversationHistory,
+                                { role: 'user', content: message }
+                            ],
+                            temperature: 0.8,
+                            max_tokens: 1024
+                        })
+                    });
+
+                    if (!resp.ok) {
+                        const err = await resp.json().catch(() => ({}));
+                        throw new Error(err.error?.message || `HTTP ${resp.status}`);
+                    }
+
+                    const data = await resp.json();
+                    const reply = data.choices[0]?.message?.content?.trim() || "No response.";
+
+                    conversationHistory.push({ role: 'user', content: message });
+                    conversationHistory.push({ role: 'assistant', content: reply });
+                    if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
+
+                    addMessage(reply, 'bot');
+                } catch (e) {
+                    addMessage(`Error: ${e.message}`, 'bot');
+                } finally {
+                    loadingIndicator.classList.remove('active');
+                    sendBtn.disabled = false;
+                    userInput.focus();
+                }
+            }
+
+            function handleSend() {
+                const msg = userInput.value.trim();
+                if (!msg) return;
+                addMessage(msg, 'user');
+                userInput.value = '';
+                sendToGrok(msg);
+            }
+
+            // === Switch Persona (FIXED) ===
+            function switchPersona(name, iconClass, source, prompt) {
+                currentPrompt = prompt;
+
+                currentPersona.name.textContent = name;
+                currentPersona.desc.textContent = `Inspired by: ${new URL(source).hostname}`;
+
+                currentPersona.icon.innerHTML = '';
+                const i = document.createElement('i');
+                i.className = `fas ${iconClass} text-3xl`;
+                currentPersona.icon.appendChild(i);
+
+                document.querySelectorAll('.persona-btn').forEach(b =>
+                    b.classList.remove('ring-2', 'ring-purple-400', 'bg-purple-900')
+                );
+                event.currentTarget.classList.add('ring-2', 'ring-purple-400', 'bg-purple-900');
+
+                conversationHistory = [];
+                chatMessages.innerHTML = `
+                    <div class="text-center text-gray-400 text-sm">
+                        <i class="fas fa-sync-alt mr-1"></i>
+                        Persona switched to <strong>${name}</strong>. Start chatting!
+                    </div>`;
+            }
+
+            // === Event Listeners ===
+            sendBtn.addEventListener('click', handleSend);
+            userInput.addEventListener('keypress', e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                }
+            });
+
+            personaButtons.forEach(btn => {
+                btn.addEventListener('click', e => {
+                    const { name, icon, source, prompt } = e.currentTarget.dataset;
+                    switchPersona(name, icon, source, prompt);
+                });
+            });
+
+            applyCustomBtn.addEventListener('click', () => {
+                const url = customUrlInput.value.trim();
+                if (!url || !/^https?:\/\//i.test(url)) {
+                    alert('Please enter a valid URL (e.g., https://example.com)');
+                    return;
+                }
+                const domain = new URL(url).hostname;
+                const customPrompt = `You are an AI assistant whose knowledge and communication style is inspired by the content, tone, and structure of ${domain}. Adapt your responses accordingly while remaining helpful and coherent.`;
+                switchPersona(`Custom: ${domain}`, 'fa-globe', url, customPrompt);
+                customUrlInput.value = '';
+            });
+
+            // === Welcome ===
+            setTimeout(() => {
+                addMessage(`
+                    Welcome <strong>${USER_HANDLE}</strong>!<br><br>
+                    • Click any persona on the left – it updates instantly<br>
+                    • Hover over Grok replies → <strong>share icon</strong><br>
+                    • Using <strong>grok-4</strong> for real-time data<br>
+                    • Get API key at <a href="https://console.x.ai" class="underline">console.x.ai</a>
+                `, 'bot');
+            }, 500);
+
+            userInput.focus();
+        });
+    </script>
+</body>
+</html>
