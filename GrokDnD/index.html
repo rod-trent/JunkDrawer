@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuestForge Local • AI Dungeon Master</title>
+    <style>
+        body { font-family: 'Georgia', serif; background: #0f0f0f; color: #e0e0e0; margin: 0; }
+        #chat { max-width: 900px; margin: 0 auto; padding: 20px; height: 90vh; display: flex; flex-direction: column; }
+        #messages { flex: 1; overflow-y: auto; padding: 20px; background: #1a1a1a; border-radius: 10px; }
+        .message { margin: 15px 0; padding: 12px 18px; border-radius: 15px; max-width: 80%; }
+        .user { background: #3a86ff; align-self: flex-end; margin-left: auto; }
+        .ai { background: #2d2d2d; border: 1px solid #444; align-self: flex-start; }
+        #input-area { display: flex; margin-top: 20px; }
+        input { flex: 1; padding: 15px; font-size: 16px; background: #222; border: 1px solid #444; color: white; border-radius: 10px; }
+        button { padding: 15px 25px; margin-left: 10px; background: #8338ec; color: white; border: none; border-radius: 10px; cursor: pointer; }
+        h1 { text-align: center; color: #ffbe0b; }
+        .dice { color: #ff006e; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="chat">
+        <h1>⚔️ QuestForge Local ⚔️</h1>
+        <div id="messages">
+            <div class="message ai">Welcome, adventurer!<br><br>
+            Type <b>Start new adventure</b> or continue your saved campaign.</div>
+        </div>
+        <div id="input-area">
+            <input type="text" id="userInput" placeholder="What do you do?" autofocus autocomplete="off">
+            <button onclick="send()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const messagesDiv = document.getElementById('messages');
+        const input = document.getElementById('userInput');
+
+        function addMessage(text, sender) {
+            const div = document.createElement('div');
+            div.className = 'message ' + sender;
+            div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        async function send() {
+            const message = input.value.trim();
+            if (!message) return;
+            addMessage(message, 'user');
+            input.value = '';
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message})
+            });
+            const data = await response.json();
+            addMessage(data.response, 'ai');
+        }
+
+        input.addEventListener('keypress', e => {
+            if (e.key === 'Enter') send();
+        });
+    </script>
+</body>
+</html>
