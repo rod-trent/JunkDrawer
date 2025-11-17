@@ -58,6 +58,7 @@ GROK_MODEL=grok-4
 Full code is below — yes, really, just two files.
 
 Put this in the main directory: https://github.com/rod-trent/JunkDrawer/blob/main/GrokDnD/app.py
+
 Put this in a \templates\ directory under the main directory: https://github.com/rod-trent/JunkDrawer/blob/main/GrokDnD/index.html
 
 
