@@ -53,9 +53,13 @@ GROK_MODEL=grok-4
 4. `pip install flask python-dotenv requests`  
 5. `python app.py`  
 6. Open http://localhost:5000  
-7. Type “Start a new D&D 5e adventure” and watch magic happen
+7. Type “Start a new adventure” and watch magic happen
 
 Full code is below — yes, really, just two files.
+
+Put this in the main directory: https://github.com/rod-trent/JunkDrawer/blob/main/GrokDnD/app.py
+Put this in a \templates\ directory under the main directory: https://github.com/rod-trent/JunkDrawer/blob/main/GrokDnD/index.html
+
 
 ### The Moment It Clicked
 
