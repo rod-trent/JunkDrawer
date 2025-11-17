@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grokipedia Search Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .input-group {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            min-height: 100px;
+            overflow-y: auto;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .api-key-group {
+            margin-bottom: 20px;
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Grokipedia Search Chatbot</h1>
+        <p>Powered by xAI's Grok API. Enter your API key below (it stays local in your browser).</p>
+        
+        <div class="api-key-group">
+            <label for="api-key">xAI API Key:</label>
+            <input type="password" id="api-key" placeholder="Enter your XAI_API_KEY here">
+        </div>
+        
+        <div class="input-group">
+            <input type="text" id="topic" placeholder="Enter a topic to search on Grokipedia">
+            <button onclick="searchGrokipedia()">Search</button>
+        </div>
+        
+        <div class="response" id="response"></div>
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        async function searchGrokipedia() {
+            const topic = document.getElementById('topic').value.trim();
+            const apiKey = document.getElementById('api-key').value.trim();
+            const responseDiv = document.getElementById('response');
+            const errorDiv = document.getElementById('error');
+
+            responseDiv.innerHTML = '';
+            errorDiv.innerHTML = '';
+
+            if (!topic) {
+                errorDiv.innerHTML = 'Please enter a valid topic.';
+                return;
+            }
+            if (!apiKey) {
+                errorDiv.innerHTML = 'Please enter your xAI API key.';
+                return;
+            }
+
+            responseDiv.innerHTML = 'Searching...';
+
+            try {
+                const response = await fetch('https://api.x.ai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'grok-3',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: 'You are Grok, a helpful AI by xAI. Use your capabilities to search and summarize content from Grokipedia.'
+                            },
+                            {
+                                role: 'user',
+                                content: `Search Grokipedia for ${topic} and provide a detailed summary.`
+                            }
+                        ],
+                        max_tokens: 1000,
+                        temperature: 0.7
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status} - ${await response.text()}`);
+                }
+
+                const data = await response.json();
+                responseDiv.innerHTML = data.choices[0].message.content;
+            } catch (error) {
+                errorDiv.innerHTML = `Error: ${error.message}`;
+                responseDiv.innerHTML = '';
+            }
+        }
+    </script>
+</body>
+</html>
