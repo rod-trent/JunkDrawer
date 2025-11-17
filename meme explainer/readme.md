@@ -69,7 +69,3 @@ You’re welcome, internet.
 
 Link again when you run it → share your best generations below.  
 The saltiest timeline wins.
-
-🗿
-
-P.S. Yes, this entire post was written by me, not Grok. But the meme explainer inside the tool absolutely will drag me harder than I just dragged you. Try it.
