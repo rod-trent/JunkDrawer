@@ -47,7 +47,7 @@ The whole thing is ~150 lines. I literally built it in an afternoon while procra
 
 ### Try It Right Now (It’s Free)
 
-Deployed and live: [https://roast-my-fitness.streamlit.app](https://roast-my-fitness.streamlit.app)  
+Deployed and live: https://github.com/rod-trent/JunkDrawer/tree/main/Roast%20My%20Fitness  
 (If Hugging Face Spaces or Streamlit Cloud hugs it to death from traffic, I’ll spin up a better host.)
 
 Warning: This app will hurt feelings. Side effects may include:
@@ -85,6 +85,8 @@ st.caption("Fixed & working Nov 18 2025 | Powered by the real Grok API 🔥")
 ```
 
 (Full code in the gist/repo linked below if you want the pretty version.)
+
+https://github.com/rod-trent/JunkDrawer/tree/main/Roast%20My%20Fitness 
 
 ### Final Burn
 
