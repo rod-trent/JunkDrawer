@@ -6,8 +6,8 @@ Meet **Sci-Fi Story Co-Writer**: a Streamlit app that turns xAI’s Grok-3 into 
 
 You type a paragraph in the style of *The Hitchhiker’s Guide to the Galaxy*. Grok-3 instantly continues it with perfect prose, bone-dry British wit, improbable inventions, and a strict “no breaking the fourth wall” policy. The result? An endlessly expanding, canon-consistent, laugh-out-loud sci-fi epic that feels like Douglas Adams himself came back for one more cup of tea.
 
-Link to the live app (when I deploy it): coming soon  
-Full source code: right here in this post (and on GitHub shortly)
+* Link to the live app: https://github.com/rod-trent/JunkDrawer/blob/main/SciFi%20Cowriter/SciFiCoWriter.py   
+* Full source code: right here in this post
 
 ### What It Actually Does
 
