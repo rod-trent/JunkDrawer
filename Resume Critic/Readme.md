@@ -1,4 +1,4 @@
-# I Built a “Brutally Honest Career Advisor” App That Roasts Your Résumé With Grok-3 (And It Will Hurt Your Feelings)
+# “Brutally Honest Career Advisor” App That Roasts Your Résumé With Grok-3 (And It Will Hurt Your Feelings)
 
 In 2025, the job market is more savage than ever. Recruiters spend 7.4 seconds on your résumé. AI screeners reject 75% of applicants before a human even blinks. Everyone is “passionate,” “results-oriented,” and apparently saved their last company 4000% in costs.
 
