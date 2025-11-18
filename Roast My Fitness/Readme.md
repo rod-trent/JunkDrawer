@@ -13,7 +13,7 @@ I’m tired of polite fitness advice.
 - Normal apps: “You can do it! 🌟”
 - Grok in this app: “You’re 85 kg of broken dreams and family-size chip bags. The only thing you’ve been lifting is the remote. Congrats, you peaked in high school.”
 
-It’s the motivational kick in the ass we all secretly need.
+It’s the motivational kick in the butt we all secretly need.
 
 And because it’s Grok, the roast is *personalized*. You confess that Coke is your breakfast? It will remember. You say your favorite excuse is “gym clothes are dirty”? It will never let you forget.
 
