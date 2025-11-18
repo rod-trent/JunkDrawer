@@ -53,7 +53,7 @@ Full code is 150 lines. You can have it running locally in under two minutes.
 Here’s the whole thing (copy-paste ready):
 
 ```python
-# app.py — Brutally Honest Career Advisor (2025 edition)
+# ResumeCritic.py — Brutally Honest Career Advisor (2025 edition)
 import streamlit as st
 import os
 from dotenv import load_dotenv
@@ -128,7 +128,7 @@ Tone: Gordon Ramsay meets a venture capitalist who’s late for his flight.
 Run it with:
 ```bash
 pip install streamlit python-dotenv PyPDF2 requests
-streamlit run app.py
+streamlit run ResumeCritic.py
 ```
 
 Get your API key at https://x.ai/api
