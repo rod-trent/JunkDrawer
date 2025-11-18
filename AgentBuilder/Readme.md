@@ -77,4 +77,4 @@ https://github.com/rod-trent/JunkDrawer/blob/main/AgentBuilder/CreateAgentYAML.p
 
 Now stop hand-crafting YAML and start shipping agents 🤖
 
-P.S. If you build something cool with it, tag Rod (or me)! I’d love to see what people are creating in late 2025.
+P.S. If you build something cool with it, tag me! I’d love to see what people are creating in late 2026.
