@@ -57,7 +57,7 @@ streamlit run app.py
 
 That’s it. No Docker. No complicated setup. No hallucinations.
 
-### The Full Code (Copy-Paste Ready – 100% Working Nov 18, 2025)
+### The Full Code (Copy-Paste Ready)
 
 ```python
 import streamlit as st
@@ -203,7 +203,7 @@ I’m already cooking:
 - Local LLM fallback when you’re offline
 
 Star the repo (I’ll push it tonight):  
-→ https://github.com/yourusername/grok-code-review-bot (coming in 5 minutes)
+→ https://github.com/rod-trent/JunkDrawer
 
 Try it. Paste your most embarrassing legacy function. Or drop your startup’s repo URL.
 
