@@ -143,4 +143,4 @@ Use it. Cry a little. Then go fix your career.
 You’re welcome.  
 (And yes, I ran my own résumé through it first. It hurt. A lot.)
 
-🔗 GitHub repo coming soon — star this post if you want me to open-source the polished version with dark mode and one-click LinkedIn export.
+
