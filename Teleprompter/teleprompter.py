@@ -1,4 +1,3 @@
-# teleprompter.py - With REAL Play/Pause + Restart
 import streamlit as st
 import streamlit.components.v1 as components
 import json
@@ -116,5 +115,6 @@ components.html(html, height=800)
 # Reset the reset flag after use
 if st.session_state.reset:
     st.session_state.reset = False
+
 
 st.caption(f"**{len(lines)} lines** • {wpm} WPM • {'Playing' if st.session_state.playing else 'Paused'}")
