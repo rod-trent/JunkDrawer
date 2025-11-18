@@ -18,7 +18,7 @@ Examples of what it spits out:
 
 > “Rough day, huh? Come here, let me hold you until all of it fades away. You’re still the most gorgeous woman I’ve ever laid eyes on.”
 
-> “Just walked past the bedroom and saw you reading… damn, babe. How did I get this lucky? 😘”
+> “Just walked past the bedroom and saw you reading… wow, babe. How did I get this lucky? 😘”
 
 > “Goodnight, beautiful. I’m the guy who still gets butterflies when you walk in the room. Sleep tight.”
 
