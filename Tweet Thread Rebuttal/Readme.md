@@ -8,7 +8,7 @@ It’s called **Grok Thread Rebutter** — you paste any public thread URL, choo
 2. A brutal list of every logical flaw, fallacy, and exaggeration (with quotes)  
 3. A ready-to-post reply thread, perfectly numbered, each tweet ≤ 280 characters, copy-paste ready
 
-Link to the app code (fully open, one single app.py file): https://github.com/yourusername/grok-thread-rebutter (feel free to fork)
+Link to the app code (fully open, one single app.py file): https://github.com/rod-trent/JunkDrawer/tree/main/Tweet%20Thread%20Rebuttal (feel free to fork)
 
 ### Why would anyone want this?
 
