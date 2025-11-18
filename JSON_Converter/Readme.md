@@ -1,8 +1,6 @@
 ![JSON Converter](https://raw.githubusercontent.com/rod-trent/JunkDrawer/refs/heads/main/JSON_Converter/Images/workingwithjson.jpg "JSON Converter")
 
-# My Favorite Offline JSON Formatter: A Tool I Built and Actually Use Every Day
-
-Hi, I'm Rod Trent – yes, the guy behind the somewhat chaotically named *JunkDrawer* repo on GitHub.
+# My Favorite Offline JSON Formatter: A Tool I Built and Actually Use Often
 
 Over the years I’ve thrown hundreds of random scripts, KQL queries, one-liners, and little utilities in there. Most of them are quick-and-dirty things I needed during a Sentinel incident, a customer call, or while staring at yet another unreadable blob of JSON at 2 a.m.
 
