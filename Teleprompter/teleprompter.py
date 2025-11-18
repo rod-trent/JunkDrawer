@@ -1,4 +1,3 @@
-# teleprompter.py ─ FINAL, REALLY WORKS THIS TIME
 import streamlit as st
 import streamlit.components.v1 as components
 import json
@@ -89,5 +88,6 @@ with col1:
         st.rerun()
 with col2:
     st.caption(f"**{len(lines)} lines** • {wpm} WPM • {font_size}px • 60 fps smooth")
+
 
 st.success("✓ Works perfectly now — text appears instantly and scrolls beautifully!")
