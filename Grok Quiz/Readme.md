@@ -1,6 +1,5 @@
 # I Built a Grok-Powered Flashcard App in One Afternoon – And It’s Insane How Well It Works
 
-**Date: November 18, 2025**  
 **Author: A very happy developer who just 10x’d their learning speed**
 
 I used to spend hours making Anki cards by hand.  
