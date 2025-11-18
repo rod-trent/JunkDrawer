@@ -13,7 +13,7 @@ That YAML file defines everything about your custom agent:
 
 One tiny indentation error and your agent fails to deploy. 😩
 
-Enter a tiny but insanely useful Python script from Microsoft Sentinel legend **Rod Trent**:  
+Enter a tiny but insanely useful Python script:  
 [**CreateAgentYAML.py**](https://github.com/rod-trent/JunkDrawer/blob/main/AgentBuilder/CreateAgentYAML.py)
 
 ### What does it do?
