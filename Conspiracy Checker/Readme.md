@@ -15,7 +15,7 @@ You don’t need to be a programmer. Works on Windows, Mac, or Linux.
 
 #### Step 1: Grab the code
 Copy this entire script and save it as `conspiracy_detector.py`  
-→ Direct link (clean, ready-to-run version): [https://gist.github.com/yourfriend/grok-disinfo-detector.py ](https://github.com/rod-trent/JunkDrawer/blob/main/Conspiracy%20Checker/conspiracy_detector.py)  
+→ Direct link (clean, ready-to-run version): https://github.com/rod-trent/JunkDrawer/blob/main/Conspiracy%20Checker/conspiracy_detector.py   
 
 #### Step 2: Install Python (one-time)
 If you don’t have it: https://python.org/downloads  
@@ -81,7 +81,7 @@ Pro tip: Set tone to “Maximum British Sarcasm” and depth to “Deep Forensic
 ### Download & Run It Right Now
 
 Clean, ready-to-go file:  
-→ [https://gist.github.com/anon/74f3a9e8b2d1c0e7f8a9](https://github.com/rod-trent/JunkDrawer/blob/main/Conspiracy%20Checker/conspiracy_detector.py)
+→ https://github.com/rod-trent/JunkDrawer/blob/main/Conspiracy%20Checker/conspiracy_detector.py
 
 Stop arguing with crazy. Start dismantling it with surgical precision.
 
