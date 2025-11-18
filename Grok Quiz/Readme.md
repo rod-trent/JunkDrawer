@@ -1,4 +1,4 @@
-# I Built a Grok-Powered Flashcard App in One Afternoon – And It’s Insane How Well It Works
+# A Grok-Powered Flashcard App Built in One Afternoon
 
 **Author: A very happy developer who just 10x’d their learning speed**
 
