@@ -6,7 +6,7 @@ I’d had enough. So I built my own — one that loads instantly, scrolls like m
 
 Here’s the result: a clean, distraction-free teleprompter that works perfectly in any browser, supports mirror mode for real teleprompter glass, adjustable speed/font, line highlighting, and even file upload. And the best part? It’s ~100 lines of pure Streamlit + a tiny bit of JavaScript.
 
-You can try the final app here: https://teleprompter.streamlit.app (or just copy the code below and run it locally).
+You can try the final app here: https://github.com/rod-trent/JunkDrawer/blob/main/Teleprompter/teleprompter.py (or just copy the code below and run it locally).
 
 ### Why this one actually works perfectly
 
