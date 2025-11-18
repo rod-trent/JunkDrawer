@@ -149,4 +149,4 @@ That’s it. Run `streamlit run teleprompter.py` and you’re done.
 
 Never stare at a blank screen again. Happy recording! 🎥
 
-(Star the repo if you liked it: https://github.com/yourusername/teleprompter — or just deploy your own copy in 3 seconds on Streamlit Community Cloud.)
+(Star the repo if you liked it: https://github.com/rod-trent/JunkDrawer — or just deploy your own copy in 3 seconds on Streamlit Community Cloud.)
