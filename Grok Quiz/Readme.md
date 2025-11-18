@@ -1,7 +1,5 @@
 # A Grok-Powered Flashcard App Built in One Afternoon
 
-**Author: A very happy developer who just 10x’d their learning speed**
-
 I used to spend hours making Anki cards by hand.  
 Highlight → copy → rephrase → tag → repeat… absolute torture.
 
