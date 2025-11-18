@@ -89,4 +89,4 @@ The truth deserves better weapons.
 
 Go forth and debunk responsibly.  
 – A concerned citizen who definitely isn’t part of the control group  
-November 17, 2025
+
