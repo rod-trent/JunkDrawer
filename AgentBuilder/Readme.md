@@ -1,7 +1,5 @@
 # Build Custom Copilot Agents in Seconds: Meet CreateAgentYAML.py – A Hidden Gem for Microsoft 365 Copilot Fans
 
-**November 18, 2025**
-
 If you're deep in the Microsoft 365 Copilot ecosystem (or the new "Agent" wave with Copilot Studio), you know one of the biggest pain points: creating the **agent manifest YAML** file by hand.
 
 That YAML file defines everything about your custom agent:
