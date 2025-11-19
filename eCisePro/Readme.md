@@ -1,6 +1,6 @@
 # eCise Pro
 
-A few months ago I threw together a quick Python script called **eCise** – a super-simple command-line workout generator that pulled exercises from a JSON file I scraped together, let you filter by equipment, and spat out a random workout. It worked, I used it every day, but… typing commands every time got old fast.
+A few months ago I threw together a quick Python script called **[eCise](https://github.com/rod-trent/JunkDrawer/tree/main/eCise)** – a super-simple command-line workout generator that pulled exercises from a JSON file I scraped together, let you filter by equipment, and spat out a random workout. It worked, I used it every day, but… typing commands every time got old fast.
 
 So I spent the last couple of weeks rebuilding it from the ground up as a real little web app with Streamlit.
 
