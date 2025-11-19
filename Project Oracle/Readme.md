@@ -71,17 +71,6 @@ GROK_API_KEY=xai_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 Hit “Consult the Oracle” and watch Grok roast then elevate your entire career.
 
-### Deploy It Yourself (Free & Public Options)
-
-#### Streamlit Community Cloud (easiest)
-1. Fork the repo  
-2. Go to https://share.streamlit.io → New app → connect your fork  
-3. Deploy  
-Tokens are entered by each user (intentionally — keeps it personal and secure).
-
-#### Railway / Fly.io / Render
-Standard Streamlit deployment. Works out of the box.
-
 ### Why This Feels Like Cheating
 
 Generic idea generators give everyone the same todo app.
