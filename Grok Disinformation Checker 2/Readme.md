@@ -1,6 +1,6 @@
 # Truth Mirror: A Free, Privacy-First Disinformation Checker Powered by Grok-4
 
-I just published a simple but extremely useful little web app called **Truth Mirror** — a one-click (or one-paste) tool that sends any article or block of text directly to Grok-4 and asks it to rate its factual accuracy using only its internal up-to-date knowledge.
+Here's a simple but extremely useful little web app called **Truth Mirror** — a one-click (or one-paste) tool that sends any article or block of text directly to Grok-4 and asks it to rate its factual accuracy using only its internal up-to-date knowledge.
 
 No external fact-checking sites.  
 No search engines.  
