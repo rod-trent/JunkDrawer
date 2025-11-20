@@ -59,7 +59,7 @@ Agent Platform/
 1. Go to https://github.com/rod-trent/JunkDrawer/tree/main/Agent%20Platform
 2. Download the two Python files (or clone the whole JunkDrawer if you want everything)
 3. `pip install streamlit psutil croniter python-dotenv requests`
-4. `streamlit run GAgentPlatform.py`
+4. `streamlit run AgentPlatform.py`
 
 Done. Click “START Worker” and you’re live.
 
