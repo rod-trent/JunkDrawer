@@ -1,9 +1,0 @@
-streamlit
-requests
-python-dotenv
-g4f  # Optional fallback, but we'll use official if available; otherwise use xAI-compatible client
-openai  # Grok API is OpenAI-compatible
-watchdog
-threaded
-croniter
-psutil
