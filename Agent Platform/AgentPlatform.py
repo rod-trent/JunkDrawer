@@ -100,8 +100,8 @@ if worker_pid:
         st.rerun()
 
 # ========================= UI =========================
-st.set_page_config(page_title="Grok Agent Platform", layout="wide")
-st.title("🦾 Grok Agent Platform")
+st.set_page_config(page_title="AI Agent Platform", layout="wide")
+st.title("🦾 AI Agent Platform")
 st.caption("PID Display • User-Friendly Scheduler • Final Final Final • November 20, 2025")
 
 # === WORKER STATUS WITH PID ===
@@ -264,4 +264,4 @@ if not worker_pid:
     if st.button("🔄 Manual Refresh"):
         st.rerun()
 
-st.caption("Grok Agent Platform • PID + Friendly Scheduler Edition • Absolutely Final • November 20, 2025 🦾")
+st.caption("AI Agent Platform • PID + Friendly Scheduler Edition 🦾")
