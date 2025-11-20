@@ -54,6 +54,39 @@ Agent Platform/
 └── .status_*                  ← temporary status files
 ```
 
+### Example Agent (MorningBriefing.py)
+
+```python
+# agents/MorningBriefing.py
+import os
+from datetime import datetime
+
+# Optional: use Grok API via xAI endpoint or OpenRouter, etc.
+# from grok import GrokClient   # whatever library you prefer
+
+STATUS_FILE = os.path.join(os.path.dirname(__file__), "..", ".status_MorningBriefing")
+
+def set_status(status):
+    with open(STATUS_FILE, "w") as f:
+        f.write(f"{status} | {datetime.now().isoformat()}")
+
+set_status("Running")
+
+# === Your actual logic here ===
+print("Good morning! Building today's briefing...")
+
+# Example: call Grok, generate summary, send to email/Telegram/X, etc.
+# grok = GrokClient(api_key=os.getenv("GROK_API_KEY"))
+# response = grok.chat("Give me a concise morning briefing: top news, weather in Seattle, my calendar")
+
+# Do whatever you want with the response
+# send_to_telegram(response)
+
+set_status("Success")
+```
+
+
+
 ### How to Get It Running in Under 2 Minutes
 
 1. Go to https://github.com/rod-trent/JunkDrawer/tree/main/Agent%20Platform
@@ -65,7 +98,15 @@ Done. Click “START Worker” and you’re live.
 
 ### Example Agent & Everything Else
 
-Full walkthrough, example agents, and the exact code are all in the GitHub folder above. No more copy-pasting from blog posts that go out of date — the repo will always have the latest working version.
+Example agents, and the exact code are all in the GitHub folder above. No more copy-pasting from blog posts that go out of date — the repo will always have the latest working version.
+
+#### Summary – Daily Workflow
+
+1.  `streamlit run AgentPlatform.py`
+2.  Make sure worker is green (START Worker)
+3.  Add agents via sidebar (upload or URL + schedule)
+4.  Watch them run automatically or click “Run Now”
+5.  When finished → click STOP Worker (otherwise it keeps running in background)
 
 Go build something that runs every single day without you touching it.
 
