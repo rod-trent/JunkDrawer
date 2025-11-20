@@ -1,4 +1,4 @@
-# Introducing the Grok Agent Platform – A Dead-Simple, Bulletproof Way to Run Scheduled Grok-Powered Agents (PID Edition – November 20, 2025)
+# Introducing the Grok Agent Platform – A Dead-Simple, Bulletproof Way to Run Scheduled Grok-Powered Agents
 
 If you’ve ever wanted to turn Grok (or any LLM) into a fleet of autonomous, scheduled agents that just run in the background without you babysitting them, this little Streamlit app is pure gold.
 
