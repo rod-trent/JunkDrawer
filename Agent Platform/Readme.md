@@ -42,7 +42,7 @@ This platform turns those one-off scripts into real agents that just keep runnin
 
 ```
 Agent Platform/
-├── GAgentPlatform.py          ← the dashboard
+├── AgentPlatform.py          ← the dashboard
 ├── background_worker.py       ← the detached worker
 ├── agent_registry.json        ← list of registered agents
 ├── .worker_pid                ← PID of the running background process
