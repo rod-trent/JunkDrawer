@@ -44,7 +44,7 @@ I've open-sourced the full code on GitHub for anyone to fork, tweak, or deploy t
    Best regards,  
    [Your Name]
 
-### Why Build This? (And Why Now, in Late 2025)
+### Why Build This? (And Why Now)
 
 Hiring is brutal right now. Layoffs in Big Tech linger, remote roles are scarcer, and AI is automating entry-level gigs. Yet, executive pay soars—why should you settle for less when armed with data?
 
