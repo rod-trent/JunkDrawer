@@ -66,7 +66,7 @@ if st.button("Analyze & Recommend Gifts", type="primary"):
 
         if not posts or any("error" in str(p).lower() or "not found" in str(p).lower() for p in posts):
             st.error(posts[0] if posts else "No data")
-            st.info("Try public profiles: @elonmusk (X) or @natgeo (Instagram)")
+            st.info("Try public profiles (examples): @elonmusk (X) or @natgeo (Instagram)")
         else:
             st.success(f"Found {len(posts)} posts!")
             with st.expander("Sample posts"):
@@ -105,5 +105,6 @@ Markdown + emojis. Warm & creative."""
                 st.success("Perfect gifts found!")
                 st.markdown(reply)
                 st.download_button("Download List", reply, f"gifts_@{username}.md", "text/markdown")
+
 
 st.caption("Reliable in 2025: X via Grok • Instagram via Instaloader")
