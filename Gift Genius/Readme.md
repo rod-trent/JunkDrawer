@@ -1,65 +1,64 @@
-# Gift Genius: I Finally Stole My Son’s Superpower (with a little help from Grok)
+# Gift Genius: I Finally Stole My Son’s Superpower  
+(And Now It Lives Permanently on GitHub)
 
-For years I’ve lived in the shadow of the greatest gift-giver on planet Earth: my oldest son.
+For years I’ve been hopelessly outclassed by the greatest gift-giver alive: my oldest son.
 
-This kid is spooky. You mention once, in passing, that you kind of like mechanical keyboards? Christmas morning there’s a custom-built 75% with lubed Gateron Ink Blacks under the tree. Your friend says they’re “sort of getting into film photography”? He somehow finds a perfectly serviced Contax T2 in Kyoto, has it shipped, and wraps it like it was no big deal. He doesn’t guess—he *knows*.  
+You casually mention you’re “thinking about getting into espresso”? Boom—three days later a niche lever machine from 1970s Italy appears, restored, with a handwritten note about tamp pressure. Your cousin says she misses film photography? He tracks down a mint Leica M6 with the exact lens she drooled over in 2009. The kid doesn’t guess—he performs psychic surgery on your soul and pulls out the perfect object.
 
-I, on the other hand, am the guy who buys socks. Nice socks… but still socks.
+Me? I’m the guy who buys the wrong size Yeti rambler. Every. Single. Year.
 
-So I did what any self-respecting dad-who-can-code does: I built an app that cheats.
+So I did the only rational thing: I built an app that gives me his superpower on demand.
 
-Meet **Gift Genius**—a tiny Streamlit app that turns a public X (Twitter) or Instagram profile into five scarily spot-on gift ideas, powered entirely by Grok-3.
+Say hello to **Gift Genius**—a dead-simple Streamlit app that turns any public X (Twitter) or Instagram profile into five terrifyingly accurate, heartfelt gift ideas in under a minute.
 
-### What It Is
+### Permanent Home
+The app now lives forever right here:  
+https://github.com/rod-trent/JunkDrawer/tree/main/Gift%20Genius
 
-You give it a public @username (no @ sign needed).  
-It quietly pulls their recent posts.  
-Grok reads them like a mind-reader and returns five thoughtful, specific gifts they’ll actually love—complete with price range, why it fits (with references to their posts), and where to buy.
+Everything you need is in that folder:
+- `gifter.py` – the main Streamlit app
+- `utils/social_scraper.py` – Instagram fetching logic (using battle-tested Instaloader)
+- `.env.example` – just drop in your Grok API key and go
 
-Think of it as hiring my son’s brain for ten seconds, except it costs $0 in API fees if you stay within limits and works for anyone with a public social profile.
+### How to Run It (30-second setup)
 
-### The Origin Story (a.k.a. Dad Jealousy)
+```bash
+git clone https://github.com/rod-trent/JunkDrawer.git
+cd JunkDrawer/Gift Genius
+pip install streamlit python-dotenv httpx instaloader
+cp .env.example .env
+# paste your Grok API key into .env
+streamlit run gifter.py
+```
 
-Every December I watch my son nail gift after gift while I panic-order Amazon Prime desperation presents at 2 a.m. Last year I decided enough was enough. If I can’t naturally develop this talent, I’ll engineer it.
+That’s it. You now possess the same dark art my son has been wielding against the family for a decade.
 
-The result is Gift Genius. It’s my love letter to his gift-giving genius—and my attempt to level the playing field with AI.
+### Where It Shines in Real Life
 
-### How to Use It (takes ~30 seconds)
+Most of my family and friends abandoned X years ago. They live on Instagram—posting Stories of their new hobby, weekend hikes, obscure vinyl finds, or their dog in increasingly ridiculous outfits. Gift Genius reads all of it like a best friend who never forgets anything you’ve ever said.
 
-1. Grab a free Grok API key at https://console.x.ai
-2. `pip install streamlit python-dotenv httpx instaloader`
-3. Clone the repo or copy the single `gifter.py` file
-4. Create a `.env` file with  
-   `GROK_API_KEY=your_key_here`
-5. `streamlit run gifter.py`
-6. Pick X or Instagram → type a public username → hit “Analyze & Recommend Gifts”
-7. Watch Grok do the scary-accurate thing
+I’ve used it on:
+- My sister-in-law who only posts sourdough and plants → got a rare Japanese shibo pot and a $300 grow-light sculpture she still talks about
+- My brother who’s deep into mechanical watches on IG → a limited Sinn U50 “S” that actually made him tear up
+- My niece whose entire personality is Taylor Swift concert footage → custom Eras Tour embroidery on a vintage denim jacket
 
-Try it with @elonmusk, @taylorswift13, @natgeo, or literally any public account. The results are… honestly kind of terrifying in the best way.
+Every single one felt like my son had picked it… because in a way, he finally taught me how.
 
-### How It Works Under the Hood
+### Under the Hood (Nerd Section)
 
-- **X (Twitter)**: Instead of dealing with Twitter’s API apocalypse, I just ask Grok itself to search the user and fetch the latest 20 posts using its built-in tools (`x_user_search` + `x_keyword_search`). Zero extra libraries, zero rate limits, zero pain.
-- **Instagram**: Falls back to good old Instaloader (still works great for public profiles in 2025).
-- The posts are concatenated and fed to a second Grok-3 call with a carefully crafted prompt that forces warm, creative, markdown-rich gift recommendations.
-- Everything runs locally in Streamlit—no backend, no database, no funny business.
-
-### Example in Action
-
-I tested it on myself (@yourhandlehere). Grok noticed I keep posting about coffee, fountain pens, and retro gaming. The suggestions?
-
-1. A limited-run ceramic dripper from a Japanese pottery studio ($120–180)  
-2. Sailor 1911L with a custom nib grind from Tokyo ($320–400)  
-3. Analogue Pocket with the openFPGA Mario core pre-loaded ($280)  
-
-…My wife is now terrified because she used the app on me.
+- X posts → fetched directly by asking Grok-3 to use its own built-in `x_user_search` + `x_keyword_search` tools. No Twitter API keys, no rate-limit tears.
+- Instagram posts → pulled cleanly by `utils/social_scraper.py` using Instaloader (still rock-solid for public profiles in 2025).
+- Final gift recommendations → one spicy Grok-3 call with a prompt I’ve been refining for months. Temperature 0.85 for warmth and creativity, but still grounded in the actual posts.
 
 ### Closing Thought
 
-My son still has the edge—he’ll always add that perfect hand-written card and wrap it like a work of art. But for the first time in my life, I’m walking into Christmas without the annual “gift anxiety” sweat.
+My son will always be the undisputed champion—he adds the card, the story, the perfect bow. But for the first time ever, I’m not sweating December like it’s a second mortgage.
 
-If you’ve ever felt gift-blocked, try Gift Genius. And if you’re already a natural like my oldest… well, consider this my formal surrender.
+If you’ve ever stared at someone’s wishlist (or lack thereof) in quiet panic, steal my cheat code.
 
-Link to the code: github.com/yourname/gift-genius (I’ll push it right after posting this)
+Gift Genius is public, free, and waiting for you:  
+https://github.com/rod-trent/JunkDrawer/tree/main/Gift%20Genius
 
-Happy gifting—and may all your presents finally be as good as my kid’s. 🎁
+Go forth and give like the favorite child you secretly wish you were.
+
+(And son, if you’re reading this… yes, I finally caught up. Love you.) 🎁
