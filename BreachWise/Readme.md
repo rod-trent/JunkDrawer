@@ -7,7 +7,7 @@ https://github.com/rod-trent/JunkDrawer/tree/main/BreachWise
 
 This is not a hosted SaaS. This is a tool you run yourself — exactly the way it should be when you’re dealing with sensitive emails and breach data.
 
-## What Breach infinitely Wise Actually Is
+## What Breach Wise Actually Is
 
 BreachWise is a single-file Streamlit app (BreachWise.py) plus a few tiny supporting files that:
 
