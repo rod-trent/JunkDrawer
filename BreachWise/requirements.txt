@@ -1,0 +1,8 @@
+streamlit>=1.28.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+plotly>=5.17.0
+xai-sdk>=1.0.0rc1  # Official xAI SDK; supports Grok API calls
+httpx>=0.25.0
+cachetools>=5.3.0
+weasyprint>=62.0  # Optional: For PDF exports
