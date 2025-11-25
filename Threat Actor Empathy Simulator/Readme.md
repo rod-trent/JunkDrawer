@@ -2,7 +2,7 @@
 
 A new open-source tool that lets you **think exactly like an elite attacker** – and instantly see how your defenses hold up (or crumble).
 
-I just released the **Threat Actor Empathy Simulator** – a Streamlit app that turns red-team thinking into an interactive, real-time game using **Grok (xAI)** as the adversary brain.
+I have released the **Threat Actor Empathy Simulator** – a Streamlit app that turns red-team thinking into an interactive, real-time game using **Grok (xAI)** as the adversary brain.
 
 Live code & permanent home:  
 https://github.com/rod-trent/JunkDrawer/tree/main/Threat%20Actor%20Empathy%20Simulator
