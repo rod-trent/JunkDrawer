@@ -1,4 +1,4 @@
-# **QCrypto: Your Free, Permanent Post-Quantum Crypto Migration Advisor**  
+# **Meet “QCrypto”: Your Personal Post-Quantum Crypto Migration Advisor**  
 (Powered by Grok xAI)
 
 If you’ve been putting off post-quantum migration because “it’s complicated,” “the standards aren’t final,” or “I’ll deal with it later,” then your excuses just expired.
