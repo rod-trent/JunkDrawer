@@ -8,8 +8,7 @@ Meet QCrypto — the open, free Streamlit app that instantly audits your RSA/ECD
 **Permanent home & source (always free, no sign-up, no paywall):**  
 https://github.com/rod-trent/JunkDrawer/tree/main/Quantum-Resilient%20Crypto%20Migration%20Advisor
 
-Live demo (hosted forever): https://qcrypto.streamlit.app  
-Or run it 100% locally — your private keys never leave your machine.
+Run it 100% locally — your private keys never leave your machine.
 
 ### What happens in under a minute
 
