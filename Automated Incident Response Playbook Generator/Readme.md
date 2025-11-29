@@ -9,7 +9,7 @@ No templates. No copy-paste from old runbooks. No 4-hour war-room writing sessio
 
 Just Grok 4 doing what it does best, instantly.
 
-Here’s the tool: https://github.com/rotrent/grok-ir-playbook  
+Here’s the tool: https://github.com/rod-trent/JunkDrawer/tree/main/Automated%20Incident%20Response%20Playbook%20Generator
 (Direct Streamlit one-click deploy coming soon)
 
 ### What It Actually Does
