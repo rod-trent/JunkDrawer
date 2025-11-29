@@ -1,0 +1,16 @@
+Incident Summary (paste this exactly):
+
+At 03:14 UTC today, our SIEM generated a critical alert: over 400 endpoints in the EMEA region began encrypting files with the .LOCKY extension within a 9-minute window. 
+The attack appears to have originated from a single compromised privileged account (svc_deploy@domain.local) that was observed performing mass RDP brute-force attempts internally starting 48 hours ago.
+
+Key observations so far:
+- Cobalt Strike beacons detected to 185.117.118[.]44 (known Qakbot/QBot C2)
+- Multiple LSASS memory dumps (ProcDump + comsvcs.dll technique) on several domain controllers
+- BloodHound collection activity followed by DCSync rights abuse
+- Lateral movement via WMI, PsExec, and RDP
+- Ransomware note demands payment in BTC and references LockBit 3.0
+- EDR (CrowdStrike) is partially blinded — falcon sensor service stopped on ~60% of affected hosts
+- Internet egress still active from several jump hosts
+
+Environment: Hybrid AD (on-prem + Entra ID sync), 12,000 Windows endpoints, primary DC in Frankfurt.
+We are currently in containment mode but encryption is still spreading slowly.
