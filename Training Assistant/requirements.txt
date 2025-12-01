@@ -1,0 +1,22 @@
+streamlit==1.38.0          # Works with packaging 25.0 despite pin
+python-dotenv==1.1.1
+openai==1.99.9             # Compatible with langchain-openai 1.1.0
+httpx==0.28.0
+httpcore==1.0.7
+PyPDF2==3.0.1
+pypdf==6.4.0
+markdown2==2.5.0
+anki==2.1.66
+genanki==0.13.1
+matplotlib==3.9.2
+networkx==3.3
+plotly==5.24.1
+pandas==2.2.3
+xai-sdk==1.4.0
+langchain-openai==1.1.0    # Use --no-deps if pip gripes
+packaging==25.0            # Safe override for streamlit
+jiter==0.10.0
+pydantic==2.11.0
+requests==2.32.3  # For web search
+beautifulsoup4==4.12.3  # For parsing search results
+google-api-python-client==2.111.0  # For official YouTube API
