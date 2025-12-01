@@ -66,8 +66,8 @@ requests
 
 ```bash
 # 1. Clone it
-git clone https://github.com/rotrent/grok-ir-playbook.git
-cd grok-ir-playbook
+git clone https://github.com/rod-trent/JunkDrawer.git
+cd JunkDrawer/Automated Incident Response Playbook Generator
 
 # 2. Install deps
 pip install streamlit python-dotenv requests
