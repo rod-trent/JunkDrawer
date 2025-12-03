@@ -1,17 +1,49 @@
-# StockPop.py - FINAL ULTIMATE - NOW WITH GROK TRADING RECOMMENDATIONS
-import json, os, threading, queue
+# StockPop.py – FINAL WORKING VERSION (December 2025)
+# Real Windows toasts + persistent tray icon + working Config menu
+
+import json
+import os
+import threading
+import queue
+import logging
 from pathlib import Path
+import datetime
 import yfinance as yf
 from dotenv import load_dotenv
 from openai import OpenAI
 from PIL import Image, ImageDraw
 import pystray
 from pystray import MenuItem as item
-from plyer import notification
 import tkinter as tk
 from tkinter import messagebox
 
-APP_NAME = "Stock Pop - powered by Grok"
+# ------------------- WINDOWS TOASTS (RELIABLE 2025) -------------------
+try:
+    from windows_toasts import Toast, WindowsToaster
+    toaster = WindowsToaster('StockPop')
+    def send_toast(title: str, body: str):
+        t = Toast()
+        t.text_fields = [title, body]
+        toaster.show_toast(t)
+    logging.info("Using windows_toasts → perfect notifications")
+except ImportError:
+    send_toast = None
+    logging.warning("windows_toasts not found → pip install windows-toasts")
+
+# Thread-safe queue for GUI & notifications
+gui_queue = queue.Queue()
+
+def show_notification(title: str, message: str):
+    title = str(title)[:100]
+    message = str(message)[:500].replace('\n', ' | ')
+    gui_queue.put(('toast', title, message))
+
+def open_config_menu():
+    gui_queue.put(('config',))
+
+# ------------------- APP SETUP -------------------
+APP_NAME = "StockPop • Grok Signals"
+logging.basicConfig(level=logging.INFO, format="%(H:%M:%S) %(message)s")
 
 load_dotenv()
 XAI_API_KEY = os.getenv('XAI_API_KEY')
@@ -23,150 +55,171 @@ client = OpenAI(base_url="https://api.x.ai/v1", api_key=XAI_API_KEY)
 MODEL = "grok-4"
 
 CONFIG_FILE = Path("stock_config.json")
-config = {"tickers": [], "threshold": 2.0}
+config = {"tickers": ["MSFT", "NVDA"], "threshold": 1.0}
 last_prices = {}
-gui_queue = queue.Queue()
 
 def load_config():
     global config
     if CONFIG_FILE.exists():
-        try: config.update(json.load(open(CONFIG_FILE)))
-        except: pass
+        try:
+            loaded = json.load(open(CONFIG_FILE))
+            config.update(loaded)
+        except Exception as e:
+            logging.error(f"Config error: {e}")
+    logging.info(f"Loaded {len(config['tickers'])} tickers @ ±{config['threshold']}%")
 
 def save_config():
-    CONFIG_FILE.write_text(json.dumps(config, indent=4))
+    try:
+        CONFIG_FILE.write_text(json.dumps(config, indent=4))
+    except: pass
 
+# ------------------- PRICE FETCHING -------------------
 def fetch_price(ticker):
     try:
-        data = yf.Ticker(ticker).history(period="1d", interval="1m")
-        return round(data["Close"].iloc[-1], 4) if not data.empty else None
-    except: return None
+        t = yf.Ticker(ticker.upper())
+        data = t.history(period="1d", interval="1m")
+        if not data.empty:
+            return round(data["Close"].iloc[-1], 4)
+        price = t.fast_info.get("lastPrice") or t.info.get("regularMarketPrice")
+        if price:
+            return round(float(price), 4)
+    except Exception as e:
+        logging.debug(f"Fetch failed {ticker}: {e}")
+    return None
 
-# GROK TRADING RECOMMENDATION ENGINE
-def get_grok_recommendation(ticker, change_pct):
-    direction = "up" if change_pct > 0 else "down"
-    prompt = f"""
-    You are an elite quantitative trader. {ticker} just moved {change_pct:+.2f}% in minutes.
-    Current time: {tk.datetime.now().strftime('%b %d, %H:%M')}.
-    Give me ONE of these exact signals: Strong Buy / Buy / Hold / Sell / Strong Sell
-    Then one brutally honest sentence why.
-    Example: Strong Buy → Momentum breakout with volume surge, likely continues.
-    """
+# ------------------- GROK RECOMMENDATION -------------------
+def get_grok_recommendation(ticker, pct):
     try:
         resp = client.chat.completions.create(
             model=MODEL,
-            messages=[{"role": "user", "content": prompt}],
+            messages=[{"role": "user", "content": f"{ticker} moved {pct:+.2f}%. Signal → reason."}],
             max_tokens=70,
             temperature=0.4
         )
         return resp.choices[0].message.content.strip()
-    except:
-        return "Hold → Grok offline"
+    except Exception as e:
+        logging.error(f"Grok error: {e}")
+        return "Hold → Check connection"
 
+# ------------------- STOCK MONITOR LOOP -------------------
 def check_stocks():
-    if not config["tickers"]:
-        threading.Timer(60, check_stocks).start()
-        return
     for ticker in config["tickers"]:
+        ticker = ticker.strip().upper()
+        if not ticker: continue
+
         cur = fetch_price(ticker)
         if not cur: continue
+
         last = last_prices.get(ticker)
-        if last:
+        if last and last > 0:
             pct = (cur - last) / last * 100
             if abs(pct) >= config["threshold"]:
-                recommendation = get_grok_recommendation(ticker, pct)
-                notification.notify(
-                    app_name=APP_NAME,
-                    title=f"{ticker} • {pct:+.2f}% → {recommendation.split('→')[0].strip()}",
-                    message=f"${last:.2f} → ${cur:.2f}\n\n{recommendation.split('→',1)[1].strip() if '→' in recommendation else recommendation}",
-                    timeout=25
-                )
-        last_prices[ticker] = cur
-    threading.Timer(60, check_stocks).start()
+                rec = get_grok_recommendation(ticker, pct)
+                signal = rec.split("→")[0].strip() if "→" in rec else "Hold"
+                direction = "UP" if pct > 0 else "DOWN"
+                title = f"{ticker} {pct:+.2f}% {direction} → {signal}"
+                body = f"${last:.2f} → ${cur:.2f} | {rec}"
+                logging.info(f"ALERT: {title}")
+                show_notification(title, body)
 
-# CONFIG WINDOW (unchanged except slightly larger for new power)
+        last_prices[ticker] = cur
+
+    threading.Timer(30, check_stocks).start()
+
+# ------------------- CONFIG GUI -------------------
 def show_config_window():
     win = tk.Tk()
-    win.title(f"{APP_NAME} • Configuration")
+    win.title(f"{APP_NAME} • Config")
     win.configure(bg="#0d1117")
     win.resizable(False, False)
-    win.geometry("620x800")
-
+    win.geometry("680x860")
     win.update_idletasks()
-    x = (win.winfo_screenwidth() // 2) - 310
-    y = (win.winfo_screenheight() // 2) - 400
+    x = (win.winfo_screenwidth() // 2) - 340
+    y = (win.winfo_screenheight() // 2) - 430
     win.geometry(f"+{x}+{y}")
 
-    tk.Label(win, text=APP_NAME, font=("Segoe UI", 26, "bold"), fg="#00ff41", bg="#0d1117").pack(pady=(40, 10))
-    tk.Label(win, text="AI trading signals on every pop", fg="#cccccc", bg="#0d1117", font=("Segoe UI", 11)).pack(pady=(0, 40))
+    tk.Label(win, text="StockPop", font=("Segoe UI", 30, "bold"), fg="#00ff41", bg="#0d1117").pack(pady=(40,5))
+    tk.Label(win, text="Grok-Powered Pop Alerts", fg="#aaa", bg="#0d1117").pack(pady=(0,30))
 
-    tk.Label(win, text="Alert threshold (% change):", fg="white", bg="#0d1117", font=("Segoe UI", 12)).pack(anchor="w", padx=120)
-    threshold_var = tk.DoubleVar(value=config.get("threshold", 2.0))
-    tk.Spinbox(win, from_=0.1, to=50, increment=0.1, textvariable=threshold_var,
-               font=("Consolas", 16), width=12, bg="#1e1e1e", fg="#00ff41").pack(pady=15)
+    tk.Label(win, text="Alert Threshold (%):", fg="white", bg="#0d1117").pack(anchor="w", padx=150)
+    thresh_var = tk.DoubleVar(value=config.get("threshold", 1.0))
+    tk.Spinbox(win, from_=0.1, to=20, increment=0.1, textvariable=thresh_var,
+               font=("Consolas", 18), width=10, bg="#1e1e1e", fg="#00ff41").pack(pady=10)
 
-    tk.Label(win, text="Stocks to monitor (one per line, max 5):", fg="white", bg="#0d1117", font=("Segoe UI", 12)).pack(anchor="w", padx=120, pady=(40, 10))
-    text_box = tk.Text(win, height=11, width=36, font=("Consolas", 16), bg="#1e1e1e", fg="#00ff41", insertbackground="white")
-    text_box.pack(padx=120, pady=5)
-    text_box.insert("1.0", "\n".join(config.get("tickers", [])))
-    text_box.bind("<Return>", lambda e: (text_box.insert(tk.INSERT, "\n"), "break")[1])
+    tk.Label(win, text="Tickers (one per line, max 10):", fg="white", bg="#0d1117").pack(anchor="w", padx=150, pady=(30,5))
+    txt = tk.Text(win, height=12, width=40, font=("Consolas", 16), bg="#1e1e1e", fg="#00ff41", insertbackground="white")
+    txt.pack(padx=150, pady=5)
+    txt.insert("1.0", "\n".join(config.get("tickers", [])))
 
     def save():
         try:
-            threshold = float(threshold_var.get())
-            if not 0.1 <= threshold <= 50: raise ValueError
+            threshold = float(thresh_var.get())
         except:
-            messagebox.showerror("Error", "Threshold must be 0.1–50")
+            messagebox.showerror("Error", "Invalid threshold")
             return
-        tickers = [t.strip().upper() for t in text_box.get("1.0","end").splitlines() if t.strip()][:5]
+        tickers = [t.strip().upper() for t in txt.get("1.0","end-1c").splitlines() if t.strip()][:10]
         config["tickers"] = tickers
         config["threshold"] = threshold
         save_config()
         last_prices.clear()
-        messagebox.showinfo("Saved", f"Watching {len(tickers)} stock(s)\nThreshold: ±{threshold}%\nGrok signals active")
+        messagebox.showinfo("Saved", f"Now watching {len(tickers)} tickers @ ±{threshold}%")
         win.destroy()
-        if tickers: threading.Thread(target=check_stocks, daemon=True).start()
 
-    bottom_frame = tk.Frame(win, bg="#0d1117")
-    bottom_frame.pack(side="bottom", pady=70)
+    tk.Button(win, text="SAVE & RESTART", command=save,
+              font=("Segoe UI", 20, "bold"), bg="#00ff41", fg="black", width=30, height=2).pack(pady=60)
 
-    tk.Button(bottom_frame,
-              text="SAVE & CLOSE",
-              font=("Segoe UI", 22, "bold"),
-              bg="#00ff41", fg="black",
-              activebackground="#00cc00", activeforeground="white",
-              width=26, height=3,
-              relief="raised", bd=12,
-              command=save).pack()
+    def test():
+        show_notification("Test Alert", "Notifications are working perfectly!")
+
+    tk.Button(win, text="TEST TOAST", command=test, bg="#ff5500", fg="white").pack(pady=10)
 
     win.bind("<Return>", lambda e: save())
     win.bind("<Escape>", lambda e: win.destroy())
     win.mainloop()
 
-# TRAY ICON
+# ------------------- TRAY ICON -------------------
 def create_icon():
     img = Image.new("RGB", (64,64), "black")
     d = ImageDraw.Draw(img)
     d.ellipse((8,8,56,56), fill="#00ff41")
-    d.text((15,10), "POP", fill="black", font_size=26)
+    d.text((18,16), "POP", fill="black", font=None)
     return img
 
-def open_config(): gui_queue.put("open")
-def quit_app(icon,_): icon.stop(); os._exit(0)
-
+# ------------------- MAIN – KEEPS ALIVE + PROCESSES QUEUE -------------------
 if __name__ == "__main__":
     load_config()
-    menu = pystray.Menu(item("Configure", open_config), item("Quit", quit_app))
-    icon = pystray.Icon("StockPop", create_icon(), APP_NAME, menu)
+    save_config()
 
+    # Startup notification
+    if send_toast:
+        send_toast("StockPop Started", f"Watching {len(config['tickers'])} tickers @ ±{config['threshold']}%")
+
+    # Start monitoring
     if config.get("tickers"):
         threading.Thread(target=check_stocks, daemon=True).start()
 
+    # Tray icon
+    icon = pystray.Icon(
+        "StockPop",
+        create_icon(),
+        APP_NAME,
+        menu=pystray.Menu(
+            item("Configure", open_config_menu),
+            item("Quit", lambda: icon.stop())
+        )
+    )
     threading.Thread(target=icon.run, daemon=True).start()
 
-    while True:
-        try:
-            if gui_queue.get(timeout=0.1) == "open":
-                show_config_window()
-        except queue.Empty:
-            pass
+    # MAIN LOOP – This keeps the app alive and handles toasts + config
+    try:
+        while True:
+            try:
+                msg = gui_queue.get(timeout=1)
+                if msg[0] == 'toast' and send_toast:
+                    send_toast(msg[1], msg[2])
+                elif msg[0] == 'config':
+                    show_config_window()
+            except queue.Empty:
+                pass
+    except KeyboardInterrupt:
+        icon.stop()
