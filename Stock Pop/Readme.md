@@ -53,6 +53,8 @@ Before diving in, ensure you have the following:
   - `pystray` for system tray functionality.
   - `plyer` for cross-platform notifications.
   - `tkinter` (usually bundled with Python, but ensure it's available).
+  -  `windows-toasts`
+  -  `pystray`
 
 You can install them all with:  
 ```
