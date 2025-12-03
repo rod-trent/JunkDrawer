@@ -1,0 +1,271 @@
+Received: from SA5PPFE901F87B5.namprd20.prod.outlook.com (::1) by
+ SA1PR20MB6049.namprd20.prod.outlook.com with HTTPS; Wed, 3 Dec 2025 21:20:36
+ +0000
+Received: from BN9PR03CA0679.namprd03.prod.outlook.com (2603:10b6:408:10e::24)
+ by SA5PPFE901F87B5.namprd20.prod.outlook.com (2603:10b6:80f:fc04::9aa) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9366.17; Wed, 3 Dec
+ 2025 21:20:35 +0000
+Received: from BN3PEPF0000B078.namprd04.prod.outlook.com
+ (2603:10b6:408:10e:cafe::13) by BN9PR03CA0679.outlook.office365.com
+ (2603:10b6:408:10e::24) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.20.9388.9 via Frontend Transport; Wed, 3
+ Dec 2025 21:20:33 +0000
+Authentication-Results: spf=pass (sender IP is 172.199.26.254)
+ smtp.mailfrom=outletaffair.shop; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none
+ header.from=outletaffair.shop;compauth=pass reason=100
+Received-SPF: Pass (protection.outlook.com: domain of outletaffair.shop
+ designates 172.199.26.254 as permitted sender)
+ receiver=protection.outlook.com; client-ip=172.199.26.254; helo=medir.org;
+ pr=M
+Received: from medir.org (172.199.26.254) by
+ BN3PEPF0000B078.mail.protection.outlook.com (10.167.243.123) with Microsoft
+ SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.20.9388.8
+ via Frontend Transport; Wed, 3 Dec 2025 21:20:34 +0000
+X-IncomingTopHeaderMarker: OriginalChecksum:C1869FDB10BACA20A558593C90E1EA4F46B2DCDEA520010E11EC15E737E8674E;UpperCasedChecksum:619A5417A42D2E64D80EB68220A334E4BB956C5F61A171E4B082B8E608FB3AFE;SizeAsReceived:476;Count:10
+Content-Type: text/html
+To: <rodtrent@outlook.com>
+From: TruGreen Partner <TruGreen@outletaffair.shop>
+Reply-To: TruGreen@outletaffair.shop
+Subject: =?UTF-8?B?8J+SmlN0YXJ0IDIwMjYgcmlnaHQgd2l0aCA1MCUgb2ZmIHlvdXIgZmk=?= =?UTF-8?B?cnN0IGxhd24gdHJlYXRtZW50IGZyb20gVHJ1R3JlZW4g8J+MsQ==?=
+X-Campaign-ID: MjYwNDItNDQ3MDg3LTExMTIyNDYwMy1vLTc2MC05LTU4MDQtMTA2MDkyLTAtMC0wLTAtY25SdW56aldoLTM3NzMwNGJm
+X-IncomingHeaderCount: 10
+Message-ID: <05b9446c-19fa-4ff9-b3df-0611d38446a0@BN3PEPF0000B078.namprd04.prod.outlook.com>
+Return-Path: JjdXTW5BJOovknp2JW@outletaffair.shop
+Date: Wed, 3 Dec 2025 21:20:34 +0000
+X-MS-Exchange-Organization-ExpirationStartTime: 03 Dec 2025 21:20:34.3182
+ (UTC)
+X-MS-Exchange-Organization-ExpirationStartTimeReason: OriginalSubmit
+X-MS-Exchange-Organization-ExpirationInterval: 1:00:00:00.0000000
+X-MS-Exchange-Organization-ExpirationIntervalReason: OriginalSubmit
+X-MS-Exchange-Organization-Network-Message-Id: 9e2dec08-6399-4272-cdbf-08de32b1cbcf
+X-EOPAttributedMessage: 0
+X-EOPTenantAttributedMessage: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa:0
+X-MS-Exchange-Organization-MessageDirectionality: Incoming
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: BN3PEPF0000B078:EE_|SA5PPFE901F87B5:EE_|SA1PR20MB6049:EE_
+X-MS-Exchange-Organization-AuthSource: BN3PEPF0000B078.namprd04.prod.outlook.com
+X-MS-Exchange-Organization-AuthAs: Anonymous
+X-MS-UserLastLogonTime: 12/3/2025 9:07:48 PM
+X-MS-Office365-Filtering-Correlation-Id: 9e2dec08-6399-4272-cdbf-08de32b1cbcf
+X-MS-Exchange-EOPDirect: true
+X-Sender-IP: 172.199.26.254
+X-SID-PRA: TRUGREEN@OUTLETAFFAIR.SHOP
+X-SID-Result: PASS
+X-MS-Exchange-AtpMessageProperties: SA|SL
+X-MS-Exchange-Organization-SCL: 5
+X-Microsoft-Antispam: BCL:0;ARA:1444111002|47200799021|2700799029|19000799015|15092099007|7120799021|46080799006|58200799018|32080799003|461199028|9400799040|56000799018|13020799006|970799057|10300799035|33080799003|9000799056|1680799066|30140799003|42200799015|4302099013|3412199025|440099028|16500799035;
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Dec 2025 21:20:34.0207
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 9e2dec08-6399-4272-cdbf-08de32b1cbcf
+X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
+X-MS-Exchange-CrossTenant-AuthSource: BN3PEPF0000B078.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: Internet
+X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg: 00000000-0000-0000-0000-000000000000
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA5PPFE901F87B5
+X-MS-Exchange-Transport-EndToEndLatency: 00:00:02.7168330
+X-MS-Exchange-Processed-By-BccFoldering: 15.20.9366.012
+X-Message-Flag: Follow up
+Importance: high
+X-Priority: 1
+X-Microsoft-Antispam-Mailbox-Delivery:
+	ucf:0;jmr:0;ex:0;auth:1;dest:J;OFR:SpamFilterAuthJ;ENG:(5062000311)(920221119095)(90000117)(920221120095)(90005022)(91005020)(91035115)(9050020)(9100341)(944500132)(2008001181)(2008121020)(4810010)(4910033)(10005027)(9610028)(9540006)(10160021)(9320005)(9245025)(120001)(1110175);RF:JunkEmail;
+X-Message-Delivery: Vj0xLjE7dXM9MDtsPTA7YT0wO0Q9MjtHRD0xO1NDTD02
+X-Microsoft-Antispam-Message-Info:
+	=?utf-8?B?ZVdoUUJZRnJvNytidCtXajFLQUxSNXF0Z3hkbk5GRTVqSnBJcnpvK0RCUDMx?=
+ =?utf-8?B?YTdwN05QL0w2L2YvdkM1YU9rRExmc1VIcVg1b3BxUEYxMHk1SlpoWXY2bERU?=
+ =?utf-8?B?RjdjLzFCWWQxNFRsK2t2MDZ5VXA4V2FTRGtXaGR3dDlHL2Q3SWRJTWUrZ2Vs?=
+ =?utf-8?B?NEFYdjEvL0RmUllJc3d1RTMvNHNVWDJBd0ZTUUR4bGJlUURiMGQyN2VWR2lj?=
+ =?utf-8?B?dElZbnMwK1p5Mkh2ZjJ2ZzBtZGhaMEhkZjY0Z1RNR1FMODdZV1hOQTc1TGxN?=
+ =?utf-8?B?d29DaEoyMHNGSytSejdaTlBwYkdTem1zcDBmRzVZUktodmY3MkJkVEl4bWs0?=
+ =?utf-8?B?NkQ2b25JTUlnYXNaNUZQbHN5TzNUNlpUYjkxNDVNclNpSk9yN005eWt3Z0NR?=
+ =?utf-8?B?UXF2M0xMUG5iT2QxaHR6NzRwRGltOWQ4SEdlZHlRcTF3SWJHK0RnNi9hR1cw?=
+ =?utf-8?B?RlhBTEJyS21WM0c0VlZ0VFo4cS9LLzJSSFBvWE1IUGdGaWlPTlNYa1ZabDFm?=
+ =?utf-8?B?WGFacGlONjdiZTlwTjUwRU1yUjZPcU5ZWi9XaGZwV1Q3TnI2dnZLQytndkJ2?=
+ =?utf-8?B?UWF6QnhGK3FTUERrREdJQlhxTlpTZzVKTW1LdW13VTI3dzdMZ0xKTk1meHVK?=
+ =?utf-8?B?Rld0UFZlRFJoWU1qYzVSRmRVU1RPYU9ZQkMyM1ZmdHVCZEY0bklYWW5nSE5i?=
+ =?utf-8?B?TWpTMjFFZWhhMzNUeTVLbTExR0Q2WG0zZnc2M2YwS0RaVFdxeFpKdjJ0bVdT?=
+ =?utf-8?B?M1pETExIOEhUWDV4dzJQYnFsczUzdmhBTC8vSFZxeDRnbWdmTHFXTlhDbE0r?=
+ =?utf-8?B?aEFtcm5menl2MWRzZzE2bEFSbVdtWmNqa2N1b1NGc2FkWk9TK280Z0xmTlQv?=
+ =?utf-8?B?U1BGNGhSdVVhOUowc211S0xRamo3TWtKcVMvOHY5SVNiSEN6MXRrdWUvd3Ix?=
+ =?utf-8?B?QXVKVU1icmR3WmR5YXB1c0pFR0xDT0hSRnU0N0p3SXNmYWhJTTUyaFZWeGZn?=
+ =?utf-8?B?UEtnUmgrMDcxSDBuVHNkZ3ljaFo2dGNJVVQydDdKRlZBcjFleVd3c2lVNEsz?=
+ =?utf-8?B?TmxzMnIzMU40UVZuVTZxY3haL2ozZEE2UCtnZXp3clE3VUN6NmxYMWd4bUNi?=
+ =?utf-8?B?M0ZDSTVEOVV3aHM4R2xrTVJXTjZWU2tYY1NCdFJqcnhFd0MwUUhLaXR5ZlVm?=
+ =?utf-8?B?dEhlL2NVYnVPUXgyaTlxa3VnclFHN2tCRldJTWJaaFJ3L0xOSytkMy8vK2xO?=
+ =?utf-8?B?RjJuRDlTZ2o0a3JjTVBTR2pjT1B3WmhaU09rQ0h4eDRrSnA3bzN3RXRnTzVG?=
+ =?utf-8?B?WmphNWJUcTZmS2gzZjh4U0hnbFp4QXJvRUhSaG5UWFRFRDNUdHFFYmR6ZTJi?=
+ =?utf-8?B?TWxlSDI3QmZubGVFWjlCRXhUcWZvVkljOE9wZUU3YWZ2cjdIczFkQ3hDU1R5?=
+ =?utf-8?B?d21MRC81YzkrTU5NMFVadFdrZDFqbnRuRlQveERVbGFwa1hYbW9rRUI2U1dJ?=
+ =?utf-8?B?VW5qcEJWWTlzVm8xUTdEcVNHa0xjNmJ6bnAzYnh4VjB1Q2tJcEVzZ0kwVEZz?=
+ =?utf-8?B?cDg3YmpCU2svemtNU3YvSWIvN0RZUzVIS3RhMzhmSHhBN1EzTTducnkxNW5T?=
+ =?utf-8?B?dTlVYlBXTFVEZXhSK2tBOVhzM0FJRDB2cVpXMlpoeXJ1VHNycnJkelNzWXVi?=
+ =?utf-8?B?WVZaZDN4ZC9QNHFXWWo2dXpabU12bHVNd1JQeTNCeHBpbWE0SXk2aU5yRTV4?=
+ =?utf-8?B?Z1NrM2pKdXpRbHcyc21kNnhBNUgwVHVFQjh6K2crb1JXM0NHZVI1MnQvaUR3?=
+ =?utf-8?B?Yjd4NVoxajc2eXhKTzdkZUlVWHJZaC9VOFpqb0E1aDVVMW5YcUhUUXA1OTdt?=
+ =?utf-8?B?NXVkcXNXNmxUQ0ptcXB0VERJL3Zmc2dKU28zajArVnduSzgyN2RoTllQVzJu?=
+ =?utf-8?B?aDMrdFdOL0tZVTN5UHdtdWtoZGxEUm5ZdStRL3Z4VjF0NUYvdFdLZlU0MzZm?=
+ =?utf-8?B?VXY1NVVxcjZlV05sQTVmZStVZENHcGhBdm1rTmk0MXFKZjZDcXFOWVUwekxQ?=
+ =?utf-8?B?ajI4aGVqTDlhWGlnZzMxSzhRbGFGQXNDSlBzdmFxaXlPdEM2czBBQmZKR2tI?=
+ =?utf-8?B?eGNYY09mRFhhT05lR2J4a2hSbXd3UHdpekttNjhlcXd6RXI5OXBORk55MHBX?=
+ =?utf-8?B?LzNWK3FEc2FHT0lrNTcxWUtnek8rQjNTd09xWFZXcWhwd1ZjWStpWEpOZXNC?=
+ =?utf-8?B?RUZtRWR3cmdJNlQvWkRSUjJlbE9RY3hKanRrSVhNV0picTdCVng0V0h6dUJU?=
+ =?utf-8?B?b0dkdnRybnRLdVA0eFVkbUEyYVYvTzZFY3UzZ2g1TExYTjRnUGcvb0hmZUdu?=
+ =?utf-8?B?dlhIUlZmYU1Zak1OZjFzVTJmR0dwMDdqYXZwckpwRlNTaGx6RzkwTC9XdjN6?=
+ =?utf-8?B?QzZUTUhiUVhjQ01DWDlsb0JrNm9URWhzK1lWTEQ0NE5KcVAxd3h2NHdsM0Q3?=
+ =?utf-8?B?UGxZbXl3emlMQW5td0p4eSs5VnJpWDJMMWRjaGYyZWs1MjNndkNIZmVrN0xv?=
+ =?utf-8?B?MGw1STJidU9jNm45NThEMWpHYkt2QzRTT3FXMmNZUWorOGU4UVhodWFwUC9m?=
+ =?utf-8?B?VVRkMXkyK29zZUJjVVdDdldkYXdLbEdkcjUwRUllbHc5em1lYUZ3OEVSRVNN?=
+ =?utf-8?B?djhKQS9lV3JTamVTcTBYTTB1elZWM2pwNnBzRG84TndOaWZCaFo3UW92Ulpt?=
+ =?utf-8?B?aHBLUWFCTncxM0p4d0oxc1c3ZlVnb1BDbFVYQi9OZUZxL3VmZHg4Slh1QUo4?=
+ =?utf-8?B?ZFgxVGFOUFphbERyYUNHNXlqTmI0Z0tEL1pyTXJmaWdRVWdTZzZWdEk2TDdY?=
+ =?utf-8?B?eVE3cnBqN3dpUGxSaC9pQ2U1bnFuQkN5Qzl0YUVFNGtHWFViZmpBbGwzb2xq?=
+ =?utf-8?B?cHpvT0EyUlRySjlJaFROREtKa2hZTGQwVkRWSW4yVGZCekluTndCOTU5NEdQ?=
+ =?utf-8?B?eDR1UTl6aWJHVGJoeUFKVnp3ZC8zSzBkTlZYbUVSN0FkOEZHbDZjQ1F5NEVn?=
+ =?utf-8?B?TTFtN1JyY0lIUUc4N3RlbDNpU1Jlc0Q5d2c0U1lVOHdFODhmNUdYS3hwbDA5?=
+ =?utf-8?B?SXlHbldKRnNsTi9XK04vZGxZdHQxU1o5ZHpuRTloSUgyc2N4WHRybk4xRWFS?=
+ =?utf-8?B?Y1FlTE5sVDg1bXlpaCtsVWR4M05LTHg3TndXQi92Sk1PWW96ZVBQZVZmY2t4?=
+ =?utf-8?B?TTZRQmFmaVo4VXcyYXVOWjNYejYwZDMzRkw1NHdzYjhuNlF1SmFOSkhxUnJF?=
+ =?utf-8?B?Y29SQmUyTDlhcGtMTGZPb1Jna1lpeSs5d1d4cS9LWm1jOVQxeUlZNkVsTTdy?=
+ =?utf-8?B?T05ITmc4T3pzT0FVbXZIMkdyZUd1SytFQUFSVEZhQ0c0NXJlZENiSTU0dmdr?=
+ =?utf-8?B?OWhrYTdtQXZrdXFaUUZRNTI3Mms0Q1VjSk13ZlFQN3FOc3l6OWU0YUVXb3NE?=
+ =?utf-8?B?RHNEcDBveEZWQkJGQTZpZ3owKzI1U3JhMEpHdloyekxWcGdOaG81WnM4anNa?=
+ =?utf-8?B?TnVLUXdxUnRsMkVJdzdYTS8ybXNkTmlXUnRtV1ExU2hQRkZGY1dWcTZFakxk?=
+ =?utf-8?B?cHdjQW5hYzEwc1hzTzl2ZDdxNE5yMFhpMUg5V1YybmF2ZHQ1QXdIR25LVHhi?=
+ =?utf-8?B?Vk1PNjIxK3BMN0o4QVVwWTl4M2lXMVNxSE9wbEpPV2FEOU80SWVKQkJpNWJG?=
+ =?utf-8?B?ZnFQOGE5WmxXaWVzUlRtanNxWFVpQ1ZuNElQcWpIdUVaZzFNUE5xUFJvamtD?=
+ =?utf-8?B?KzJmaGdvRnBMeWo2ekZ6MU9CR3M3QlJhTEdDMERYODdwMCtPc2xqS2g5Vm9K?=
+ =?utf-8?B?TmhTNFZVQ3BhUGl6WkdTRGZUY1cwNGtocnVWWllubnhSTzNDRmgrd0UrSU1I?=
+ =?utf-8?B?UDZqKzVrYktjbDBGU0oxMllZem01TG9xTkpPcTBOKyt1OCtnSVNTTVpQM2ZI?=
+ =?utf-8?B?YzkxQWRnc1loazl0OUpzOGEzT3kzZUgzNk0xNWo3MmQvVjh3cDRYanVjTnZG?=
+ =?utf-8?Q?23lURLD3R2mUZH5k0=3D?=
+MIME-Version: 1.0
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEW YEAR BLAST: 50% OFF TruGreen – Transform Your Lawn!</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: #ff6b6b ; /* Vibrant green-to-orange-to-red gradient for excitement */
+            color: #fff;
+            text-align: center;
+            animation: pulse 2s infinite; /* Pulsing for high energy */
+        }
+        @keyframes pulse {
+            0% { background: #ff6b6b ; }
+            50% { background:  #2ed573 ; }
+            100% { background:   #ff6b6b ; }
+        }
+        .container {
+            max-width: 650px;
+            margin: 30px auto;
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.95); /* Sharp contrast */
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(46, 213, 115, 0.2); /* Deep shadow with green inner glow */
+        }
+        h1 {
+            font-size: 42px; /* Massive impact */
+            font-weight: 900;
+            margin-bottom: 25px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            color: #27ae60; /* Bold green */
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .promo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e67e22;
+            margin: 20px 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        .cta-link {
+            display: inline-block;
+            margin: 30px 0;
+            text-decoration: none;
+            color: #fff;
+            background:  #004D08 ; /* Green-to-orange gradient */
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 28px;
+            font-weight: 900;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .cta-link:hover {
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 25px 0;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        .secondary-link {
+            display: inline-block;
+            margin-top: 40px;
+        }
+        .secondary-link img {
+            width: 450px;
+            border-radius: 10px;
+        }
+        p {
+            font-size: 20px;
+            margin: 25px 0;
+            line-height: 1.7;
+            color: #333;
+        }
+        .benefits {
+            font-size: 18px;
+            font-weight: bold;
+            color: #27ae60;
+            margin: 20px 0;
+        }
+        a.text-link {
+            color: inherit;
+            text-decoration: underline;
+        }
+        a.text-link:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="http://opdash.site/SVJDQPWLMGrMjYwNDItNDQ3MDg3LTExMTIyNDYwMy1vLTc2MC05LTU4MDQtMTA2MDkyLTAtMC0wLTAtY25SdW56aldoLTM3NzMwNGJm" class="text-link">
+            <h1>💥 NEW YEAR BLAST: TRANSFORM YOUR LAWN WITH TRUGREEN! 🌱🚀</h1>
+        </a>
+        <a href="http://opdash.site/SVJDQPWLMGrMjYwNDItNDQ3MDg3LTExMTIyNDYwMy1vLTc2MC05LTU4MDQtMTA2MDkyLTAtMC0wLTAtY25SdW56aldoLTM3NzMwNGJm" class="text-link">
+            <div class="promo">50% OFF Your First Treatment – Don't Miss This Deal!</div>
+        </a>
+        <a href="http://opdash.site/SVJDQPWLMGrMjYwNDItNDQ3MDg3LTExMTIyNDYwMy1vLTc2MC05LTU4MDQtMTA2MDkyLTAtMC0wLTAtY25SdW56aldoLTM3NzMwNGJm" class="text-link">
+            <p>Start the year right with a lush, green lawn! TruGreen's expert treatments kill weeds, feed grass, and make your yard the envy of the neighborhood. Act now – this offer won't last!</p>
+        </a>
+        <a href="http://opdash.site/SVJDQPWLMGrMjYwNDItNDQ3MDg3LTExMTIyNDYwMy1vLTc2MC05LTU4MDQtMTA2MDkyLTAtMC0wLTAtY25SdW56aldoLTM3NzMwNGJm" class="text-link">
+            <div class="benefits">Thousands of happy customers – Join them and save big!</div>
+        </a>
+        <a href="http://opdash.site/SVJDQPWLMGrMjYwNDItNDQ3MDg3LTExMTIyNDYwMy1vLTc2MC05LTU4MDQtMTA2MDkyLTAtMC0wLTAtY25SdW56aldoLTM3NzMwNGJm" class="cta-link">
+            <font size="7">CLAIM 50% OFF NOW – LAWN UPGRADE TIME!</font><br>
+            <img src="http://opdash.site/MEY/c2kt3p.png"  /><img src="//opdash.site/MEY/c2kt3p.png"  />
+        </a>
+        <br>
+        <a href="http://opdash.site/SVJDQPWLMGuMjYwNDItNDQ3MDg3LTExMTIyNDYwMy1vLTc2MC05LTU4MDQtMTA2MDkyLTAtMC0wLTAtY25SdW56aldoLTM3NzMwNGJm" class="secondary-link">
+            <img src="http://opdash.site/MEY/u7QNac.png"  /><img src="//opdash.site/MEY/u7QNac.png"  />
+        </a>
+    </div>
+</body>
+</html>
+
