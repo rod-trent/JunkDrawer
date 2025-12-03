@@ -85,7 +85,7 @@ Using the app is intuitive:
 
 2. **Configure**: Right-click the tray icon and select "Configure." This opens the settings window.
 
-   ![Stock Pop Configuration Window](https://raw.githubusercontent.com/rod-trent/JunkDrawer/main/Stock%20Pop/StockPopConfigure.jpg)
+   ![Stock Pop Configuration Window](https://raw.githubusercontent.com/rod-trent/JunkDrawer/main/Stock%20Pop/StockPopNew.jpg)
 
 3. **Set Options**:
    - **Alert Threshold**: Use the spinbox to set the percentage change (e.g., 2.0% for ±2%).
