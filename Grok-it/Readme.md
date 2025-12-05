@@ -14,7 +14,7 @@ I still browse the web constantly — articles, research papers, forum threads, 
 
 I just highlight the text, right-click, and choose **“Grok-it”**.
 
-Two seconds later a clean popup appears with Grok’s answer — always in perfect English, always relevant, always right there.
+Two seconds later a clean popup appears with Grok’s answer — always relevant, always right there.
 
 That’s why I built **Grok-it**.
 
