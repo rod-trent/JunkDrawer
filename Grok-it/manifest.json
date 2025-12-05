@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Grok-it",
+  "version": "1.5",
+  "description": "Right-click any text → Grok-it instantly answers in English",
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+
+  "permissions": ["contextMenus", "storage"],
+  "host_permissions": ["https://api.x.ai/*"],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Grok-it"
+  },
+  "options_page": "options.html",
+
+  "background": {
+    "service_worker": "background.js"
+  }
+}
