@@ -6,7 +6,7 @@
 
 Dec 5, 2025
 
-If you've been following my retro-AI tinkering, you know I'm still knee-deep in the Great Underground Empire. Just two weeks after Microsoft open-sourced the sacred Zork source code and I unveiled **Grok Gork** – that cheeky Grok-powered revival of Zork I – I've gone and ported it to Azure OpenAI. Welcome to **Azure Zork**, a seamless adaptation that swaps xAI's freewheeling Grok for the robust, customizable brains of Azure's GPT deployments. It's the same pixel-less thrill of "OPEN MAILBOX" and grue-dodging, but now tuned for enterprise devs, Azure enthusiasts, or anyone with a deployment humming in the cloud.
+If you've been following my retro-AI tinkering, you know I'm still knee-deep in the Great Underground Empire. Just minutes after Microsoft open-sourced the sacred Zork source code and I unveiled **[Grok Gork](https://github.com/rod-trent/JunkDrawer/tree/main/Grok%20Gork)** – that cheeky Grok-powered revival of Zork I – I've gone and ported it to Azure OpenAI. Welcome to **Azure Zork**, a seamless adaptation that swaps xAI's freewheeling Grok for the robust, customizable brains of Azure's GPT deployments. It's the same pixel-less thrill of "OPEN MAILBOX" and grue-dodging, but now tuned for enterprise devs, Azure enthusiasts, or anyone with a deployment humming in the cloud.
 
 Why the port? Grok Gork was a blast – quick to spin up, laced with that signature sarcasm – but Azure OpenAI offers deeper control: fine-tuned models, private endpoints, and integration with your org's guardrails. Plus, with Azure's scalability, you can host multiplayer sessions or embed it in a larger app without breaking a sweat. This isn't a rewrite; it's a lift-and-shift with Azure flair, proving how portable these AI adventures can be.
 
