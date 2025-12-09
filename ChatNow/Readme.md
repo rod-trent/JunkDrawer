@@ -1,4 +1,4 @@
-# Building a Custom Chatbot with Streamlit and xAI: Introducing ChatNow
+# Building a Custom Chatbot on-the-fly with Streamlit and xAI: Introducing ChatNow
 
 In the rapidly evolving world of AI, creating personalized chatbots has become more accessible than ever. Today, I'm excited to dive into **ChatNow**, a Streamlit-based application that lets you build custom AI assistants powered by xAI's Grok models. This app, as of December 2025, combines simplicity with powerful features like tool integrations, local Retrieval-Augmented Generation (RAG), and dynamic configurations. Whether you're a developer, writer, or hobbyist, ChatNow makes it easy to spin up a tailored chatbot without writing mountains of code.
 
