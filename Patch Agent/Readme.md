@@ -6,7 +6,7 @@ The app is permanently hosted on GitHub at [https://github.com/rod-trent/JunkDra
 
 ## What It Is
 
-The Microsoft Patch Tuesday AI Agent is a Python script (`patches_agent.py`) designed to monitor and report on Microsoft's latest security patches. It's billed as the "ULTIMATE FINAL VERSION" in the code comments, with features like always fetching the latest data (e.g., December 2025 and beyond), full CVE descriptions in YAML output, direct links to Microsoft CVE pages, MITRE ATT&CK mappings (with inferences), and AI-generated executive summaries delivered via email.
+The Microsoft Patch Tuesday AI Agent is a Python script (`patches_agent.py`) designed to monitor and report on Microsoft's latest security patches. It provides features like always fetching the latest data (e.g., December 2025 and beyond), full CVE descriptions in YAML output, direct links to Microsoft CVE pages, MITRE ATT&CK mappings (with inferences), and AI-generated executive summaries delivered via email.
 
 At its core, it's an automation tool that combines web scraping/API calls to Microsoft's update services, data parsing, AI analysis via Grok, and email notifications. It runs as a scheduled task, making it perfect for ongoing security monitoring without manual intervention.
 
