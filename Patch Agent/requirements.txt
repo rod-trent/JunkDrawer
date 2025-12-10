@@ -1,0 +1,5 @@
+requests
+pyyaml
+schedule
+python-dotenv
+openai
