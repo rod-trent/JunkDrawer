@@ -1,0 +1,6 @@
+# .env
+GROK_API_KEY=sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+EMAIL_SENDER=your.name@gmail.com
+EMAIL_PASSWORD=your_16_digit_app_password
+EMAIL_RECIPIENT=security-team@company.com,your.email@company.com
+RUN_TIME=09:00
