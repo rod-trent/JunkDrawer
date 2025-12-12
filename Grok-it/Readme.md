@@ -52,9 +52,10 @@ Now I stay in flow. I read, I highlight, I understand — without ever breaking 
 - Always answers in clear, natural English (system prompt enforced)  
 - Automatically uses the best model your API key has access to  
 - One-time API key setup (saved securely in Chrome storage)  
-- Works on any website, any language  
-- Zero dependencies, tiny footprint  
-- Completely open source and free
+- Works on any website, any language
+- Requires Grok token credits (For full details on pricing (per million tokens), current promotions, eligibility, and to manage your account, always check directly in the xAI Console or at https://x.ai/api.)
+- Tiny footprint  
+- Completely open source
 
 ### How to Install (30 Seconds)
 
