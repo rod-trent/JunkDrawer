@@ -1,0 +1,7 @@
+streamlit
+markdown 
+htmldocx 
+python-docx 
+mammoth
+beautifulsoup4
+pygments
