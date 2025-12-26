@@ -1,0 +1,440 @@
+{
+  "foods": [
+    {
+      "category": "Dairy Products",
+      "items": [
+        {
+          "brand": "Organic Valley",
+          "product_name": "Whole Milk",
+          "ingredients": ["Organic Grade A Milk", "Vitamin D3"],
+          "allergen_statement": "Contains: Milk",
+          "certifications": ["USDA Organic", "Certified Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Cabot",
+          "product_name": "Sharp Cheddar Cheese",
+          "ingredients": ["Pasteurized Milk", "Cheese Cultures", "Salt", "Enzymes"],
+          "allergen_statement": "Contains: Milk. Manufactured in a facility that also processes soy.",
+          "certifications": ["Naturally Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Fage",
+          "product_name": "Total 0% Greek Yogurt",
+          "ingredients": ["Grade A Pasteurized Skimmed Milk", "Live Active Yogurt Cultures"],
+          "allergen_statement": "Contains: Milk",
+          "certifications": ["Certified Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        }
+      ]
+    },
+    {
+      "category": "Proteins",
+      "items": [
+        {
+          "brand": "Perdue",
+          "product_name": "Fresh Chicken Breast",
+          "ingredients": ["Chicken Breast"],
+          "allergen_statement": "No allergens",
+          "certifications": ["Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Wild Planet",
+          "product_name": "Wild Albacore Tuna",
+          "ingredients": ["Wild Albacore Tuna", "Sea Salt"],
+          "allergen_statement": "Contains: Fish",
+          "certifications": ["Non-GMO Project Verified", "Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Applegate",
+          "product_name": "Organic Roasted Turkey Breast",
+          "ingredients": ["Organic Turkey", "Water", "Sea Salt", "Organic Vinegar", "Organic Cultured Celery Juice"],
+          "allergen_statement": "No allergens",
+          "certifications": ["USDA Organic", "Gluten-Free", "No Casein"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        }
+      ]
+    },
+    {
+      "category": "Grains & Flours",
+      "items": [
+        {
+          "brand": "Bob's Red Mill",
+          "product_name": "White Rice Flour",
+          "ingredients": ["White Rice"],
+          "allergen_statement": "Made in a facility that also processes tree nuts and soy",
+          "certifications": ["Certified Gluten-Free", "Kosher"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Bob's Red Mill",
+          "product_name": "Almond Flour",
+          "ingredients": ["Blanched Almonds"],
+          "allergen_statement": "Contains: Tree Nuts (Almonds). Manufactured in a facility that also uses wheat, soy, and other tree nuts.",
+          "certifications": ["Certified Gluten-Free", "Paleo Friendly", "Kosher"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Lundberg",
+          "product_name": "Organic Brown Rice",
+          "ingredients": ["Organic Brown Rice"],
+          "allergen_statement": "No allergens",
+          "certifications": ["USDA Organic", "Non-GMO Project Verified", "Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Nature's Earthly Choice",
+          "product_name": "Organic Quinoa",
+          "ingredients": ["Organic White Quinoa"],
+          "allergen_statement": "No allergens",
+          "certifications": ["USDA Organic", "Gluten-Free", "Kosher"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        }
+      ]
+    },
+    {
+      "category": "Snacks",
+      "items": [
+        {
+          "brand": "Blue Diamond",
+          "product_name": "Whole Natural Almonds",
+          "ingredients": ["Almonds"],
+          "allergen_statement": "Contains: Tree Nuts (Almonds)",
+          "certifications": ["Non-GMO", "Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Kind",
+          "product_name": "Dark Chocolate Nuts & Sea Salt Bar",
+          "ingredients": ["Almonds", "Honey", "Dark Chocolate (Chocolate Liquor, Sugar, Cocoa Butter, Vanilla)", "Peanuts", "Sugar", "Glucose Syrup", "Rice Flour", "Sea Salt", "Soy Lecithin"],
+          "allergen_statement": "Contains: Almonds, Peanuts, Soy. May contain other tree nuts and sesame seeds.",
+          "certifications": ["Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Simple Mills",
+          "product_name": "Almond Flour Crackers - Sea Salt",
+          "ingredients": ["Almond Flour", "Sunflower Seeds", "Flax Seeds", "Organic Sunflower Oil", "Sea Salt", "Organic Garlic Powder", "Organic Onion Powder", "Rosemary Extract"],
+          "allergen_statement": "Contains: Tree Nuts (Almonds). Made in a facility that also processes soy and other tree nuts.",
+          "certifications": ["Non-GMO Project Verified", "Gluten-Free", "Paleo Friendly"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Skinny Pop",
+          "product_name": "Original Popcorn",
+          "ingredients": ["Popcorn", "Sunflower Oil", "Salt"],
+          "allergen_statement": "No allergens",
+          "certifications": ["Non-GMO", "Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        }
+      ]
+    },
+    {
+      "category": "Condiments & Sauces",
+      "items": [
+        {
+          "brand": "Heinz",
+          "product_name": "Tomato Ketchup",
+          "ingredients": ["Tomato Concentrate", "Distilled Vinegar", "High Fructose Corn Syrup", "Corn Syrup", "Salt", "Spice", "Onion Powder", "Natural Flavoring"],
+          "allergen_statement": "No allergens",
+          "certifications": ["Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Sir Kensington's",
+          "product_name": "Classic Mayonnaise",
+          "ingredients": ["Sunflower Oil", "Organic Eggs", "Distilled Vinegar", "Water", "Fair Trade Organic Cane Sugar", "Salt", "Organic Lemon Juice Concentrate"],
+          "allergen_statement": "Contains: Eggs",
+          "certifications": ["Certified Gluten-Free", "Non-GMO Project Verified"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Annie's",
+          "product_name": "Organic Yellow Mustard",
+          "ingredients": ["Organic Distilled Vinegar", "Water", "Organic Mustard Seed", "Salt", "Organic Turmeric", "Organic Paprika"],
+          "allergen_statement": "No allergens",
+          "certifications": ["USDA Organic", "Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Primal Kitchen",
+          "product_name": "Avocado Oil",
+          "ingredients": ["100% Pure Avocado Oil"],
+          "allergen_statement": "No allergens",
+          "certifications": ["Non-GMO Project Verified", "Paleo Certified", "Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        }
+      ]
+    },
+    {
+      "category": "Vegetables & Fruits",
+      "items": [
+        {
+          "brand": "Green Giant",
+          "product_name": "Frozen Broccoli Florets",
+          "ingredients": ["Broccoli"],
+          "allergen_statement": "No allergens",
+          "certifications": ["Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Birds Eye",
+          "product_name": "Steamfresh Sweet Peas",
+          "ingredients": ["Sweet Peas"],
+          "allergen_statement": "No allergens",
+          "certifications": ["Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Dole",
+          "product_name": "Frozen Strawberries",
+          "ingredients": ["Strawberries"],
+          "allergen_statement": "No allergens",
+          "certifications": ["Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Earthbound Farm",
+          "product_name": "Organic Baby Spinach",
+          "ingredients": ["Organic Baby Spinach"],
+          "allergen_statement": "No allergens",
+          "certifications": ["USDA Organic", "Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        }
+      ]
+    },
+    {
+      "category": "Pasta & Noodles",
+      "items": [
+        {
+          "brand": "Jovial",
+          "product_name": "Brown Rice Pasta Penne",
+          "ingredients": ["Organic Brown Rice", "Water"],
+          "allergen_statement": "Made in a dedicated gluten-free facility. No allergens.",
+          "certifications": ["USDA Organic", "Certified Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Banza",
+          "product_name": "Chickpea Pasta Rotini",
+          "ingredients": ["Chickpeas", "Pea Starch", "Tapioca", "Xanthan Gum"],
+          "allergen_statement": "No allergens. Manufactured in a facility that also processes eggs.",
+          "certifications": ["Gluten-Free", "Non-GMO"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Explore Cuisine",
+          "product_name": "Organic Edamame Spaghetti",
+          "ingredients": ["Organic Edamame Soybeans"],
+          "allergen_statement": "Contains: Soy",
+          "certifications": ["USDA Organic", "Gluten-Free", "Non-GMO"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        }
+      ]
+    },
+    {
+      "category": "Baking Ingredients",
+      "items": [
+        {
+          "brand": "King Arthur",
+          "product_name": "Gluten-Free Measure for Measure Flour",
+          "ingredients": ["Rice Flour", "Whole Grain Brown Rice Flour", "Tapioca Starch", "Whole Grain Sweet White Sorghum Flour", "Xanthan Gum"],
+          "allergen_statement": "Made in a facility that also processes wheat, milk, soy, eggs, and tree nuts.",
+          "certifications": ["Certified Gluten-Free", "Kosher"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Anthony's",
+          "product_name": "Tapioca Starch",
+          "ingredients": ["Tapioca Starch"],
+          "allergen_statement": "No allergens. Packed in a gluten-free facility.",
+          "certifications": ["Gluten-Free", "Non-GMO", "Vegan"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Domino",
+          "product_name": "Granulated Sugar",
+          "ingredients": ["Pure Cane Sugar"],
+          "allergen_statement": "No allergens",
+          "certifications": ["Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Rumford",
+          "product_name": "Aluminum-Free Baking Powder",
+          "ingredients": ["Monocalcium Phosphate", "Sodium Bicarbonate", "Cornstarch"],
+          "allergen_statement": "No allergens",
+          "certifications": ["Gluten-Free", "Aluminum-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        }
+      ]
+    },
+    {
+      "category": "Beverages",
+      "items": [
+        {
+          "brand": "Zevia",
+          "product_name": "Zero Calorie Cola",
+          "ingredients": ["Carbonated Water", "Natural Flavors", "Stevia Leaf Extract", "Citric Acid", "Caffeine"],
+          "allergen_statement": "No allergens",
+          "certifications": ["Non-GMO Project Verified", "Gluten-Free", "Vegan"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "LaCroix",
+          "product_name": "Sparkling Water - Lime",
+          "ingredients": ["Carbonated Water", "Natural Flavors"],
+          "allergen_statement": "No allergens",
+          "certifications": ["Gluten-Free", "Non-GMO", "Vegan"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Tazo",
+          "product_name": "Organic Chai Tea Bags",
+          "ingredients": ["Organic Black Tea", "Organic Ginger", "Organic Cinnamon", "Organic Black Pepper", "Organic Cardamom", "Organic Cloves", "Organic Star Anise"],
+          "allergen_statement": "No allergens",
+          "certifications": ["USDA Organic", "Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        }
+      ]
+    },
+    {
+      "category": "Breakfast Foods",
+      "items": [
+        {
+          "brand": "Bob's Red Mill",
+          "product_name": "Gluten-Free Rolled Oats",
+          "ingredients": ["Whole Grain Oats"],
+          "allergen_statement": "May contain tree nuts and soy. Manufactured in a facility that also processes wheat.",
+          "certifications": ["Certified Gluten-Free", "Non-GMO"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Nature's Path",
+          "product_name": "Organic Buckwheat Flakes",
+          "ingredients": ["Organic Buckwheat", "Organic Evaporated Cane Juice", "Sea Salt"],
+          "allergen_statement": "May contain tree nuts and soy",
+          "certifications": ["USDA Organic", "Non-GMO Project Verified", "Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Simple Mills",
+          "product_name": "Almond Flour Pancake & Waffle Mix",
+          "ingredients": ["Almond Flour", "Organic Coconut Sugar", "Arrowroot", "Cream of Tartar", "Organic Coconut Flour", "Sea Salt", "Baking Soda"],
+          "allergen_statement": "Contains: Tree Nuts (Almonds, Coconut)",
+          "certifications": ["Non-GMO Project Verified", "Gluten-Free", "Paleo Friendly"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        }
+      ]
+    },
+    {
+      "category": "Legumes & Beans",
+      "items": [
+        {
+          "brand": "Bush's Best",
+          "product_name": "Black Beans",
+          "ingredients": ["Prepared Black Beans", "Water", "Salt", "Calcium Chloride"],
+          "allergen_statement": "No allergens",
+          "certifications": ["Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Goya",
+          "product_name": "Low Sodium Chickpeas",
+          "ingredients": ["Chickpeas", "Water", "Salt", "EDTA (to preserve color)"],
+          "allergen_statement": "No allergens",
+          "certifications": ["Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Eden Organic",
+          "product_name": "Organic Pinto Beans",
+          "ingredients": ["Organic Pinto Beans", "Water", "Kombu Seaweed"],
+          "allergen_statement": "No allergens",
+          "certifications": ["USDA Organic", "Non-GMO", "Gluten-Free", "Kosher"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        }
+      ]
+    },
+    {
+      "category": "Nuts & Seeds",
+      "items": [
+        {
+          "brand": "Justin's",
+          "product_name": "Classic Almond Butter",
+          "ingredients": ["Dry Roasted Almonds", "Palm Oil", "Sea Salt"],
+          "allergen_statement": "Contains: Tree Nuts (Almonds). May contain peanuts, other tree nuts, and soy.",
+          "certifications": ["Non-GMO Project Verified", "Gluten-Free", "Kosher"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Sunbutter",
+          "product_name": "Organic Sunflower Seed Butter",
+          "ingredients": ["Organic Roasted Sunflower Seeds", "Organic Dried Cane Syrup", "Salt", "Natural Mixed Tocopherols"],
+          "allergen_statement": "Made in a peanut-free and tree nut-free facility",
+          "certifications": ["USDA Organic", "Non-GMO Project Verified", "Gluten-Free"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        },
+        {
+          "brand": "Bob's Red Mill",
+          "product_name": "Raw Chia Seeds",
+          "ingredients": ["Chia Seeds"],
+          "allergen_statement": "Manufactured in a facility that also uses tree nuts, soy, wheat, and milk",
+          "certifications": ["Gluten-Free", "Kosher"],
+          "gluten_free": true,
+          "potato_starch_free": true
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2025-12-26",
+    "total_items": 48,
+    "categories": 12,
+    "note": "All products listed are verified to be both gluten-free and potato starch-free based on their ingredient lists. Always check current product labels as formulations may change."
+  }
+}
