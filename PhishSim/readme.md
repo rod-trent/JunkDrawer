@@ -21,17 +21,9 @@ Unlike enterprise tools like Gophish for campaigns, PhishSim focuses on interact
 ### How It Works
 
 1. Enter a username to track progress.
-2. Choose industry and difficulty.
-3. Generate a message and guess: Phishing or Legitimate?
-4. Receive AI feedback, update your score/streak, and unlock badges.
-5. Analyze real emails or view your profile/leaderboard.
-
-
-
-
-
-
-
+2. Generate a message and guess: Phishing or Legitimate?
+3. Receive AI feedback, update your score/streak, and unlock badges.
+4. Analyze real emails or view your profile/leaderboard.
 
 ### Requirements
 
