@@ -1,34 +1,89 @@
-# **Build Your Phishing Defense Skills with This AI-Powered Simulator**
+# Build Your Phishing Defense Skills with This AI-Powered Simulator
 
-In today's digital world, **phishing attacks** remain one of the top cybersecurity threats, tricking even savvy users into revealing sensitive information. Traditional training often falls short against evolving tactics, but what if you could practice spotting them in a fun, gamified way?
+In an era where phishing attacks are more sophisticated than ever, staying ahead requires hands-on practice. As of January 2026, with cyber threats evolving alongside AI advancements, tools like **PhishSim** offer a timely solution. This open-source Streamlit app, powered by xAI's Grok models, simulates realistic phishing scenarios to train users in spotting malicious emails. Whether you're an individual sharpening your skills or a team enhancing security awareness, PhishSim turns learning into an engaging game.
 
-Introducing **PhishSim**, an open-source, **AI-powered phishing simulator and trainer** built with Streamlit and powered by xAI's Grok models. This app generates realistic phishing or legitimate emails on demand, lets you guess if they're malicious, and provides detailed AI feedback to help you improve.
 
-### **Why PhishSim Stands Out**
 
-- **AI-Generated Realism**: Using xAI's Grok API, PhishSim creates deceptive phishing emails (with urgency, fake links, etc.) or benign ones tailored to industries like Finance, Healthcare, Retail, Tech, or General. Difficulty levels (Easy, Medium, Hard) ramp up the challenge.
-- **Gamification for Engagement**: Track your score, streak, level (from Beginner to Master), and earn badges like "Phishing Hunter" (50 correct phishing flags), "Hard Mode Hero," or "Perfect Round." Daily logins reward consecutive day streaks.
-- **Personalized Progress**: User profiles persist scores, badges, and industry-specific stats. A global leaderboard fosters competition.
-- **Instant Real-Time Analyzer**: Paste any suspicious email for on-the-spot AI analysis and confidence scoring.
-- **Basic Training Modules**: Quick tips on common phishing signs like urgency, mismatched links, or generic greetings.
 
-Unlike traditional open-source tools like Gophish (focused on campaign management for organizations), PhishSim targets **individual or team training** with endless, varied AI-generated scenarios—no predefined templates needed.
+### Why PhishSim Stands Out
 
-### **How It Works**
+Traditional phishing training often relies on static templates, but PhishSim leverages AI to generate dynamic, industry-specific messages—phishing or legitimate—tailored to sectors like Finance, Healthcare, Retail, Tech, or General. Difficulty levels (Easy, Medium, Hard) ensure progressive challenges.
+
+Key features include:
+- **AI-Driven Content**: Grok generates deceptive phishing emails with elements like urgency, fake links, or attachments, or professional legitimate ones.
+- **Gamification**: Earn points, streaks, levels (Beginner to Master), and badges (e.g., "Streak Master" for 5 correct in a row, "Phishing Hunter" for 50 flagged phishing attempts).
+- **Progress Tracking**: User profiles save scores, badges, industry stats, and leaderboards.
+- **Real-Time Analyzer**: Paste any email for instant AI analysis.
+- **Training Modules**: Quick guides on spotting phishing signs.
+
+Unlike enterprise tools like Gophish for campaigns, PhishSim focuses on interactive, endless training for personal or small-group use.
+
+### How It Works
 
 1. Enter a username to track progress.
-2. Generate a message and decide: Phishing or Legitimate?
-3. Get immediate feedback, score updates, and expert tips from Grok.
-4. Check your profile for badges, leaderboard for top scores, or analyze real emails.
+2. Choose industry and difficulty.
+3. Generate a message and guess: Phishing or Legitimate?
+4. Receive AI feedback, update your score/streak, and unlock badges.
+5. Analyze real emails or view your profile/leaderboard.
 
-The code uses xAI's chat completions endpoint with a recent Grok model (update from deprecated grok-beta). It requires an xAI API key (get one at https://x.ai/api) and runs locally or deployable via Streamlit sharing.
 
-### **Get Started Today**
 
-PhishSim is perfect for personal skill-building, team training, or cybersecurity enthusiasts. Hone your instincts against AI-crafted attacks that mimic real threats.
 
-Source code and app: https://github.com/rod-trent/JunkDrawer/edit/main/PhishSim/
 
-Deploy your own instance, contribute improvements, or fork it for custom features. Stay safe out there—train hard, phish smarter! 🔒🎣
 
-*Note: Always practice ethical use. This tool is for education and awareness only.*
+
+
+### Requirements
+
+To run PhishSim, you'll need:
+- **Python 3.8+**: The app is built in Python.
+- **Dependencies**: Install via `pip install streamlit requests python-dotenv pandas`.
+  - Streamlit for the web interface.
+  - Requests for API calls.
+  - python-dotenv for loading environment variables.
+  - Pandas for potential data handling (e.g., leaderboards).
+- **xAI API Key**: Sign up at [x.ai](https://x.ai) and get an API key. Set it as `XAI_API_KEY` in a `.env` file.
+- **Model Access**: The code defaults to "grok-3", but as of January 2026, xAI offers advanced models like "grok-4-fast-reasoning" with a 2,000,000 token context window for better reasoning and outputs. Update `MODEL_NAME` in the code to a current model (e.g., "grok-4-1-fast-reasoning") for optimal performance, especially if you have access to Grok-4 variants.
+- **Optional**: For deployment, use Streamlit Community Cloud or a server.
+
+No additional installations are needed beyond these, as the app uses built-in Python libraries for the rest.
+
+### How to Implement
+
+PhishSim's code is structured for simplicity and extensibility:
+
+1. **Setup and Imports**: Loads libraries, environment variables, and defines the xAI API endpoint (`https://api.x.ai/v1/chat/completions`).
+2. **Core Functions**:
+   - `generate_message(is_phishing, industry, difficulty)`: Crafts prompts for Grok to create phishing or legit messages without revealing their nature.
+   - `get_feedback(message, is_phishing, user_guess)`: Uses Grok to explain why the message is phishing/legit and provide spotting tips.
+3. **User Management**: Handles logins, data persistence in JSON files (`user_data.json`, `leaderboard.json`), streaks, badges (defined in a dictionary), and levels based on scores.
+4. **Streamlit Interface**: 
+   - Sidebar for settings (industry, difficulty, navigation).
+   - Main page for message generation, guessing, feedback, and real-time email analyzer.
+   - Pages for training modules, leaderboard, and profile with badge displays.
+5. **Badge System**: Comprehensive checks award badges like "First Win" or "Hard Mode Hero" after correct guesses.
+6. **Error Handling**: Basic checks for API responses.
+
+To customize:
+- Add industries or difficulties by extending selectboxes.
+- Enhance badges or integrate more AI features (e.g., image analysis for email screenshots).
+- Update prompts for more deceptive phishing as Grok models evolve.
+
+The app emphasizes ethical use—messages are for training only.
+
+### How to Run It
+
+1. **Clone the Repo**: `git clone https://github.com/rod-trent/JunkDrawer.git` (navigate to `/PhishSim`).
+2. **Install Dependencies**: Run `pip install -r requirements.txt` (create one with the listed packages if needed).
+3. **Set Environment**: Create `.env` with `XAI_API_KEY=your_key_here`.
+4. **Update Model**: Change `MODEL_NAME` to a current one like "grok-4-fast-reasoning" for better results.
+5. **Launch**: `streamlit run PhishSim.py`.
+6. **Access**: Open in your browser (default: http://localhost:8501). Enter a username to start.
+
+For production, deploy to Streamlit Cloud: Upload to GitHub, connect to Streamlit, and set secrets for the API key.
+
+### Get Started Today
+
+PhishSim empowers you to build real-world defenses against phishing. Fork it, contribute (e.g., more industries or multi-user support), or deploy for your team. Stay vigilant—train with AI to outsmart AI threats! 🔒🎣
+
+*Disclaimer: For educational purposes only. Always comply with API terms and ethical guidelines.*
