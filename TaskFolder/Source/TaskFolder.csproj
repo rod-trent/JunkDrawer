@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>Resources\TaskFolder.ico</ApplicationIcon>
+    <AssemblyName>TaskFolder</AssemblyName>
+    <RootNamespace>TaskFolder</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>Your Name</Authors>
+    <Company>TaskFolder</Company>
+    <Product>TaskFolder</Product>
+    <Description>Quick application launcher for Windows 11 taskbar</Description>
+    <Copyright>Copyright © 2025</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Copy icon file to output directory -->
+    <None Update="Resources\TaskFolder.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\Icons\" />
+    <Folder Include="Models\" />
+    <Folder Include="Services\" />
+    <Folder Include="Views\" />
+    <Folder Include="Utilities\" />
+  </ItemGroup>
+
+</Project>
