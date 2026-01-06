@@ -1,0 +1,7 @@
+streamlit
+python-dotenv
+openai
+requests
+pillow
+moviepy>=2.0
+imageio-ffmpeg
