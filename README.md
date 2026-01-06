@@ -4,12 +4,13 @@ Miscellaneous stuff I create.
 
 This repository serves as a personal "junk drawer" for various experimental projects, scripts, AI-powered tools, and utilities—mostly built around Grok, automation, cybersecurity, productivity, and creative fun.
 
-Last updated: January 6, 2026 (recent additions include updates to **PhishSim** and **TaskFolder**).
+**Last updated:** January 6, 2026 (recent additions/updates include **AWVA**, **PhishSim**, **TaskFolder**, and **Meal Finder**).
 
 ## Projects and Tools
 
 | Folder Name                                      | Description                                                                 | Link |
 |--------------------------------------------------|-----------------------------------------------------------------------------|------|
+| AWVA                                             | Automated Windows Vulnerability Assessment tool (newly added)               | [View](https://github.com/rod-trent/JunkDrawer/tree/main/AWVA) |
 | Agent Platform                                   | Platform/framework for developing AI agents                                 | [View](https://github.com/rod-trent/JunkDrawer/tree/main/Agent%20Platform) |
 | AgentBuilder                                     | Tools and scripts for building AI agents                                    | [View](https://github.com/rod-trent/JunkDrawer/tree/main/AgentBuilder) |
 | Automated Incident Response Playbook Generator   | Tool to automatically generate incident response playbooks                  | [View](https://github.com/rod-trent/JunkDrawer/tree/main/Automated%20Incident%20Response%20Playbook%20Generator) |
@@ -34,8 +35,9 @@ Last updated: January 6, 2026 (recent additions include updates to **PhishSim** 
 | JSON_Converter                                   | Tools/prompts for JSON formatting and parsing                               | [View](https://github.com/rod-trent/JunkDrawer/tree/main/JSON_Converter) |
 | JobAgent                                         | AI agent for job searching, resume help, and interview preparation          | [View](https://github.com/rod-trent/JunkDrawer/tree/main/JobAgent) |
 | Layover Buddy                                    | AI assistant for optimizing airport layovers                                | [View](https://github.com/rod-trent/JunkDrawer/tree/main/Layover%20Buddy) |
+| MMSFlamingo2024                                  | Project related to Microsoft Security event (2024)                          | [View](https://github.com/rod-trent/JunkDrawer/tree/main/MMSFlamingo2024) |
 | Make Me Famous                                   | Grok-powered tool for creating viral content                                | [View](https://github.com/rod-trent/JunkDrawer/tree/main/Make%20Me%20Famous) |
-| Meal Finder                                      | Tool for finding meal options                                               | [View](https://github.com/rod-trent/JunkDrawer/tree/main/Meal%20Finder) |
+| Meal Finder                                      | Tool for finding meal options (recently updated)                            | [View](https://github.com/rod-trent/JunkDrawer/tree/main/Meal%20Finder) |
 | MemeBuilder                                      | Prompts/templates for generating memes                                      | [View](https://github.com/rod-trent/JunkDrawer/tree/main/MemeBuilder) |
 | Microsoft Purview Quest                          | Project/tool related to Microsoft Purview data governance                   | [View](https://github.com/rod-trent/JunkDrawer/tree/main/Microsoft%20Purview%20Quest) |
 | Palm Reader                                      | AI palm reader using Grok vision capabilities                               | [View](https://github.com/rod-trent/JunkDrawer/tree/main/Palm%20Reader) |
