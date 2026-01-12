@@ -15,19 +15,6 @@ A simple, modern **Streamlit** web app that lets you create QR codes — with op
 - Download as PNG
 - Clean, mobile-friendly interface
 
-## Demo
-
-Live app:  
-→ [https://your-app-name.streamlit.app](https://your-app-name.streamlit.app)  
-*(update link once deployed)*
-
-## Screenshots
-
-<p align="center">
-  <img src="https://via.placeholder.com/600x400/4a5568/ffffff?text=With+Logo+Example" alt="QR with logo" width="45%"/>
-  <img src="https://via.placeholder.com/600x400/4a5568/ffffff?text=Plain+Color+Custom+QR" alt="Custom colors" width="45%"/>
-</p>
-
 ## How to Run Locally
 
 ```bash
