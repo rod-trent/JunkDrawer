@@ -2,8 +2,8 @@
 
 A simple, modern **Streamlit** web app that lets you create QR codes — with optional centered logo overlay, customizable colors, error correction, and module size.
 
-![App screenshot](https://via.placeholder.com/800x500/2d3748/ffffff?text=QR+Code+Generator+Screenshot)  
-*(replace with real screenshot when you deploy)*
+![App screenshot](https://github.com/rod-trent/JunkDrawer/blob/main/QR%20Code%20Extra/qrcodegen.jpg)  
+
 
 ## Features
 
