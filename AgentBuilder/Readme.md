@@ -47,14 +47,10 @@ cd JunkDrawer/AgentBuilder
 python CreateAgentYAML.py
 ```
 
-You’ll be prompted for:
-
-- Agent name & description  
-- System instructions (your core prompt)  
-- Whether it can create/analyze files, use the web, etc.  
-- Custom actions (OpenAPI specs)  
-- Authentication type (None, OAuth, API key)  
-- Icons, categories, languages, and a bunch more  
+Command line:
+```
+python createagentyaml.py --prompt "Create a researcher agent for AI news" --output "custom_agent.yaml"
+```
 
 When you’re done, it creates `agent.yaml` in the current folder.
 
