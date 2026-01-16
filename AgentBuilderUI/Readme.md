@@ -116,7 +116,7 @@ If you encounter errors (e.g., missing API key), the app will display a helpful 
 
 ## Final Thoughts
 
-AgentBuilderUI takes the solid foundation of the command-line AgentBuilder and makes it more approachable with a modern UI. It's perfect for anyone dipping their toes into AI agents or streamlining their CrewAI workflows. If you're in Middletown, Ohio, or anywhere else, give it a spin and let me know what you think—drop a comment on GitHub or hit me up on X (@rodtrent).
+AgentBuilderUI takes the solid foundation of the command-line AgentBuilder and makes it more approachable with a modern UI. It's perfect for anyone dipping their toes into AI agents or streamlining their CrewAI workflows. 
 
 As of January 2026, I'm planning to add features like multi-agent generation or prompt templates. Stay tuned, and happy building!
 
