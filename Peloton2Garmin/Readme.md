@@ -24,6 +24,8 @@ A Windows desktop application that seamlessly syncs your Peloton workouts to Gar
 - **Peloton Account**
 - **Garmin Connect Account**
 
+Check out the accompanying blog post: https://rodtrent.substack.com/p/sync-your-peloton-workouts-to-garmin
+
 ## Installation
 
 ### 1. Clone the Repository
