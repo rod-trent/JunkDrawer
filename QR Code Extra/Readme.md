@@ -21,6 +21,7 @@ A simple, modern **Streamlit** web app that lets you create QR codes — with op
 # 1. Clone or download the repository
 git clone https://github.com/yourusername/qr-code-generator-streamlit.git
 cd qr-code-generator-streamlit
+(or just download BuildQRCode.py to a directory on your computer)
 
 # 2. (Recommended) Create virtual environment
 python -m venv venv
@@ -32,5 +33,4 @@ pip install -r requirements.txt
 
 # 4. Run the app
 streamlit run BuildQRCode.py
-# or
-streamlit run qr_code_generator_with_logo_fixed.py
+
