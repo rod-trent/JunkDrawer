@@ -4,7 +4,7 @@ openai==1.99.9             # Compatible with langchain-openai 1.1.0
 httpx==0.28.0
 httpcore==1.0.7
 PyPDF2==3.0.1
-pypdf==6.6.0
+pypdf==6.6.2
 markdown2==2.5.0
 anki==24.6
 genanki==0.13.1
