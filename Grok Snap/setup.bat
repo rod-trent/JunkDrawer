@@ -27,11 +27,16 @@ echo Setup complete!
 echo ========================================
 echo.
 echo NEXT STEPS:
-echo 1. Set your XAI_API_KEY environment variable
-echo    PowerShell: $env:XAI_API_KEY="your-key"
-echo    CMD: set XAI_API_KEY=your-key
-echo.
-echo 2. Run the application:
+echo 1. Run the application:
 echo    python grok_snap_chat.py
+echo.
+echo 2. Click the Settings button (gear icon) in the app
+echo.
+echo 3. Enter your xAI API key
+echo    Get your key at: https://x.ai
+echo.
+echo 4. Click Save Settings
+echo.
+echo Your API key will be saved and loaded automatically!
 echo.
 pause

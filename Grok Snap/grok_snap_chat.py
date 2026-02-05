@@ -138,13 +138,82 @@ class GrokSnapChat(QMainWindow):
     def __init__(self):
         super().__init__()
         self.target_hwnd = None
-        self.api_key = os.environ.get('XAI_API_KEY', '')
         self.conversation_history = []
         self.position_timer = QTimer()
         self.position_timer.timeout.connect(self.update_position)
+        self.snap_position = "right"  # Default snap position
+        self.current_opacity = 1.0  # Default full opacity
+        
+        # Timer for detecting window underneath
+        self.detect_timer = QTimer()
+        self.detect_timer.timeout.connect(self.detect_window_underneath)
+        self.detect_timer.start(500)  # Check every 500ms
+        
+        # Load settings including API key
+        self.load_settings()
         
         self.init_ui()
         self.load_windows()
+    
+    def load_settings(self):
+        """Load settings from config file"""
+        import json
+        from pathlib import Path
+        
+        # Settings file location
+        settings_dir = Path.home() / ".grok_snap_chat"
+        settings_file = settings_dir / "settings.json"
+        
+        # Default settings
+        defaults = {
+            "api_key": os.environ.get('XAI_API_KEY', ''),
+            "snap_position": "right",
+            "opacity": 1.0
+        }
+        
+        try:
+            if settings_file.exists():
+                with open(settings_file, 'r') as f:
+                    settings = json.load(f)
+                    self.api_key = settings.get("api_key", defaults["api_key"])
+                    self.snap_position = settings.get("snap_position", defaults["snap_position"])
+                    self.current_opacity = settings.get("opacity", defaults["opacity"])
+            else:
+                # Use defaults
+                self.api_key = defaults["api_key"]
+                self.snap_position = defaults["snap_position"]
+                self.current_opacity = defaults["opacity"]
+        except Exception as e:
+            print(f"Error loading settings: {e}")
+            # Use defaults on error
+            self.api_key = defaults["api_key"]
+            self.snap_position = defaults["snap_position"]
+            self.current_opacity = defaults["opacity"]
+    
+    def save_settings(self):
+        """Save settings to config file"""
+        import json
+        from pathlib import Path
+        
+        # Settings file location
+        settings_dir = Path.home() / ".grok_snap_chat"
+        settings_file = settings_dir / "settings.json"
+        
+        try:
+            # Create directory if it doesn't exist
+            settings_dir.mkdir(exist_ok=True)
+            
+            settings = {
+                "api_key": self.api_key,
+                "snap_position": self.snap_position,
+                "opacity": self.current_opacity
+            }
+            
+            with open(settings_file, 'w') as f:
+                json.dump(settings, f, indent=2)
+                
+        except Exception as e:
+            print(f"Error saving settings: {e}")
         
     def init_ui(self):
         self.setWindowTitle("Grok Snap Chat")
@@ -168,6 +237,25 @@ class GrokSnapChat(QMainWindow):
         title_label = QLabel("🤖 Grok Snap Chat")
         title_label.setStyleSheet("color: white; font-size: 14px; font-weight: bold;")
         title_layout.addWidget(title_label)
+        
+        title_layout.addStretch()
+        
+        settings_btn = QPushButton("⚙️")
+        settings_btn.setFixedSize(30, 30)
+        settings_btn.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: white;
+                font-size: 16px;
+                border: none;
+            }
+            QPushButton:hover {
+                background-color: #0f3460;
+                border-radius: 15px;
+            }
+        """)
+        settings_btn.clicked.connect(self.show_settings)
+        title_layout.addWidget(settings_btn)
         
         close_btn = QPushButton("✕")
         close_btn.setFixedSize(30, 30)
@@ -384,7 +472,7 @@ class GrokSnapChat(QMainWindow):
         
         # Check for API key
         if not self.api_key:
-            self.append_message("System", "⚠️ XAI_API_KEY not found in environment variables. Please set it to use Grok API.", "#e74c3c")
+            self.append_message("System", "⚠️ No xAI API key found. Click the ⚙️ Settings button to add your API key.", "#e94560")
         
     def load_windows(self):
         """Load available windows into combo box"""
@@ -396,6 +484,68 @@ class GrokSnapChat(QMainWindow):
         for hwnd, title in windows:
             if title != my_title and len(title.strip()) > 0:
                 self.window_combo.addItem(title, hwnd)
+    
+    def detect_window_underneath(self):
+        """Detect which window the chat pane is hovering over and update dropdown"""
+        # Only detect if not currently snapped
+        if self.target_hwnd:
+            return
+        
+        try:
+            # Get the position of this window
+            my_rect = self.frameGeometry()
+            
+            # Check a point just to the left/right/top/bottom depending on intended snap position
+            # This ensures we're checking the window we'd snap TO, not ourselves
+            check_x = my_rect.x() - 10  # Check 10 pixels to the left
+            check_y = my_rect.y() + my_rect.height() // 2  # Middle height
+            
+            # Use ctypes to call WindowFromPoint
+            class POINT(ctypes.Structure):
+                _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+            
+            point = POINT(check_x, check_y)
+            hwnd = user32.WindowFromPoint(point)
+            
+            if not hwnd:
+                return
+            
+            # Get the actual window (not a child control)
+            hwnd = user32.GetAncestor(hwnd, 2)  # GA_ROOT = 2
+            
+            if not hwnd:
+                return
+            
+            # Skip if it's this window
+            my_hwnd = int(self.winId())
+            if hwnd == my_hwnd:
+                return
+            
+            # Get window title
+            length = user32.GetWindowTextLengthW(hwnd)
+            if length > 0:
+                title = ctypes.create_unicode_buffer(length + 1)
+                user32.GetWindowTextW(hwnd, title, length + 1)
+                
+                if title.value and title.value != self.windowTitle():
+                    # Find this window in the combo box and select it
+                    for i in range(self.window_combo.count()):
+                        if self.window_combo.itemData(i) == hwnd:
+                            if self.window_combo.currentIndex() != i:
+                                self.window_combo.setCurrentIndex(i)
+                            return
+                    
+                    # Window not in list, refresh the list
+                    self.load_windows()
+                    # Try again to find it
+                    for i in range(self.window_combo.count()):
+                        if self.window_combo.itemData(i) == hwnd:
+                            self.window_combo.setCurrentIndex(i)
+                            return
+        except Exception as e:
+            # For debugging - you can comment this out later
+            # print(f"Detection error: {e}")
+            pass
                 
     def snap_to_window(self):
         """Snap chat pane to selected window"""
@@ -438,21 +588,36 @@ class GrokSnapChat(QMainWindow):
             
         try:
             rect = get_window_rect(self.target_hwnd)
-            
-            # Position chat pane to the right of target window
-            x = rect.right
-            y = rect.top
+            width = rect.right - rect.left
             height = rect.bottom - rect.top
             
-            # Ensure minimum height
-            if height < 200:
-                height = 600
+            # Calculate position based on snap_position setting
+            if self.snap_position == "right":
+                x = rect.right
+                y = rect.top
+                snap_height = height
+                snap_width = self.width()
+            elif self.snap_position == "left":
+                x = rect.left - self.width()
+                y = rect.top
+                snap_height = height
+                snap_width = self.width()
+            elif self.snap_position == "top":
+                x = rect.left
+                y = rect.top - 300  # Fixed height for top/bottom
+                snap_height = 300
+                snap_width = width
+            elif self.snap_position == "bottom":
+                x = rect.left
+                y = rect.bottom
+                snap_height = 300
+                snap_width = width
             
-            # Debug output (you can remove this later)
-            # print(f"Target window rect: left={rect.left}, top={rect.top}, right={rect.right}, bottom={rect.bottom}")
-            # print(f"Setting chat pane to: x={x}, y={y}, height={height}")
+            # Ensure minimum height for left/right
+            if self.snap_position in ["left", "right"] and snap_height < 200:
+                snap_height = 600
             
-            self.setGeometry(x, y, self.width(), height)
+            self.setGeometry(x, y, snap_width, snap_height)
         except Exception as e:
             self.status_label.setText(f"⚠️ Error: {str(e)}")
             self.position_timer.stop()
@@ -487,7 +652,7 @@ class GrokSnapChat(QMainWindow):
             return
             
         if not self.api_key:
-            self.append_message("System", "Please set XAI_API_KEY environment variable", "#e74c3c")
+            self.append_message("System", "Please set your xAI API key in Settings (⚙️ button)", "#e74c3c")
             return
             
         self.input_field.clear()
@@ -528,6 +693,375 @@ class GrokSnapChat(QMainWindow):
         self.chat_display.clear()
         self.conversation_history = []
         self.status_label.setText("✓ Chat cleared - Fresh start!")
+    
+    def show_settings(self):
+        """Show settings dialog"""
+        from PyQt6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QSlider, QComboBox, QPushButton, QFileDialog, QMessageBox, QLineEdit
+        from PyQt6.QtCore import Qt
+        
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Settings")
+        dialog.setModal(True)
+        dialog.setFixedSize(450, 550)
+        dialog.setStyleSheet("""
+            QDialog {
+                background-color: #1a1a2e;
+            }
+            QLabel {
+                color: white;
+                font-size: 12px;
+            }
+            QComboBox, QLineEdit {
+                background-color: #0f3460;
+                color: white;
+                border: none;
+                padding: 5px;
+                border-radius: 3px;
+            }
+            QLineEdit {
+                padding: 8px;
+            }
+            QSlider::groove:horizontal {
+                background: #0f3460;
+                height: 6px;
+                border-radius: 3px;
+            }
+            QSlider::handle:horizontal {
+                background: #e94560;
+                width: 16px;
+                margin: -5px 0;
+                border-radius: 8px;
+            }
+            QPushButton {
+                background-color: #e94560;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 3px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #ff5577;
+            }
+        """)
+        
+        layout = QVBoxLayout(dialog)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        # API Key Setting
+        api_label = QLabel("xAI API Key:")
+        api_label.setStyleSheet("font-size: 14px; font-weight: bold; color: white;")
+        layout.addWidget(api_label)
+        
+        api_input = QLineEdit()
+        api_input.setPlaceholderText("Enter your xAI API key...")
+        api_input.setText(self.api_key)
+        api_input.setEchoMode(QLineEdit.EchoMode.Password)
+        layout.addWidget(api_input)
+        
+        # Show/Hide API key toggle
+        show_api_btn = QPushButton("👁 Show Key")
+        show_api_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #0f3460;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 3px;
+                font-size: 10px;
+            }
+            QPushButton:hover {
+                background-color: #1a4d7a;
+            }
+        """)
+        
+        def toggle_api_visibility():
+            if api_input.echoMode() == QLineEdit.EchoMode.Password:
+                api_input.setEchoMode(QLineEdit.EchoMode.Normal)
+                show_api_btn.setText("🔒 Hide Key")
+            else:
+                api_input.setEchoMode(QLineEdit.EchoMode.Password)
+                show_api_btn.setText("👁 Show Key")
+        
+        show_api_btn.clicked.connect(toggle_api_visibility)
+        layout.addWidget(show_api_btn)
+        
+        # Snap Position Setting
+        snap_label = QLabel("Snap Position:")
+        snap_label.setStyleSheet("font-size: 14px; font-weight: bold; color: white; margin-top: 10px;")
+        layout.addWidget(snap_label)
+        
+        snap_combo = QComboBox()
+        snap_combo.addItems(["Right Edge", "Left Edge", "Top Edge", "Bottom Edge"])
+        snap_combo.setCurrentText({
+            "right": "Right Edge",
+            "left": "Left Edge", 
+            "top": "Top Edge",
+            "bottom": "Bottom Edge"
+        }[self.snap_position])
+        layout.addWidget(snap_combo)
+        
+        # Opacity Setting
+        opacity_label = QLabel(f"Window Opacity: {int(self.current_opacity * 100)}%")
+        opacity_label.setStyleSheet("font-size: 14px; font-weight: bold; color: white; margin-top: 10px;")
+        layout.addWidget(opacity_label)
+        
+        opacity_slider = QSlider(Qt.Orientation.Horizontal)
+        opacity_slider.setMinimum(30)
+        opacity_slider.setMaximum(100)
+        opacity_slider.setValue(int(self.current_opacity * 100))
+        opacity_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
+        opacity_slider.setTickInterval(10)
+        
+        def update_opacity_label(value):
+            opacity_label.setText(f"Window Opacity: {value}%")
+            self.setWindowOpacity(value / 100)
+            self.current_opacity = value / 100
+            
+        opacity_slider.valueChanged.connect(update_opacity_label)
+        layout.addWidget(opacity_slider)
+        
+        # Save Conversation Setting
+        layout.addWidget(QLabel("Conversation History:", styleSheet="font-size: 14px; font-weight: bold; color: white; margin-top: 10px;"))
+        
+        save_container = QVBoxLayout()
+        save_container.setSpacing(10)
+        
+        # Save conversation button
+        save_btn = QPushButton("💾 Save Current Conversation")
+        save_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #e94560;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 3px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #ff5577;
+            }
+        """)
+        save_btn.clicked.connect(lambda: self.save_conversation_history(dialog))
+        save_container.addWidget(save_btn)
+        
+        # Load conversation button
+        load_btn = QPushButton("📂 Load Conversation")
+        load_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #16a085;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 3px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #1abc9c;
+            }
+        """)
+        load_btn.clicked.connect(lambda: self.load_conversation_history(dialog))
+        save_container.addWidget(load_btn)
+        
+        # Open folder button
+        folder_btn = QPushButton("📁 Open Conversations Folder")
+        folder_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #0f3460;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 3px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #1a4d7a;
+            }
+        """)
+        folder_btn.clicked.connect(self.open_conversations_folder)
+        save_container.addWidget(folder_btn)
+        
+        layout.addLayout(save_container)
+        
+        # Save and Close buttons
+        layout.addStretch()
+        button_layout = QHBoxLayout()
+        
+        save_settings_btn = QPushButton("💾 Save Settings")
+        save_settings_btn.clicked.connect(lambda: self.apply_settings(api_input.text(), snap_combo.currentText(), dialog))
+        button_layout.addWidget(save_settings_btn)
+        
+        close_btn = QPushButton("Cancel")
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #0f3460;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 3px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #1a4d7a;
+            }
+        """)
+        close_btn.clicked.connect(dialog.reject)
+        button_layout.addWidget(close_btn)
+        
+        layout.addLayout(button_layout)
+        
+        dialog.exec()
+    
+    def apply_settings(self, api_key, snap_position_text, dialog):
+        """Apply and save settings from dialog"""
+        # Update API key
+        if api_key.strip():
+            self.api_key = api_key.strip()
+        
+        # Update snap position
+        position_map = {
+            "Right Edge": "right",
+            "Left Edge": "left",
+            "Top Edge": "top",
+            "Bottom Edge": "bottom"
+        }
+        self.snap_position = position_map[snap_position_text]
+        
+        # Save settings to file
+        self.save_settings()
+        
+        # Update position if currently snapped
+        if self.target_hwnd:
+            self.update_position()
+        
+        # Show confirmation
+        self.status_label.setText("✓ Settings saved")
+        
+        dialog.accept()
+    
+    def save_conversation_history(self, parent_dialog=None):
+        """Save conversation history to a JSON file"""
+        if not self.conversation_history:
+            self.append_message("System", "⚠️ No conversation history to save", "#e74c3c")
+            return
+        
+        from PyQt6.QtWidgets import QFileDialog
+        import json
+        from datetime import datetime
+        from pathlib import Path
+        
+        # Default conversations folder
+        conversations_dir = Path.home() / "Documents" / "Grok Snap Chat Conversations"
+        conversations_dir.mkdir(parents=True, exist_ok=True)
+        
+        default_filename = conversations_dir / f"grok_chat_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        
+        filename, _ = QFileDialog.getSaveFileName(
+            parent_dialog or self,
+            "Save Conversation",
+            str(default_filename),
+            "JSON Files (*.json);;All Files (*)"
+        )
+        
+        if filename:
+            try:
+                # Get all chat display text for reference
+                chat_text = self.chat_display.toPlainText()
+                
+                save_data = {
+                    "timestamp": datetime.now().isoformat(),
+                    "conversation_history": self.conversation_history,
+                    "chat_display": chat_text,
+                    "message_count": len(self.conversation_history)
+                }
+                
+                with open(filename, 'w', encoding='utf-8') as f:
+                    json.dump(save_data, f, indent=2, ensure_ascii=False)
+                
+                self.append_message("System", f"✓ Conversation saved to {Path(filename).name}", "#00ff88")
+                self.status_label.setText("✓ Conversation saved")
+            except Exception as e:
+                self.append_message("System", f"⚠️ Error saving conversation: {str(e)}", "#e74c3c")
+                self.status_label.setText("✗ Save failed")
+    
+    def load_conversation_history(self, parent_dialog=None):
+        """Load conversation history from a JSON file"""
+        from PyQt6.QtWidgets import QFileDialog, QMessageBox
+        import json
+        from pathlib import Path
+        
+        # Start in conversations folder
+        conversations_dir = Path.home() / "Documents" / "Grok Snap Chat Conversations"
+        start_dir = str(conversations_dir) if conversations_dir.exists() else ""
+        
+        filename, _ = QFileDialog.getOpenFileName(
+            parent_dialog or self,
+            "Load Conversation",
+            start_dir,
+            "JSON Files (*.json);;All Files (*)"
+        )
+        
+        if filename:
+            try:
+                with open(filename, 'r', encoding='utf-8') as f:
+                    save_data = json.load(f)
+                
+                # Confirm overwrite
+                if self.conversation_history:
+                    reply = QMessageBox.question(
+                        parent_dialog or self,
+                        "Load Conversation",
+                        "This will clear your current conversation. Continue?",
+                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                    )
+                    if reply != QMessageBox.StandardButton.Yes:
+                        return
+                
+                # Load the conversation
+                self.conversation_history = save_data.get("conversation_history", [])
+                
+                # Clear and rebuild chat display
+                self.chat_display.clear()
+                
+                # Rebuild display from history
+                for msg in self.conversation_history:
+                    role = msg.get("role", "")
+                    content = msg.get("content", "")
+                    
+                    if role == "user":
+                        self.append_message("You", content, "#00d4ff")
+                    elif role == "assistant":
+                        self.append_message("Grok", content, "#00ff88")
+                
+                message_count = save_data.get("message_count", len(self.conversation_history))
+                timestamp = save_data.get("timestamp", "unknown")
+                
+                self.append_message("System", f"✓ Loaded conversation from {timestamp} ({message_count} messages)", "#00ff88")
+                self.status_label.setText("✓ Conversation loaded")
+                
+            except Exception as e:
+                self.append_message("System", f"⚠️ Error loading conversation: {str(e)}", "#e74c3c")
+                self.status_label.setText("✗ Load failed")
+    
+    def open_conversations_folder(self):
+        """Open the conversations folder in Windows Explorer"""
+        from pathlib import Path
+        import subprocess
+        
+        conversations_dir = Path.home() / "Documents" / "Grok Snap Chat Conversations"
+        
+        try:
+            # Create folder if it doesn't exist
+            conversations_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Open in Windows Explorer
+            subprocess.run(['explorer', str(conversations_dir)])
+            
+            self.status_label.setText("✓ Opened conversations folder")
+        except Exception as e:
+            self.append_message("System", f"⚠️ Error opening folder: {str(e)}", "#e74c3c")
+            self.status_label.setText("✗ Could not open folder")
         
     def analyze_window(self):
         """Capture and analyze the content of the snapped window"""
@@ -536,7 +1070,7 @@ class GrokSnapChat(QMainWindow):
             return
             
         if not self.api_key:
-            self.append_message("System", "Please set XAI_API_KEY environment variable", "#e74c3c")
+            self.append_message("System", "Please set your xAI API key in Settings (⚙️ button)", "#e74c3c")
             return
             
         self.status_label.setText("📸 Capturing window...")
