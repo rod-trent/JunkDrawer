@@ -25,9 +25,6 @@ if not exist GarminChatDesktop.py (
 
 echo Starting Garmin Chat Desktop...
 echo.
-echo All credentials are configured in the app settings.
-echo No .env file needed!
-echo.
 echo ============================================================
 echo.
 

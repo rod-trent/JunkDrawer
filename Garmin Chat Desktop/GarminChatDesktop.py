@@ -23,7 +23,7 @@ class SettingsDialog(tk.Toplevel):
     def __init__(self, parent, current_config=None):
         super().__init__(parent)
         self.title("Settings")
-        self.geometry("600x450")
+        self.geometry("600x520")
         self.resizable(False, False)
         
         # Make modal
@@ -126,7 +126,7 @@ class SettingsDialog(tk.Toplevel):
         
         # Buttons frame
         button_frame = ttk.Frame(main_frame)
-        button_frame.grid(row=10, column=0, columnspan=2, pady=(15, 0))
+        button_frame.grid(row=10, column=0, columnspan=2, pady=(20, 10))
         
         save_btn = ttk.Button(button_frame,
                              text="Save",
@@ -139,6 +139,9 @@ class SettingsDialog(tk.Toplevel):
                                command=self.cancel,
                                width=15)
         cancel_btn.grid(row=0, column=1, padx=(10, 0))
+        
+        # Add some bottom padding to ensure buttons are visible
+        ttk.Label(main_frame, text="").grid(row=11, column=0, pady=(0, 5))
         
         # Focus on first empty field
         if not self.api_key_var.get():
@@ -203,10 +206,10 @@ class GarminChatApp:
         """Initialize the application"""
         self.root = root
         self.root.title("Garmin Chat")
-        self.root.geometry("900x750")
+        self.root.geometry("900x800")
         
         # Set minimum window size
-        self.root.minsize(600, 500)
+        self.root.minsize(700, 650)
         
         # Configuration file path
         self.config_dir = Path.home() / ".garmin_chat"
@@ -237,6 +240,9 @@ class GarminChatApp:
         # Check if credentials are configured
         if not self.xai_api_key or not self.garmin_email or not self.garmin_password:
             self.root.after(100, self.prompt_for_credentials)
+        else:
+            # Auto-connect if credentials are configured
+            self.root.after(500, self.auto_connect)
         
     def load_config(self):
         """Load configuration from file"""
@@ -281,6 +287,12 @@ class GarminChatApp:
         )
         self.open_settings()
         
+    def auto_connect(self):
+        """Automatically connect to Garmin on startup if credentials are configured"""
+        self.add_message("System", "Auto-connecting to Garmin Connect...", 'system')
+        self.update_status("Connecting to Garmin...", False)
+        self.connect_to_garmin()
+        
     def setup_styles(self):
         """Configure ttk styles for modern look"""
         style = ttk.Style()
@@ -320,7 +332,7 @@ class GarminChatApp:
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         main_frame.columnconfigure(0, weight=1)
-        main_frame.rowconfigure(2, weight=1)
+        main_frame.rowconfigure(3, weight=1)  # Chat display gets the extra space
         
         # Header
         header_frame = ttk.Frame(main_frame)
@@ -413,23 +425,45 @@ class GarminChatApp:
         self.chat_display.tag_configure('assistant', foreground='#27ae60', font=('Segoe UI', 10, 'bold'))
         self.chat_display.tag_configure('system', foreground='#e74c3c', font=('Segoe UI', 9, 'italic'))
         self.chat_display.tag_configure('timestamp', foreground='#95a5a6', font=('Segoe UI', 8))
+        self.chat_display.tag_configure('bold', font=('Segoe UI', 10, 'bold'))
+        self.chat_display.tag_configure('header', font=('Segoe UI', 11, 'bold'), foreground='#34495e')
         
         # Input frame
         input_frame = ttk.Frame(main_frame)
         input_frame.grid(row=4, column=0, sticky=(tk.W, tk.E))
         input_frame.columnconfigure(0, weight=1)
         
-        # Message input
-        self.message_entry = ttk.Entry(input_frame, font=('Segoe UI', 10))
-        self.message_entry.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=(0, 5))
-        self.message_entry.bind('<Return>', lambda e: self.send_message())
+        # Message input (multi-line Text widget)
+        input_container = ttk.Frame(input_frame)
+        input_container.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=(0, 5))
+        input_container.columnconfigure(0, weight=1)
+        
+        self.message_entry = tk.Text(input_container, 
+                                     height=3,
+                                     width=1,
+                                     font=('Segoe UI', 10),
+                                     wrap=tk.WORD,
+                                     relief=tk.FLAT,
+                                     borderwidth=1,
+                                     bg='white')
+        self.message_entry.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=1, pady=1)
+        
+        # Scrollbar for input
+        input_scrollbar = ttk.Scrollbar(input_container, orient=tk.VERTICAL, command=self.message_entry.yview)
+        input_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        self.message_entry.config(yscrollcommand=input_scrollbar.set)
+        
+        # Bind Ctrl+Enter to send (Enter alone creates new line)
+        self.message_entry.bind('<Control-Return>', lambda e: self.send_message())
+        self.message_entry.bind('<Control-Key-Return>', lambda e: self.send_message())
         self.message_entry.config(state=tk.DISABLED)
         
         self.send_btn = ttk.Button(input_frame,
-                                   text="Send",
+                                   text="Send\n(Ctrl+Enter)",
                                    command=self.send_message,
                                    state=tk.DISABLED,
-                                   style='Primary.TButton')
+                                   style='Primary.TButton',
+                                   width=12)
         self.send_btn.grid(row=0, column=1)
         
         # Example questions frame
@@ -459,12 +493,73 @@ class GarminChatApp:
         timestamp = datetime.now().strftime("%H:%M")
         self.chat_display.insert(tk.END, f"[{timestamp}] ", 'timestamp')
         
-        # Add sender and message
+        # Add sender
         self.chat_display.insert(tk.END, f"{sender}: ", tag)
-        self.chat_display.insert(tk.END, f"{message}\n\n")
+        
+        # Parse and add message with markdown formatting
+        if tag == 'assistant':
+            self._insert_markdown(message)
+        else:
+            self.chat_display.insert(tk.END, f"{message}\n\n")
         
         self.chat_display.config(state=tk.DISABLED)
         self.chat_display.see(tk.END)
+        
+    def _insert_markdown(self, text):
+        """Insert text with basic markdown formatting (headers, bold, bullets)"""
+        import re
+        
+        lines = text.split('\n')
+        
+        for line in lines:
+            # Handle headers (#### or ### or ## or #)
+            if line.startswith('#### '):
+                header_text = line[5:]
+                self._insert_inline_formatting(header_text)
+                self.chat_display.insert(tk.END, '\n', 'header')
+            elif line.startswith('### '):
+                header_text = line[4:]
+                self._insert_inline_formatting(header_text)
+                self.chat_display.insert(tk.END, '\n', 'header')
+            elif line.startswith('## '):
+                header_text = line[3:]
+                self._insert_inline_formatting(header_text)
+                self.chat_display.insert(tk.END, '\n', 'header')
+            elif line.startswith('# '):
+                header_text = line[2:]
+                self._insert_inline_formatting(header_text)
+                self.chat_display.insert(tk.END, '\n', 'header')
+            # Handle bullets (- item or * item)
+            elif line.strip().startswith(('- ', '* ')):
+                bullet_text = '  • ' + line.strip()[2:]
+                self._insert_inline_formatting(bullet_text)
+                self.chat_display.insert(tk.END, '\n')
+            # Handle numbered lists (1. item)
+            elif re.match(r'^\d+\.\s', line.strip()):
+                self._insert_inline_formatting(line)
+                self.chat_display.insert(tk.END, '\n')
+            # Regular line with possible inline formatting
+            else:
+                self._insert_inline_formatting(line)
+                self.chat_display.insert(tk.END, '\n')
+        
+        self.chat_display.insert(tk.END, "\n")
+    
+    def _insert_inline_formatting(self, text):
+        """Insert text with inline bold formatting (**text**)"""
+        import re
+        
+        # Split by bold markers **text**
+        parts = re.split(r'(\*\*.*?\*\*)', text)
+        
+        for part in parts:
+            if part.startswith('**') and part.endswith('**') and len(part) > 4:
+                # Bold text
+                bold_text = part[2:-2]
+                self.chat_display.insert(tk.END, bold_text, 'bold')
+            else:
+                # Regular text
+                self.chat_display.insert(tk.END, part)
         
     def update_status(self, message, is_error=False):
         """Update the status label"""
@@ -611,7 +706,8 @@ class GarminChatApp:
             self.update_status("❌ Please connect to Garmin first", True)
             return
             
-        message = self.message_entry.get().strip()
+        # Get message from Text widget
+        message = self.message_entry.get("1.0", tk.END).strip()
         if not message:
             return
             
@@ -619,7 +715,7 @@ class GarminChatApp:
         self.add_message("You", message, 'user')
         
         # Clear input
-        self.message_entry.delete(0, tk.END)
+        self.message_entry.delete("1.0", tk.END)
         
         # Disable input while processing
         self.message_entry.config(state=tk.DISABLED)
@@ -629,6 +725,9 @@ class GarminChatApp:
         thread = threading.Thread(target=self._process_message, args=(message,))
         thread.daemon = True
         thread.start()
+        
+        # Return 'break' to prevent default behavior when called from key binding
+        return 'break'
         
     def _process_message(self, message):
         """Process the message and get AI response (runs in thread)"""
@@ -667,8 +766,8 @@ class GarminChatApp:
             self.update_status("❌ Please connect to Garmin first", True)
             return
             
-        self.message_entry.delete(0, tk.END)
-        self.message_entry.insert(0, question)
+        self.message_entry.delete("1.0", tk.END)
+        self.message_entry.insert("1.0", question)
         self.send_message()
         
     def refresh_data(self):
@@ -687,6 +786,12 @@ class GarminChatApp:
             if result.get('success'):
                 self.root.after(0, lambda: self.update_status("✅ Data refreshed!", False))
                 self.root.after(0, lambda: self.add_message("System", "Data refreshed successfully!", 'system'))
+            elif result.get('mfa_required'):
+                # MFA is required for refresh
+                self.mfa_required = True
+                self.authenticated = False
+                self.root.after(0, lambda: self._show_mfa_input())
+                self.root.after(0, lambda: self.update_status("🔐 MFA Required: Enter your 6-digit code", False))
             else:
                 error_msg = result.get('error', 'Unknown error')
                 self.root.after(0, lambda: self.update_status(f"❌ {error_msg}", True))

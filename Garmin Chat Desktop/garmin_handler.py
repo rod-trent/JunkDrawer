@@ -31,6 +31,7 @@ class GarminDataHandler:
         self.client: Optional[Garmin] = None
         self._authenticated = False
         
+        # Token store directory - garth will create oauth1_token and oauth2_token files
         if token_store_path is None:
             self.token_store = Path.home() / ".garmin_tokens"
         else:
@@ -57,17 +58,66 @@ class GarminDataHandler:
             
             # Try to resume existing session first
             try:
+                oauth1_path = self.token_store / "oauth1_token"
+                oauth2_path = self.token_store / "oauth2_token"
+                
+                logger.info(f"Checking for token files in: {self.token_store}")
+                logger.info(f"OAuth1 token exists: {oauth1_path.exists()}")
+                logger.info(f"OAuth2 token exists: {oauth2_path.exists()}")
+                
+                if not oauth1_path.exists() or not oauth2_path.exists():
+                    logger.info("Token files not found, will do fresh login")
+                    raise FileNotFoundError("Token files not found")
+                
+                logger.info(f"Attempting to resume session from: {self.token_store}")
                 garth.resume(str(self.token_store))
+                logger.info("garth.resume() succeeded")
+                
                 self.client = Garmin()
                 self.client.garth = garth.client
+                logger.info("Garmin client initialized with garth.client")
                 
-                # Verify session is valid
-                self.client.get_user_summary(datetime.now().strftime('%Y-%m-%d'))
-                self._authenticated = True
-                logger.info("Successfully resumed existing Garmin session")
-                return {'success': True}
-            except:
-                logger.info("No valid saved session, attempting fresh login...")
+                # Try to load the display name and verify session
+                try:
+                    logger.info("Loading display name...")
+                    self.client.get_full_name()
+                    logger.info(f"Display name loaded: {self.client.display_name}")
+                    
+                    # Verify session is valid by getting today's summary
+                    from datetime import date
+                    today = date.today().strftime('%Y-%m-%d')
+                    logger.info(f"Verifying session with user summary for {today}")
+                    self.client.get_user_summary(today)
+                    
+                    self._authenticated = True
+                    logger.info("Successfully resumed existing Garmin session")
+                    return {'success': True}
+                    
+                except Exception as verify_error:
+                    # Session might be expired, try to refresh the token
+                    logger.info(f"Session verification failed, attempting token refresh: {verify_error}")
+                    try:
+                        logger.info("Attempting to refresh OAuth2 token...")
+                        garth.client.refresh_oauth2()
+                        garth.save(str(self.token_store))
+                        logger.info("Token refreshed and saved")
+                        
+                        # Try again after refresh
+                        self.client.get_full_name()
+                        from datetime import date
+                        today = date.today().strftime('%Y-%m-%d')
+                        self.client.get_user_summary(today)
+                        
+                        self._authenticated = True
+                        logger.info("Successfully refreshed and resumed Garmin session")
+                        return {'success': True}
+                        
+                    except Exception as refresh_error:
+                        logger.info(f"Token refresh failed: {refresh_error}")
+                        raise  # Fall through to fresh login
+                        
+            except Exception as resume_error:
+                logger.info(f"Could not resume session: {resume_error}")
             
             # Attempt fresh login
             try:
@@ -91,6 +141,13 @@ class GarminDataHandler:
                 self.client = Garmin()
                 self.client.garth = garth.client
                 self._authenticated = True
+                
+                # Load the display name so the client has the user ID
+                try:
+                    self.client.get_full_name()
+                except Exception as e:
+                    logger.warning(f"Could not load display name: {e}")
+                
                 logger.info("Successfully authenticated with Garmin Connect")
                 return {'success': True}
                 
@@ -123,16 +180,64 @@ class GarminDataHandler:
             # Resume login with MFA code - it's in the sso submodule
             # This returns the OAuth tokens
             from garth.sso import resume_login
-            oauth1_token, oauth2_token = resume_login(self.client_state, mfa_code)
+            
+            try:
+                oauth1_token, oauth2_token = resume_login(self.client_state, mfa_code)
+            except Exception as e:
+                # If CSRF token error, the session state is stale - need fresh login
+                if "CSRF token" in str(e):
+                    logger.warning("CSRF token error - session state is stale, attempting fresh login with MFA...")
+                    
+                    # Do a completely fresh login with MFA
+                    result = garth.login(self.email, self.password, return_on_mfa=True)
+                    
+                    if isinstance(result, tuple) and len(result) == 2:
+                        oauth1_token, new_client_state = result
+                        self.client_state = new_client_state
+                        
+                        # Now try resume_login again with fresh state
+                        oauth1_token, oauth2_token = resume_login(self.client_state, mfa_code)
+                    else:
+                        raise Exception("Fresh login didn't return MFA state as expected")
+                else:
+                    raise
             
             # Set the tokens in garth's global state
             garth.client.oauth1_token = oauth1_token
             garth.client.oauth2_token = oauth2_token
             
-            # Try to save tokens, but don't fail if it errors
+            # Try to save tokens - we need to extract just the data, not the methods
             try:
+                import time
+                
+                # Calculate expires_in from expires_at
+                current_time = int(time.time())
+                expires_at = oauth2_token.expires_at if hasattr(oauth2_token, 'expires_at') else (current_time + 3600)
+                refresh_token_expires_at = oauth2_token.refresh_token_expires_at if hasattr(oauth2_token, 'refresh_token_expires_at') else (current_time + 86400)
+                
+                expires_in = max(0, expires_at - current_time)
+                refresh_token_expires_in = max(0, refresh_token_expires_at - current_time)
+                
+                # Create a clean version of oauth2_token with all required fields (both _in and _at variants)
+                clean_oauth2 = {
+                    'scope': oauth2_token.scope if hasattr(oauth2_token, 'scope') else '',
+                    'jti': oauth2_token.jti if hasattr(oauth2_token, 'jti') else '',
+                    'token_type': oauth2_token.token_type if hasattr(oauth2_token, 'token_type') else 'Bearer',
+                    'access_token': oauth2_token.access_token if hasattr(oauth2_token, 'access_token') else '',
+                    'refresh_token': oauth2_token.refresh_token if hasattr(oauth2_token, 'refresh_token') else '',
+                    'expires_in': expires_in,
+                    'expires_at': expires_at,
+                    'refresh_token_expires_in': refresh_token_expires_in,
+                    'refresh_token_expires_at': refresh_token_expires_at,
+                }
+                
+                # Replace oauth2_token with clean version (both for saving and for runtime use)
+                from garth.http import OAuth2Token
+                garth.client.oauth2_token = OAuth2Token(**clean_oauth2)
+                
                 garth.save(str(self.token_store))
                 logger.info("Tokens saved successfully")
+                
             except Exception as save_error:
                 logger.warning(f"Could not save tokens (will need to re-auth next time): {save_error}")
                 # Continue anyway - authentication still worked
@@ -140,6 +245,12 @@ class GarminDataHandler:
             self.client = Garmin()
             self.client.garth = garth.client
             self._authenticated = True
+            
+            # Load the display name so the client has the user ID
+            try:
+                self.client.get_full_name()
+            except Exception as e:
+                logger.warning(f"Could not load display name: {e}")
             
             logger.info("Successfully authenticated with MFA")
             return {'success': True}
@@ -164,7 +275,30 @@ class GarminDataHandler:
         """
         self._ensure_authenticated()
         try:
-            return self.client.get_user_summary(datetime.now().strftime("%Y-%m-%d"))
+            from datetime import date
+            
+            # Ensure display name is loaded - try multiple times if needed
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    if not hasattr(self.client, 'display_name') or self.client.display_name is None:
+                        self.client.get_full_name()
+                    
+                    # Verify we have a display name now
+                    if self.client.display_name:
+                        break
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        logger.error(f"Failed to load display name after {max_retries} attempts: {e}")
+                        return {}
+                    logger.warning(f"Attempt {attempt + 1} to load display name failed, retrying...")
+            
+            if not self.client.display_name:
+                logger.error("Display name is still None, cannot fetch user summary")
+                return {}
+            
+            today = date.today().strftime("%Y-%m-%d")
+            return self.client.get_user_summary(today)
         except Exception as e:
             logger.error(f"Error fetching user summary: {e}")
             return {}
