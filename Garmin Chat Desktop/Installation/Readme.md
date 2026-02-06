@@ -299,9 +299,8 @@ This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.t
 ## 📞 Support
 
 - **Issues**: [GitHub Issues](https://github.com/rod-trent/JunkDrawer/issues)
-- **Email**: [Your email]
-- **Blog**: [Your Substack]
-- **Twitter**: [@YourTwitter]
+- **Blog**: [Rod's Blog](https://rodtrent.substack.com/)
+- **Twitter**: [@rodtrent](https://x.com/rodtrent)
 
 ---
 
