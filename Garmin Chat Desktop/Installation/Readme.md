@@ -144,24 +144,6 @@ AI: Your resting heart rate has been averaging 58 bpm...
 
 ---
 
-## 🛠️ Building from Source
-
-Want to build the executable yourself? See [BUILD-INSTRUCTIONS.md](BUILD-INSTRUCTIONS.md)
-
-**Quick Build:**
-```bash
-# Install PyInstaller
-pip install pyinstaller
-
-# Build executable
-pyinstaller --clean --noconfirm GarminChatDesktop.spec
-
-# Find your executable
-dist\GarminChat.exe
-```
-
----
-
 ## 📦 What's Included
 
 ```
