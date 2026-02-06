@@ -230,6 +230,12 @@ class GarminChatApp:
         self.config_dir = Path.home() / ".garmin_chat"
         self.config_dir.mkdir(exist_ok=True)
         self.config_file = self.config_dir / "config.json"
+        self.saved_prompts_file = self.config_dir / "saved_prompts.json"
+        self.chat_history_dir = self.config_dir / "chat_history"
+        self.chat_history_dir.mkdir(exist_ok=True)
+        
+        # Chat history for current session
+        self.current_chat_history = []
         
         # Application state
         self.garmin_handler = None
@@ -395,13 +401,24 @@ class GarminChatApp:
                                    text="🗑️ Reset Chat",
                                    command=self.reset_chat,
                                    state=tk.DISABLED)
-        self.reset_btn.grid(row=0, column=2, padx=(5, 0))
+        self.reset_btn.grid(row=0, column=2, padx=5)
+        
+        self.save_prompts_btn = ttk.Button(control_frame,
+                                          text="💾 Prompts",
+                                          command=self.open_saved_prompts)
+        self.save_prompts_btn.grid(row=0, column=3, padx=5)
+        
+        self.save_chat_btn = ttk.Button(control_frame,
+                                       text="📝 Save Chat",
+                                       command=self.save_chat_history,
+                                       state=tk.DISABLED)
+        self.save_chat_btn.grid(row=0, column=4, padx=(5, 0))
         
         # Status label
         self.status_label = ttk.Label(control_frame,
                                      text="Not connected",
                                      style='Status.TLabel')
-        self.status_label.grid(row=1, column=0, columnspan=3, sticky=tk.W, pady=(5, 0))
+        self.status_label.grid(row=1, column=0, columnspan=5, sticky=tk.W, pady=(5, 0))
         
         # MFA frame (initially hidden)
         self.mfa_frame = ttk.LabelFrame(main_frame, text="Multi-Factor Authentication", padding="10")
@@ -446,6 +463,7 @@ class GarminChatApp:
         self.chat_display.tag_configure('timestamp', foreground='#95a5a6', font=('Segoe UI', 8))
         self.chat_display.tag_configure('bold', font=('Segoe UI', 10, 'bold'))
         self.chat_display.tag_configure('header', font=('Segoe UI', 11, 'bold'), foreground='#34495e')
+        self.chat_display.tag_configure('table', font=('Courier New', 9), foreground='#2c3e50', spacing1=2, spacing3=2)
         
         # Input frame
         input_frame = ttk.Frame(main_frame)
@@ -504,6 +522,13 @@ class GarminChatApp:
                            command=lambda q=example: self.use_example(q))
             btn.grid(row=i//2, column=i%2, padx=8, pady=6, sticky=(tk.W, tk.E))
         
+        # Date range button
+        date_range_btn = ttk.Button(examples_frame,
+                                   text="📅 Set Date Range (7/14/30 days)",
+                                   command=self.show_date_range_dialog,
+                                   style='Accent.TButton')
+        date_range_btn.grid(row=2, column=0, columnspan=2, padx=8, pady=(10, 6), sticky=(tk.W, tk.E))
+        
     def add_message(self, sender, message, tag='user'):
         """Add a message to the chat display"""
         self.chat_display.config(state=tk.NORMAL)
@@ -521,16 +546,50 @@ class GarminChatApp:
         else:
             self.chat_display.insert(tk.END, f"{message}\n\n")
         
+        # Save to chat history (but not system messages)
+        if tag != 'system':
+            self.current_chat_history.append({
+                'timestamp': datetime.now().isoformat(),
+                'sender': sender,
+                'message': message,
+                'type': tag
+            })
+        
         self.chat_display.config(state=tk.DISABLED)
         self.chat_display.see(tk.END)
         
     def _insert_markdown(self, text):
-        """Insert text with basic markdown formatting (headers, bold, bullets)"""
+        """Insert text with basic markdown formatting (headers, bold, bullets, tables)"""
         import re
         
         lines = text.split('\n')
+        in_table = False
         
-        for line in lines:
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            
+            # Detect table (lines with | characters)
+            if '|' in line and line.strip().startswith('|'):
+                # Skip separator lines (lines with only |, -, and +)
+                if re.match(r'^[\|\-\+\s]+$', line):
+                    i += 1
+                    continue
+                
+                # This is a table line
+                if not in_table:
+                    in_table = True
+                
+                # Render table row with monospace font
+                self.chat_display.insert(tk.END, line + '\n', 'table')
+                i += 1
+                continue
+            else:
+                # Not a table line
+                if in_table:
+                    in_table = False
+                    self.chat_display.insert(tk.END, '\n')  # Extra space after table
+            
             # Handle headers (#### or ### or ## or #)
             if line.startswith('#### '):
                 header_text = line[5:]
@@ -561,6 +620,8 @@ class GarminChatApp:
             else:
                 self._insert_inline_formatting(line)
                 self.chat_display.insert(tk.END, '\n')
+            
+            i += 1
         
         self.chat_display.insert(tk.END, "\n")
     
@@ -714,6 +775,7 @@ class GarminChatApp:
         self.send_btn.config(state=tk.NORMAL)
         self.refresh_btn.config(state=tk.NORMAL)
         self.reset_btn.config(state=tk.NORMAL)
+        self.save_chat_btn.config(state=tk.NORMAL)
         self.connect_btn.config(state=tk.DISABLED)
         self.message_entry.focus()
         
@@ -829,9 +891,265 @@ class GarminChatApp:
         self.chat_display.config(state=tk.NORMAL)
         self.chat_display.delete(1.0, tk.END)
         self.chat_display.config(state=tk.DISABLED)
+        self.current_chat_history = []
         
         self.add_message("System", "Conversation reset!", 'system')
         self.update_status("✅ Chat reset", False)
+    
+    def open_saved_prompts(self):
+        """Open dialog to manage saved prompts"""
+        SavedPromptsDialog(self.root, self)
+    
+    def load_saved_prompts(self):
+        """Load saved prompts from file"""
+        try:
+            if self.saved_prompts_file.exists():
+                with open(self.saved_prompts_file, 'r') as f:
+                    return json.load(f)
+            return []
+        except Exception as e:
+            logger.error(f"Error loading saved prompts: {e}")
+            return []
+    
+    def save_prompt(self, name, prompt):
+        """Save a prompt for reuse"""
+        try:
+            prompts = self.load_saved_prompts()
+            prompts.append({'name': name, 'prompt': prompt, 'created': datetime.now().isoformat()})
+            with open(self.saved_prompts_file, 'w') as f:
+                json.dump(prompts, f, indent=2)
+            logger.info(f"Saved prompt: {name}")
+        except Exception as e:
+            logger.error(f"Error saving prompt: {e}")
+    
+    def delete_saved_prompt(self, index):
+        """Delete a saved prompt"""
+        try:
+            prompts = self.load_saved_prompts()
+            if 0 <= index < len(prompts):
+                deleted = prompts.pop(index)
+                with open(self.saved_prompts_file, 'w') as f:
+                    json.dump(prompts, f, indent=2)
+                logger.info(f"Deleted prompt: {deleted['name']}")
+        except Exception as e:
+            logger.error(f"Error deleting prompt: {e}")
+    
+    def save_chat_history(self):
+        """Save current chat session to file"""
+        if not self.current_chat_history:
+            messagebox.showinfo("No Chat History", "There's no chat history to save yet!", parent=self.root)
+            return
+        
+        try:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = self.chat_history_dir / f"chat_{timestamp}.json"
+            
+            with open(filename, 'w') as f:
+                json.dump({
+                    'saved_at': datetime.now().isoformat(),
+                    'messages': self.current_chat_history
+                }, f, indent=2)
+            
+            messagebox.showinfo("Chat Saved", f"Chat history saved successfully!\n\nLocation: {filename}", parent=self.root)
+            logger.info(f"Saved chat history to: {filename}")
+        except Exception as e:
+            logger.error(f"Error saving chat history: {e}")
+            messagebox.showerror("Save Error", f"Failed to save chat history: {e}", parent=self.root)
+    
+    def show_date_range_dialog(self):
+        """Show dialog to select date range for data queries"""
+        DateRangeDialog(self.root, self)
+
+
+class SavedPromptsDialog(tk.Toplevel):
+    """Dialog for managing saved prompts"""
+    
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.title("Saved Prompts")
+        self.geometry("700x500")
+        self.app = app
+        
+        # Make modal
+        self.transient(parent)
+        self.grab_set()
+        
+        main_frame = ttk.Frame(self, padding="20")
+        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        main_frame.columnconfigure(0, weight=1)
+        main_frame.rowconfigure(1, weight=1)
+        
+        # Title
+        title = ttk.Label(main_frame, text="Saved Prompts", font=('Segoe UI', 14, 'bold'))
+        title.grid(row=0, column=0, sticky=tk.W, pady=(0, 15))
+        
+        # Prompts list
+        list_frame = ttk.Frame(main_frame)
+        list_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 15))
+        list_frame.columnconfigure(0, weight=1)
+        list_frame.rowconfigure(0, weight=1)
+        
+        # Scrolled listbox
+        self.prompts_listbox = tk.Listbox(list_frame, font=('Segoe UI', 10), height=15)
+        self.prompts_listbox.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self.prompts_listbox.yview)
+        scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        self.prompts_listbox.config(yscrollcommand=scrollbar.set)
+        
+        # Buttons
+        button_frame = ttk.Frame(main_frame)
+        button_frame.grid(row=2, column=0, pady=(0, 10))
+        
+        ttk.Button(button_frame, text="➕ New Prompt", command=self.new_prompt).grid(row=0, column=0, padx=5)
+        ttk.Button(button_frame, text="✏️ Use Selected", command=self.use_prompt).grid(row=0, column=1, padx=5)
+        ttk.Button(button_frame, text="🗑️ Delete", command=self.delete_prompt).grid(row=0, column=2, padx=5)
+        ttk.Button(button_frame, text="Close", command=self.destroy).grid(row=0, column=3, padx=5)
+        
+        self.load_prompts()
+    
+    def load_prompts(self):
+        """Load and display saved prompts"""
+        self.prompts_listbox.delete(0, tk.END)
+        self.prompts = self.app.load_saved_prompts()
+        
+        for prompt in self.prompts:
+            display = f"{prompt['name']} - {prompt['prompt'][:50]}..."
+            self.prompts_listbox.insert(tk.END, display)
+    
+    def new_prompt(self):
+        """Create new saved prompt"""
+        dialog = tk.Toplevel(self)
+        dialog.title("New Prompt")
+        dialog.geometry("500x300")
+        dialog.transient(self)
+        dialog.grab_set()
+        
+        frame = ttk.Frame(dialog, padding="20")
+        frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        dialog.columnconfigure(0, weight=1)
+        dialog.rowconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=1)
+        frame.rowconfigure(2, weight=1)
+        
+        ttk.Label(frame, text="Prompt Name:", font=('Segoe UI', 10)).grid(row=0, column=0, sticky=tk.W, pady=5)
+        name_entry = ttk.Entry(frame, font=('Segoe UI', 10))
+        name_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), pady=5, padx=(10, 0))
+        
+        ttk.Label(frame, text="Prompt Text:", font=('Segoe UI', 10)).grid(row=1, column=0, sticky=(tk.W, tk.N), pady=5)
+        prompt_text = tk.Text(frame, font=('Segoe UI', 10), wrap=tk.WORD, height=8)
+        prompt_text.grid(row=1, column=1, rowspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=5, padx=(10, 0))
+        
+        def save():
+            name = name_entry.get().strip()
+            prompt = prompt_text.get("1.0", tk.END).strip()
+            
+            if not name or not prompt:
+                messagebox.showerror("Validation Error", "Please enter both name and prompt text", parent=dialog)
+                return
+            
+            self.app.save_prompt(name, prompt)
+            self.load_prompts()
+            dialog.destroy()
+        
+        button_frame = ttk.Frame(frame)
+        button_frame.grid(row=3, column=0, columnspan=2, pady=(15, 0))
+        
+        ttk.Button(button_frame, text="Save", command=save).grid(row=0, column=0, padx=5)
+        ttk.Button(button_frame, text="Cancel", command=dialog.destroy).grid(row=0, column=1, padx=5)
+    
+    def use_prompt(self):
+        """Use selected prompt"""
+        selection = self.prompts_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No Selection", "Please select a prompt to use", parent=self)
+            return
+        
+        index = selection[0]
+        prompt = self.prompts[index]
+        
+        # Insert into message entry and close dialog
+        self.app.message_entry.delete("1.0", tk.END)
+        self.app.message_entry.insert("1.0", prompt['prompt'])
+        self.destroy()
+    
+    def delete_prompt(self):
+        """Delete selected prompt"""
+        selection = self.prompts_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No Selection", "Please select a prompt to delete", parent=self)
+            return
+        
+        index = selection[0]
+        prompt = self.prompts[index]
+        
+        if messagebox.askyesno("Confirm Delete", f"Delete prompt '{prompt['name']}'?", parent=self):
+            self.app.delete_saved_prompt(index)
+            self.load_prompts()
+
+
+class DateRangeDialog(tk.Toplevel):
+    """Dialog for selecting date range for queries"""
+    
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.title("Query Date Range")
+        self.geometry("400x250")
+        self.app = app
+        
+        # Make modal
+        self.transient(parent)
+        self.grab_set()
+        
+        main_frame = ttk.Frame(self, padding="20")
+        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        # Title
+        title = ttk.Label(main_frame, text="Select Date Range", font=('Segoe UI', 14, 'bold'))
+        title.grid(row=0, column=0, columnspan=2, sticky=tk.W, pady=(0, 20))
+        
+        # Days selection
+        ttk.Label(main_frame, text="Query data for the last:", font=('Segoe UI', 10)).grid(row=1, column=0, columnspan=2, sticky=tk.W, pady=5)
+        
+        self.days_var = tk.IntVar(value=7)
+        
+        ttk.Radiobutton(main_frame, text="7 days", variable=self.days_var, value=7).grid(row=2, column=0, sticky=tk.W, pady=3)
+        ttk.Radiobutton(main_frame, text="14 days", variable=self.days_var, value=14).grid(row=3, column=0, sticky=tk.W, pady=3)
+        ttk.Radiobutton(main_frame, text="30 days", variable=self.days_var, value=30).grid(row=4, column=0, sticky=tk.W, pady=3)
+        
+        # Info label
+        info = ttk.Label(main_frame, text="Your next question will query data\nfrom the selected time period.", 
+                        font=('Segoe UI', 9), foreground='#7f8c8d')
+        info.grid(row=5, column=0, columnspan=2, sticky=tk.W, pady=(15, 0))
+        
+        # Buttons
+        button_frame = ttk.Frame(main_frame)
+        button_frame.grid(row=6, column=0, columnspan=2, pady=(20, 0))
+        
+        ttk.Button(button_frame, text="Apply", command=self.apply_range).grid(row=0, column=0, padx=5)
+        ttk.Button(button_frame, text="Cancel", command=self.destroy).grid(row=0, column=1, padx=5)
+    
+    def apply_range(self):
+        """Apply selected date range"""
+        from datetime import timedelta
+        days = self.days_var.get()
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days)
+        
+        # Add a system message to guide the user
+        self.app.add_message("System", 
+                           f"Date range set to last {days} days ({start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}). "
+                           f"Your next question will query data from this period.", 
+                           'system')
+        
+        # Store the date range for use in queries
+        self.app.date_range_days = days
+        
+        self.destroy()
 
 
 def main():

@@ -61,63 +61,129 @@ class GarminDataHandler:
                 oauth1_path = self.token_store / "oauth1_token"
                 oauth2_path = self.token_store / "oauth2_token"
                 
-                logger.info(f"Checking for token files in: {self.token_store}")
+                logger.info(f"Token store directory: {self.token_store}")
+                logger.info(f"OAuth1 token path: {oauth1_path}")
+                logger.info(f"OAuth2 token path: {oauth2_path}")
                 logger.info(f"OAuth1 token exists: {oauth1_path.exists()}")
                 logger.info(f"OAuth2 token exists: {oauth2_path.exists()}")
+                
+                if oauth1_path.exists():
+                    logger.info(f"OAuth1 token file size: {oauth1_path.stat().st_size} bytes")
+                if oauth2_path.exists():
+                    logger.info(f"OAuth2 token file size: {oauth2_path.stat().st_size} bytes")
                 
                 if not oauth1_path.exists() or not oauth2_path.exists():
                     logger.info("Token files not found, will do fresh login")
                     raise FileNotFoundError("Token files not found")
                 
-                logger.info(f"Attempting to resume session from: {self.token_store}")
-                garth.resume(str(self.token_store))
-                logger.info("garth.resume() succeeded")
+                logger.info(f"Calling garth.resume() with path: {str(self.token_store)}")
+                try:
+                    garth.resume(str(self.token_store))
+                    logger.info("✅ garth.resume() succeeded!")
+                except Exception as resume_ex:
+                    logger.error(f"❌ garth.resume() failed: {type(resume_ex).__name__}: {resume_ex}")
+                    
+                    # Try manual token loading
+                    logger.info("Attempting manual token load...")
+                    import json
+                    import os
+                    
+                    token_dir = str(self.token_store)
+                    oauth1_path = os.path.join(token_dir, "oauth1_token")
+                    oauth2_path = os.path.join(token_dir, "oauth2_token")
+                    
+                    if os.path.exists(oauth1_path) and os.path.exists(oauth2_path):
+                        try:
+                            # Load OAuth1 token
+                            with open(oauth1_path, 'r') as f:
+                                oauth1_data = json.load(f)
+                            logger.info("✅ Loaded OAuth1 token manually")
+                            
+                            # Load OAuth2 token
+                            with open(oauth2_path, 'r') as f:
+                                oauth2_data = json.load(f)
+                            logger.info("✅ Loaded OAuth2 token manually")
+                            
+                            # Set tokens in garth client
+                            from garth.http import OAuth1Token, OAuth2Token
+                            garth.client.oauth1_token = OAuth1Token(**oauth1_data)
+                            garth.client.oauth2_token = OAuth2Token(**oauth2_data)
+                            logger.info("✅ Manually loaded tokens into garth.client")
+                            
+                        except Exception as manual_load_error:
+                            logger.error(f"Failed to manually load tokens: {manual_load_error}")
+                            raise
+                    else:
+                        raise
                 
+                logger.info("Creating Garmin client...")
                 self.client = Garmin()
                 self.client.garth = garth.client
-                logger.info("Garmin client initialized with garth.client")
+                logger.info("✅ Garmin client initialized with garth.client")
                 
                 # Try to load the display name and verify session
                 try:
                     logger.info("Loading display name...")
-                    self.client.get_full_name()
-                    logger.info(f"Display name loaded: {self.client.display_name}")
                     
-                    # Verify session is valid by getting today's summary
-                    from datetime import date
-                    today = date.today().strftime('%Y-%m-%d')
-                    logger.info(f"Verifying session with user summary for {today}")
-                    self.client.get_user_summary(today)
+                    # Try to load display name but don't fail if it doesn't work
+                    # It will be populated on first API call
+                    try:
+                        self.client.get_full_name()
+                        logger.info(f"Display name after get_full_name(): {self.client.display_name}")
+                    except Exception as name_error:
+                        logger.info(f"get_full_name() didn't populate display_name: {name_error}")
+                    
+                    # Don't fail if display_name is None - it will be set on first real API call
+                    # Just verify the session works by trying a simple API call
+                    logger.info("Verifying session with a test API call...")
+                    try:
+                        # Try to get activities which doesn't need display_name
+                        activities = self.client.get_activities(0, 1)  # Get just 1 activity as a test
+                        logger.info("✅ Session verified - API call succeeded")
+                    except Exception as verify_error:
+                        logger.info(f"Session verification failed: {verify_error}")
+                        raise
                     
                     self._authenticated = True
-                    logger.info("Successfully resumed existing Garmin session")
+                    logger.info("✅ Successfully resumed existing Garmin session")
                     return {'success': True}
                     
                 except Exception as verify_error:
                     # Session might be expired, try to refresh the token
-                    logger.info(f"Session verification failed, attempting token refresh: {verify_error}")
+                    logger.info(f"⚠️ Session verification failed: {type(verify_error).__name__}: {verify_error}")
+                    logger.info("Attempting token refresh...")
                     try:
-                        logger.info("Attempting to refresh OAuth2 token...")
+                        logger.info("Calling garth.client.refresh_oauth2()...")
                         garth.client.refresh_oauth2()
+                        logger.info("✅ Token refreshed, saving...")
                         garth.save(str(self.token_store))
-                        logger.info("Token refreshed and saved")
+                        logger.info("✅ Refreshed tokens saved")
                         
                         # Try again after refresh
-                        self.client.get_full_name()
-                        from datetime import date
-                        today = date.today().strftime('%Y-%m-%d')
-                        self.client.get_user_summary(today)
+                        logger.info("Retrying after refresh...")
+                        
+                        # Try to load display name but don't require it
+                        try:
+                            self.client.get_full_name()
+                        except:
+                            pass
+                        
+                        # Just verify session works
+                        logger.info("Verifying refreshed session...")
+                        activities = self.client.get_activities(0, 1)
+                        logger.info("✅ Refreshed session verified")
                         
                         self._authenticated = True
-                        logger.info("Successfully refreshed and resumed Garmin session")
+                        logger.info("✅ Successfully refreshed and resumed Garmin session")
                         return {'success': True}
                         
                     except Exception as refresh_error:
-                        logger.info(f"Token refresh failed: {refresh_error}")
+                        logger.error(f"❌ Token refresh failed: {type(refresh_error).__name__}: {refresh_error}")
                         raise  # Fall through to fresh login
                         
             except Exception as resume_error:
-                logger.info(f"Could not resume session: {resume_error}")
+                logger.info(f"❌ Could not resume session: {type(resume_error).__name__}: {resume_error}")
+                logger.info("Will attempt fresh login...")
             
             # Attempt fresh login
             try:
@@ -210,6 +276,8 @@ class GarminDataHandler:
             try:
                 import time
                 
+                logger.info(f"Preparing to save tokens to: {self.token_store}")
+                
                 # Calculate expires_in from expires_at
                 current_time = int(time.time())
                 expires_at = oauth2_token.expires_at if hasattr(oauth2_token, 'expires_at') else (current_time + 3600)
@@ -231,15 +299,68 @@ class GarminDataHandler:
                     'refresh_token_expires_at': refresh_token_expires_at,
                 }
                 
+                logger.info(f"Created clean OAuth2 token with expires_in={expires_in}, expires_at={expires_at}")
+                
                 # Replace oauth2_token with clean version (both for saving and for runtime use)
                 from garth.http import OAuth2Token
                 garth.client.oauth2_token = OAuth2Token(**clean_oauth2)
+                logger.info("Set garth.client.oauth2_token to clean version")
                 
-                garth.save(str(self.token_store))
-                logger.info("Tokens saved successfully")
+                logger.info(f"Calling garth.save('{str(self.token_store)}')")
+                
+                # Try garth's native save first
+                try:
+                    garth.save(str(self.token_store))
+                    logger.info("✅ garth.save() completed")
+                except Exception as garth_save_error:
+                    logger.warning(f"garth.save() error: {garth_save_error}")
+                
+                # MANUAL TOKEN SAVE as backup - write the tokens ourselves
+                import json
+                import os
+                
+                token_dir = str(self.token_store)
+                os.makedirs(token_dir, exist_ok=True)
+                
+                # Save OAuth1 token
+                oauth1_path = os.path.join(token_dir, "oauth1_token")
+                try:
+                    oauth1_data = {
+                        'oauth_token': oauth1_token[0] if isinstance(oauth1_token, tuple) else getattr(oauth1_token, 'oauth_token', str(oauth1_token)),
+                        'oauth_token_secret': oauth1_token[1] if isinstance(oauth1_token, tuple) else getattr(oauth1_token, 'oauth_token_secret', ''),
+                    }
+                    with open(oauth1_path, 'w') as f:
+                        json.dump(oauth1_data, f, indent=2)
+                    logger.info(f"✅ Manually saved OAuth1 token to: {oauth1_path}")
+                except Exception as oauth1_error:
+                    logger.error(f"Failed to manually save OAuth1 token: {oauth1_error}")
+                
+                # Save OAuth2 token  
+                oauth2_path = os.path.join(token_dir, "oauth2_token")
+                try:
+                    oauth2_data = clean_oauth2  # Use the clean version we already created
+                    with open(oauth2_path, 'w') as f:
+                        json.dump(oauth2_data, f, indent=2)
+                    logger.info(f"✅ Manually saved OAuth2 token to: {oauth2_path}")
+                except Exception as oauth2_error:
+                    logger.error(f"Failed to manually save OAuth2 token: {oauth2_error}")
+                
+                # Verify files were actually created
+                oauth1_path = self.token_store / "oauth1_token"
+                oauth2_path = self.token_store / "oauth2_token"
+                logger.info(f"Verifying token files were created...")
+                logger.info(f"OAuth1 exists after save: {oauth1_path.exists()}")
+                logger.info(f"OAuth2 exists after save: {oauth2_path.exists()}")
+                
+                if oauth1_path.exists() and oauth2_path.exists():
+                    logger.info("✅ Tokens saved successfully and verified!")
+                else:
+                    logger.error("⚠️ garth.save() succeeded but files were not created!")
                 
             except Exception as save_error:
                 logger.warning(f"Could not save tokens (will need to re-auth next time): {save_error}")
+                import traceback
+                logger.warning(f"Traceback: {traceback.format_exc()}")
                 # Continue anyway - authentication still worked
             
             self.client = Garmin()
