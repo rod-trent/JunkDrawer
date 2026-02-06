@@ -64,7 +64,7 @@ The app uses AI (powered by xAI's Grok) to understand your questions and provide
 ### **Option 1: Install Pre-Built Application (Easiest)**
 
 1. **Download** the installer:
-   - Go to [Releases](https://github.com/rod-trent/JunkDrawer/releases)
+   - Go to [Releases](https://github.com/rod-trent/JunkDrawer/Installation)
    - Download `GarminChatDesktop_Setup_v3.0.exe`
 
 2. **Run the installer**:
