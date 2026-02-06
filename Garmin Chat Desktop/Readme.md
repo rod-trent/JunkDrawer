@@ -2,44 +2,131 @@
 
 A standalone desktop application for querying your Garmin Connect data using natural language and AI.
 
-## What's Different from the Web Version?
+## 🎯 What is Garmin Chat?
 
-- **Native desktop app** - Runs as a local application, no web browser needed
-- **Tkinter-based** - Uses Python's built-in GUI framework (no Gradio dependency)
-- **Lighter weight** - Fewer dependencies, faster startup
-- **Same functionality** - All features from the web version work identically
+Garmin Chat transforms your fitness data from passive numbers into actionable insights through natural conversation. Instead of navigating through multiple screens in Garmin Connect, simply ask questions like "How did I sleep last night?" or "What was my last workout?" and get instant, AI-powered responses.
 
-## Requirements
+## ✨ Key Features
 
-- **Python 3.12 or 3.13**
+### **💬 Natural Language Interface**
+- Ask questions in plain English about your fitness data
+- Multi-line input field for complex queries
+- Rich markdown formatting in responses (bold text, headers, bullet points)
+- Conversation history with timestamps
+
+### **🔐 Secure Credential Management**
+- All credentials stored securely in the app (no .env files needed)
+- xAI API key stored in `~/.garmin_chat/config.json`
+- Garmin credentials encrypted and stored locally
+- Easy-to-use Settings dialog for managing credentials
+- Show/hide toggles for sensitive information
+
+### **🚀 Smart Auto-Connect**
+- Optional auto-login on startup (configurable in Settings)
+- Persistent MFA token storage (authenticate once, works for ~30 days)
+- Automatic token refresh when expired
+- Graceful fallback to MFA when needed
+
+### **🎨 Modern Desktop Interface**
+- Clean, professional Tkinter-based UI
+- Color-coded messages (You, Garmin Chat, System)
+- Real-time status indicators
+- Example question buttons for quick queries
+- Responsive layout with proper spacing
+
+### **📊 Comprehensive Garmin Data Access**
+- Recent activities (runs, cycling, strength training, etc.)
+- Sleep data (duration, quality, REM/deep sleep)
+- Daily summaries (steps, calories, heart rate)
+- Heart rate statistics
+- All data types supported by Garmin Connect
+
+### **🔄 Session Management**
+- MFA support with auto-detection
+- Session resume with saved tokens
+- Refresh data button to sync latest from Garmin
+- Reset chat to start fresh conversations
+- Automatic reconnection on token expiration
+
+## 🆚 Advantages Over Web Version
+
+| Feature | Web (Gradio) | Desktop (Tkinter) |
+|---------|--------------|-------------------|
+| Browser needed | ✅ Yes | ❌ No |
+| Dependencies | More (Gradio) | Fewer (built-in) |
+| Startup time | ~5 seconds | ~1 second |
+| Memory usage | ~200MB | ~50MB |
+| Credential storage | .env file | Secure in-app |
+| Auto-login | ❌ No | ✅ Yes |
+| Token persistence | ❌ No | ✅ Yes (30 days) |
+| Port conflicts | Possible | Never |
+| Distribution | Share code | Package as .exe |
+
+## 📋 Requirements
+
+- **Python 3.11, 3.12, or 3.13** (recommended: 3.12 or 3.13)
 - **Tkinter** (usually included with Python)
-- An **xAI API key** from [console.x.ai](https://console.x.ai/)
-- A **Garmin Connect account**
+- An **xAI API key** from [console.x.ai](https://console.x.ai/) (free tier available)
+- A **Garmin Connect account** with MFA enabled (recommended for security)
 
-## Installation
+## 🚀 Quick Start (Windows)
 
-1. **Install dependencies:**
+### **First Time Setup:**
+
+1. **Run Setup.bat**
+   - Double-click `Setup.bat`
+   - Installs all Python dependencies
+   - Takes ~30 seconds
+
+2. **Run Startup.bat**
+   - Double-click `Startup.bat`
+   - App opens and shows welcome dialog
+
+3. **Configure Settings**
+   - Settings dialog opens automatically
+   - Enter your **xAI API key**
+   - Enter your **Garmin email**
+   - Enter your **Garmin password**
+   - Choose if you want **auto-login** (recommended: enabled)
+   - Click **Save**
+
+4. **Connect & Authenticate**
+   - Click "🔐 Connect to Garmin"
+   - If MFA is enabled, enter your 6-digit code
+   - Tokens are saved for future sessions
+
+5. **Start Chatting!**
+   - Type questions about your fitness data
+   - Press **Ctrl+Enter** to send
+   - Get instant AI-powered insights
+
+### **Every Time After:**
+Just double-click **Startup.bat** - that's it!
+
+- If auto-login enabled: Connects automatically
+- If tokens are valid: No MFA needed
+- Ready to chat in seconds!
+
+## 💻 Manual Installation
+
+### **1. Install Dependencies**
+
 ```bash
 pip install -r requirements-desktop.txt
 ```
 
-Note: Tkinter is usually included with Python. If you get an error about Tkinter, install it:
-- **Windows/Mac**: Tkinter comes pre-installed
-- **Linux (Ubuntu/Debian)**: `sudo apt-get install python3-tk`
+**Included packages:**
+- `garminconnect` - Garmin Connect API
+- `garth` - Garmin authentication
+- `openai` - xAI API client
+- `requests` - HTTP library
+
+**Note:** Tkinter is built into Python. If missing:
+- **Windows/Mac**: Tkinter pre-installed
+- **Linux (Ubuntu)**: `sudo apt-get install python3-tk`
 - **Linux (Fedora)**: `sudo dnf install python3-tkinter`
 
-2. **Configure credentials:**
-
-Copy `.env.example` to `.env` and add your credentials:
-```
-XAI_API_KEY=your_xai_api_key_here
-GARMIN_EMAIL=your_garmin_email@example.com
-GARMIN_PASSWORD=your_garmin_password_here
-```
-
-## Usage
-
-Run the desktop application:
+### **2. Run the Application**
 
 ```bash
 python GarminChatDesktop.py
@@ -50,126 +137,299 @@ python GarminChatDesktop.py
 py GarminChatDesktop.py
 ```
 
-The application window will open with:
-- Connect button to authenticate with Garmin
-- Chat interface for asking questions
-- Example questions to get started
-- Buttons to refresh data and reset conversations
+## ⚙️ Settings & Configuration
 
-## Features
+### **Access Settings:**
+Click the **⚙️ Settings** button in the top-right corner
 
-### Authentication
-- Click "🔐 Connect to Garmin" to authenticate
-- If MFA is enabled, enter your 6-digit code
-- Session persists while app is running
+### **xAI Configuration:**
+- **API Key**: Get from [console.x.ai](https://console.x.ai/)
+- Masked by default with show/hide toggle
+- Required for AI responses
 
-### Chat Interface
-- Type questions in the input box and press Enter or click Send
-- View conversation history with timestamps
-- Color-coded messages (You, Garmin Chat, System)
+### **Garmin Connect Credentials:**
+- **Email**: Your Garmin Connect email
+- **Password**: Your Garmin Connect password
+- Password masked with show/hide toggle
+- Required for authentication
 
-### Controls
-- **🔄 Refresh Data** - Update with latest Garmin sync
-- **🗑️ Reset Chat** - Clear conversation and start fresh
-- **Example Questions** - Quick-click common queries
+### **Application Preferences:**
+- **☑ Automatically connect to Garmin on startup**
+  - Enabled: App auto-connects on launch
+  - Disabled: Manual connect required
+  - Default: Enabled
 
-### Example Questions
+### **Storage Locations:**
+- **App settings**: `~/.garmin_chat/config.json` (Windows: `C:\Users\YourName\.garmin_chat\`)
+- **Garmin tokens**: `~/.garmin_tokens/` (OAuth1 and OAuth2 tokens)
+
+## 🎮 Using the App
+
+### **Main Interface:**
+
+**Control Buttons:**
+- **🔐 Connect to Garmin** - Authenticate with Garmin Connect
+- **🔄 Refresh Data** - Sync latest data from Garmin
+- **🗑️ Reset Chat** - Clear conversation history
+- **⚙️ Settings** - Configure credentials and preferences
+
+**Message Input:**
+- Multi-line text field (3 rows)
+- Press **Enter** for new line
+- Press **Ctrl+Enter** to send message
+- Word wrap enabled
+
+**Example Questions:**
 - "How many steps did I take today?"
 - "What was my last workout?"
 - "How did I sleep last night?"
 - "Show me my recent activities"
 
-## Keyboard Shortcuts
+### **Keyboard Shortcuts:**
+- **Ctrl+Enter** - Send message
+- **Enter** - New line in input field
 
-- **Enter** in message box - Send message
-- **Enter** in MFA field - Submit MFA code
+### **Response Features:**
+- **Bold text** - Important information highlighted
+- **Headers** - Organized sections
+- **Bullet points** - Easy-to-read lists
+- **Timestamps** - All messages time-stamped
 
-## Advantages of Desktop Version
+## 🔐 Authentication Flow
 
-✅ **No browser overhead** - Lighter on system resources  
-✅ **Faster startup** - No web server to initialize  
-✅ **Native feel** - Proper desktop application  
-✅ **Fewer dependencies** - No Gradio requirement  
-✅ **Portable** - Can be packaged as standalone executable  
+### **First Connection:**
+1. Click "Connect to Garmin" (or auto-connects if enabled)
+2. App attempts to use saved tokens
+3. If no tokens or expired:
+   - Prompts for MFA code (if MFA enabled)
+   - Enter 6-digit code from authenticator app
+   - Tokens saved for 30 days
 
-## Troubleshooting
+### **Subsequent Connections:**
+1. App loads saved tokens
+2. Verifies tokens are valid
+3. If expired: Automatically refreshes
+4. If refresh fails: Prompts for MFA
+5. **Usually no MFA needed!**
 
-### "No module named 'tkinter'"
-Tkinter needs to be installed:
-- Windows/Mac: Reinstall Python with Tkinter option checked
-- Linux: `sudo apt-get install python3-tk`
+### **Session Management:**
+- **Access tokens**: Valid for 1 hour, auto-refreshed
+- **Refresh tokens**: Valid for ~30 days
+- **MFA required**: Only when refresh token expires
+- **Token storage**: Secure local JSON files
 
-### Window doesn't appear
-Check console for errors. Ensure all dependencies are installed.
+## 🎯 Example Use Cases
 
-### Authentication fails
-- Verify credentials in `.env` file
-- Check Garmin Connect login works in browser
-- Ensure MFA code is entered correctly (6 digits)
+### **1. Morning Routine**
+```
+You: How did I sleep last night?
+```
+Get instant feedback on sleep quality, REM, deep sleep.
 
-### App freezes
-Authentication and API calls run in background threads. Brief pauses during data fetching are normal.
+### **2. Workout Review**
+```
+You: Show me my activities from this week
+```
+See all workouts with duration, distance, calories.
 
-## Creating a Standalone Executable
+### **3. Progress Tracking**
+```
+You: Compare my running pace this month vs last month
+```
+AI analyzes trends and provides insights.
 
-Want to distribute the app without requiring Python installation? Use **PyInstaller**:
+### **4. Goal Monitoring**
+```
+You: Am I on track to hit my step goal today?
+```
+Quick check without opening Garmin Connect app.
+
+### **5. Recovery Assessment**
+```
+You: What's my resting heart rate trend this week?
+```
+Monitor recovery and training load.
+
+## 🔧 Troubleshooting
+
+### **"Python is not installed"**
+- Install Python 3.11+ from [python.org](https://www.python.org/)
+- Check "Add Python to PATH" during installation
+
+### **"No module named 'tkinter'"**
+- **Windows/Mac**: Reinstall Python with Tkinter option
+- **Linux**: `sudo apt-get install python3-tk`
+
+### **"Configuration Required" on startup**
+- Click ⚙️ Settings
+- Enter all three credentials
+- Click Save
+
+### **MFA code errors**
+- Ensure code is 6 digits
+- Enter within 30 seconds of generation
+- If "CSRF token" error: Wait a moment and try again
+
+### **Rate limit errors (429)**
+- Garmin has blocked your IP temporarily
+- Wait 15-30 minutes before trying again
+- Usually caused by repeated failed auth attempts
+
+### **Tokens not persisting**
+- Check `~/.garmin_tokens/` folder exists
+- Ensure `oauth1_token` and `oauth2_token` files present
+- Delete token files and re-authenticate if corrupted
+
+### **Display name errors (403 with /None/)**
+- App will retry loading display name
+- Usually resolves after 2-3 retries
+- If persists: Reset chat and reconnect
+
+## 📦 Creating a Standalone Executable
+
+Want to distribute without requiring Python installation?
 
 ```bash
 pip install pyinstaller
 pyinstaller --onefile --windowed --name "GarminChat" GarminChatDesktop.py
 ```
 
-This creates a single executable in the `dist/` folder that can run on any machine without Python installed.
+**Result:**
+- Single `.exe` file in `dist/` folder
+- No Python installation needed
+- Still requires credentials configuration
 
-**Note:** You'll still need to provide the `.env` file with credentials alongside the executable.
+**Note:** Config files (`~/.garmin_chat/config.json`) created on first run.
 
-## Customization
+## 🎨 Customization
 
-### Change Window Size
-Edit `GarminChatDesktop.py`:
+### **Change Window Size:**
+Edit `GarminChatDesktop.py` line ~323:
 ```python
-self.root.geometry("900x700")  # width x height
+self.root.geometry("900x800")  # width x height
 ```
 
-### Change Theme Colors
-Modify the `setup_styles()` method to customize colors, fonts, and styling.
+### **Change Colors:**
+Edit `setup_styles()` method to customize:
+- Button colors
+- Text colors
+- Background colors
+- Font sizes
 
-### Add More Example Questions
-Edit the `examples` list in `create_widgets()` method.
+### **Add More Examples:**
+Edit `create_widgets()` method, `examples` list:
+```python
+examples = [
+    "Your custom question here",
+    "Another example question",
+]
+```
 
-## Comparison: Web vs Desktop
+## 📁 Project Structure
 
-| Feature | Web (Gradio) | Desktop (Tkinter) |
-|---------|--------------|-------------------|
-| Browser needed | Yes | No |
-| Dependencies | More (Gradio) | Fewer (built-in) |
-| Startup time | ~5 seconds | ~1 second |
-| Memory usage | ~200MB | ~50MB |
-| Look & feel | Modern web UI | Native desktop |
-| Port conflicts | Possible | No |
-| Distribution | Share code | Can package as .exe |
+```
+garmin-chat-bot/
+├── GarminChatDesktop.py      # Main application
+├── garmin_handler.py          # Garmin Connect integration
+├── xai_client.py              # xAI API wrapper
+├── requirements-desktop.txt   # Python dependencies
+├── Setup.bat                  # Windows setup script
+├── Startup.bat                # Windows launch script
+├── README-Desktop.md          # This file
+└── QUICKSTART-Windows.md      # Quick start guide
+```
 
-## Files
+## 🔒 Security & Privacy
 
-- `GarminChatDesktop.py` - Main desktop application
-- `garmin_handler.py` - Garmin Connect integration (shared with web version)
-- `xai_client.py` - xAI API client (shared with web version)
-- `requirements-desktop.txt` - Python dependencies (no Gradio)
-- `.env` - Your credentials (create from `.env.example`)
+### **Data Storage:**
+- **Credentials**: Stored locally in `~/.garmin_chat/config.json`
+- **Tokens**: Stored locally in `~/.garmin_tokens/`
+- **No cloud storage**: Everything stays on your machine
+- **No telemetry**: App doesn't send usage data
 
-## Support
+### **API Usage:**
+- **xAI API**: Only receives queries and Garmin data you explicitly send
+- **Garmin Connect**: Standard OAuth authentication
+- **No data sharing**: Your data isn't shared with third parties
 
-Issues? Check:
-1. Python version (3.12 or 3.13 recommended)
-2. All dependencies installed
-3. `.env` file configured correctly
-4. Tkinter installed (usually automatic)
+### **Best Practices:**
+- ✅ Enable MFA on your Garmin account
+- ✅ Keep your xAI API key secure
+- ✅ Don't share your config files
+- ✅ Use a strong Garmin password
+- ✅ Regularly update the app
 
-## License
+## 🚀 Performance Tips
+
+### **Faster Startup:**
+- Enable auto-login in Settings
+- Keep token files intact
+- Use Python 3.12 or 3.13
+
+### **Better Responses:**
+- Be specific in your questions
+- Ask one question at a time
+- Use the example questions as templates
+
+### **Troubleshooting Authentication:**
+- Delete token files to force fresh auth
+- Check Garmin Connect web login works
+- Verify MFA code is current
+
+## 📝 Known Limitations
+
+- **No offline mode**: Requires internet for Garmin and xAI
+- **Token expiration**: Need MFA every ~30 days
+- **Rate limits**: Garmin may throttle frequent requests
+- **Data latency**: Garmin data updates every 15-30 minutes
+- **MFA required**: Cannot disable MFA requirement from Garmin
+
+## 🆕 Version History
+
+### **v2.0 - Major Update (Current)**
+- ✨ In-app credential management (no .env files)
+- 🔐 Persistent MFA token storage
+- 🚀 Auto-login on startup (configurable)
+- 🎨 Enhanced markdown rendering
+- 💬 Multi-line input field
+- 🔄 Automatic token refresh
+- 🪟 Improved UI spacing and layout
+- 📊 Better error handling and logging
+- ⚙️ Application preferences in Settings
+
+### **v1.0 - Initial Release**
+- Basic desktop application
+- Single-line input
+- Manual authentication each session
+- .env file for credentials
+
+## 🤝 Support
+
+### **Getting Help:**
+1. Check this README thoroughly
+2. Review QUICKSTART-Windows.md
+3. Check console logs for errors
+4. Verify all requirements are met
+
+### **Common Issues:**
+- Most issues are authentication-related
+- Check Settings are configured correctly
+- Verify Garmin Connect login works in browser
+- Wait if you hit rate limits
+
+## 📜 License
 
 Personal use project. Use at your own discretion.
 
+## 🙏 Acknowledgments
+
+- **Garmin Connect** - Fitness data platform
+- **xAI (Grok)** - AI API provider
+- **garminconnect/garth** - Python libraries for Garmin integration
+- **Tkinter** - Python GUI framework
+
 ---
 
-**Enjoy chatting with your fitness data!** 🏃‍♂️💪
+**Ready to transform your fitness data into insights?** 
 
+Download all files, run `Setup.bat`, then `Startup.bat`, and start chatting! 🏃‍♂️💪
