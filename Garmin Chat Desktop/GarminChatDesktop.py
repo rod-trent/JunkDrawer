@@ -20,11 +20,24 @@ logger = logging.getLogger(__name__)
 class SettingsDialog(tk.Toplevel):
     """Dialog for managing application settings"""
     
-    def __init__(self, parent, current_config=None):
+    def __init__(self, parent, current_config=None, colors=None):
         super().__init__(parent)
         self.title("Settings")
         self.geometry("600x550")
         self.resizable(False, False)
+        
+        # Store colors (use parent's colors or defaults)
+        self.colors = colors or {
+            'bg': '#F3F3F3',
+            'card_bg': '#FFFFFF',
+            'text': '#1F1F1F',
+            'text_secondary': '#605E5C',
+            'border': '#EDEBE9',
+            'accent': '#0078D4'
+        }
+        
+        # Apply theme to dialog
+        self.configure(bg=self.colors['bg'])
         
         # Make modal
         self.transient(parent)
@@ -43,29 +56,68 @@ class SettingsDialog(tk.Toplevel):
         
     def create_widgets(self):
         """Create settings dialog widgets"""
-        main_frame = ttk.Frame(self, padding="25")
+        # Configure ttk styles for this dialog with current theme
+        style = ttk.Style()
+        
+        style.configure('Settings.TFrame',
+                       background=self.colors['bg'])
+        
+        style.configure('Settings.TLabel',
+                       background=self.colors['bg'],
+                       foreground=self.colors['text'])
+        
+        style.configure('Settings.Header.TLabel',
+                       background=self.colors['bg'],
+                       foreground=self.colors['text'],
+                       font=('Segoe UI', 11, 'bold'))
+        
+        style.configure('Settings.Title.TLabel',
+                       background=self.colors['bg'],
+                       foreground=self.colors['text'],
+                       font=('Segoe UI', 14, 'bold'))
+        
+        style.configure('Settings.Help.TLabel',
+                       background=self.colors['bg'],
+                       foreground=self.colors['text_secondary'],
+                       font=('Segoe UI', 9))
+        
+        style.configure('Settings.TEntry',
+                       fieldbackground=self.colors['card_bg'],
+                       foreground=self.colors['text'],
+                       bordercolor=self.colors['border'])
+        
+        style.configure('Settings.TCheckbutton',
+                       background=self.colors['bg'],
+                       foreground=self.colors['text'])
+        
+        style.configure('Settings.TButton',
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text'])
+        
+        main_frame = ttk.Frame(self, padding="25", style='Settings.TFrame')
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         main_frame.columnconfigure(1, weight=1)
         
         # Title
         title_label = ttk.Label(main_frame,
                                text="Application Settings",
-                               font=('Segoe UI', 14, 'bold'))
+                               style='Settings.Title.TLabel')
         title_label.grid(row=0, column=0, columnspan=2, pady=(0, 25))
         
         # xAI API Key section
         xai_header = ttk.Label(main_frame,
                               text="xAI Configuration",
-                              font=('Segoe UI', 11, 'bold'))
+                              style='Settings.Header.TLabel')
         xai_header.grid(row=1, column=0, columnspan=2, sticky=tk.W, pady=(0, 10))
         
-        ttk.Label(main_frame, text="API Key:", font=('Segoe UI', 10)).grid(row=2, column=0, sticky=tk.W, pady=8)
+        ttk.Label(main_frame, text="API Key:", style='Settings.TLabel').grid(row=2, column=0, sticky=tk.W, pady=8)
         
         self.api_key_var = tk.StringVar(value=self.current_config.get('xai_api_key', ''))
         self.api_key_entry = ttk.Entry(main_frame, 
                                        textvariable=self.api_key_var,
                                        width=50,
                                        show="*",
+                                       style='Settings.TEntry',
                                        font=('Segoe UI', 10))
         self.api_key_entry.grid(row=2, column=1, sticky=(tk.W, tk.E), pady=8, padx=(10, 0))
         
@@ -74,38 +126,40 @@ class SettingsDialog(tk.Toplevel):
         show_api_check = ttk.Checkbutton(main_frame,
                                          text="Show API key",
                                          variable=self.show_api_key_var,
-                                         command=self.toggle_api_key_visibility)
+                                         command=self.toggle_api_key_visibility,
+                                         style='Settings.TCheckbutton')
         show_api_check.grid(row=3, column=1, sticky=tk.W, padx=(10, 0), pady=(0, 5))
         
         # xAI help text
         xai_help = ttk.Label(main_frame,
                             text="Get your API key from: https://console.x.ai/",
-                            foreground='#7f8c8d',
-                            font=('Segoe UI', 9))
+                            style='Settings.Help.TLabel')
         xai_help.grid(row=4, column=0, columnspan=2, sticky=tk.W, pady=(0, 20))
         
         # Garmin section
         garmin_header = ttk.Label(main_frame,
                                  text="Garmin Connect Credentials",
-                                 font=('Segoe UI', 11, 'bold'))
+                                 style='Settings.Header.TLabel')
         garmin_header.grid(row=5, column=0, columnspan=2, sticky=tk.W, pady=(10, 10))
         
-        ttk.Label(main_frame, text="Email:", font=('Segoe UI', 10)).grid(row=6, column=0, sticky=tk.W, pady=8)
+        ttk.Label(main_frame, text="Email:", style='Settings.TLabel').grid(row=6, column=0, sticky=tk.W, pady=8)
         
         self.garmin_email_var = tk.StringVar(value=self.current_config.get('garmin_email', ''))
         self.garmin_email_entry = ttk.Entry(main_frame,
                                            textvariable=self.garmin_email_var,
                                            width=50,
+                                           style='Settings.TEntry',
                                            font=('Segoe UI', 10))
         self.garmin_email_entry.grid(row=6, column=1, sticky=(tk.W, tk.E), pady=8, padx=(10, 0))
         
-        ttk.Label(main_frame, text="Password:", font=('Segoe UI', 10)).grid(row=7, column=0, sticky=tk.W, pady=8)
+        ttk.Label(main_frame, text="Password:", style='Settings.TLabel').grid(row=7, column=0, sticky=tk.W, pady=8)
         
         self.garmin_password_var = tk.StringVar(value=self.current_config.get('garmin_password', ''))
         self.garmin_password_entry = ttk.Entry(main_frame,
                                               textvariable=self.garmin_password_var,
                                               width=50,
                                               show="*",
+                                              style='Settings.TEntry',
                                               font=('Segoe UI', 10))
         self.garmin_password_entry.grid(row=7, column=1, sticky=(tk.W, tk.E), pady=8, padx=(10, 0))
         
@@ -114,47 +168,50 @@ class SettingsDialog(tk.Toplevel):
         show_garmin_check = ttk.Checkbutton(main_frame,
                                            text="Show password",
                                            variable=self.show_garmin_password_var,
-                                           command=self.toggle_garmin_password_visibility)
+                                           command=self.toggle_garmin_password_visibility,
+                                           style='Settings.TCheckbutton')
         show_garmin_check.grid(row=8, column=1, sticky=tk.W, padx=(10, 0), pady=(0, 5))
         
         # Garmin help text
         garmin_help = ttk.Label(main_frame,
                                text="Your Garmin Connect login credentials",
-                               foreground='#7f8c8d',
-                               font=('Segoe UI', 9))
+                               style='Settings.Help.TLabel')
         garmin_help.grid(row=9, column=0, columnspan=2, sticky=tk.W, pady=(0, 25))
         
         # App Preferences section
         prefs_header = ttk.Label(main_frame,
                                 text="Application Preferences",
-                                font=('Segoe UI', 11, 'bold'))
+                                style='Settings.Header.TLabel')
         prefs_header.grid(row=10, column=0, columnspan=2, sticky=tk.W, pady=(10, 10))
         
         # Auto-login checkbox
         self.auto_login_var = tk.BooleanVar(value=self.current_config.get('auto_login', True))
         auto_login_check = ttk.Checkbutton(main_frame,
                                           text="Automatically connect to Garmin on startup",
-                                          variable=self.auto_login_var)
+                                          variable=self.auto_login_var,
+                                          style='Settings.TCheckbutton')
         auto_login_check.grid(row=11, column=0, columnspan=2, sticky=tk.W, pady=(0, 5))
         
         # Buttons frame
-        button_frame = ttk.Frame(main_frame)
+        button_frame = ttk.Frame(main_frame, style='Settings.TFrame')
         button_frame.grid(row=12, column=0, columnspan=2, pady=(20, 10))
         
         save_btn = ttk.Button(button_frame,
                              text="Save",
                              command=self.save_settings,
+                             style='Settings.TButton',
                              width=15)
         save_btn.grid(row=0, column=0, padx=(0, 10))
         
         cancel_btn = ttk.Button(button_frame,
                                text="Cancel",
                                command=self.cancel,
+                               style='Settings.TButton',
                                width=15)
         cancel_btn.grid(row=0, column=1, padx=(10, 0))
         
         # Add some bottom padding to ensure buttons are visible
-        ttk.Label(main_frame, text="").grid(row=13, column=0, pady=(0, 5))
+        ttk.Label(main_frame, text="", style='Settings.TLabel').grid(row=13, column=0, pady=(0, 5))
         
         # Focus on first empty field
         if not self.api_key_var.get():
@@ -861,7 +918,7 @@ class GarminChatApp:
             'auto_login': self.auto_login
         }
         
-        dialog = SettingsDialog(self.root, current_config)
+        dialog = SettingsDialog(self.root, current_config, colors=self.colors)
         self.root.wait_window(dialog)
         
         if dialog.result:
