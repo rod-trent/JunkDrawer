@@ -23,7 +23,7 @@ class SettingsDialog(tk.Toplevel):
     def __init__(self, parent, current_config=None):
         super().__init__(parent)
         self.title("Settings")
-        self.geometry("600x520")
+        self.geometry("600x550")
         self.resizable(False, False)
         
         # Make modal
@@ -124,9 +124,22 @@ class SettingsDialog(tk.Toplevel):
                                font=('Segoe UI', 9))
         garmin_help.grid(row=9, column=0, columnspan=2, sticky=tk.W, pady=(0, 25))
         
+        # App Preferences section
+        prefs_header = ttk.Label(main_frame,
+                                text="Application Preferences",
+                                font=('Segoe UI', 11, 'bold'))
+        prefs_header.grid(row=10, column=0, columnspan=2, sticky=tk.W, pady=(10, 10))
+        
+        # Auto-login checkbox
+        self.auto_login_var = tk.BooleanVar(value=self.current_config.get('auto_login', True))
+        auto_login_check = ttk.Checkbutton(main_frame,
+                                          text="Automatically connect to Garmin on startup",
+                                          variable=self.auto_login_var)
+        auto_login_check.grid(row=11, column=0, columnspan=2, sticky=tk.W, pady=(0, 5))
+        
         # Buttons frame
         button_frame = ttk.Frame(main_frame)
-        button_frame.grid(row=10, column=0, columnspan=2, pady=(20, 10))
+        button_frame.grid(row=12, column=0, columnspan=2, pady=(20, 10))
         
         save_btn = ttk.Button(button_frame,
                              text="Save",
@@ -141,7 +154,7 @@ class SettingsDialog(tk.Toplevel):
         cancel_btn.grid(row=0, column=1, padx=(10, 0))
         
         # Add some bottom padding to ensure buttons are visible
-        ttk.Label(main_frame, text="").grid(row=11, column=0, pady=(0, 5))
+        ttk.Label(main_frame, text="").grid(row=13, column=0, pady=(0, 5))
         
         # Focus on first empty field
         if not self.api_key_var.get():
@@ -172,6 +185,7 @@ class SettingsDialog(tk.Toplevel):
         api_key = self.api_key_var.get().strip()
         garmin_email = self.garmin_email_var.get().strip()
         garmin_password = self.garmin_password_var.get().strip()
+        auto_login = self.auto_login_var.get()
         
         # Validation
         errors = []
@@ -189,7 +203,8 @@ class SettingsDialog(tk.Toplevel):
         self.result = {
             'xai_api_key': api_key,
             'garmin_email': garmin_email,
-            'garmin_password': garmin_password
+            'garmin_password': garmin_password,
+            'auto_login': auto_login
         }
         self.destroy()
         
@@ -224,6 +239,7 @@ class GarminChatApp:
         self.xai_api_key = None
         self.garmin_email = None
         self.garmin_password = None
+        self.auto_login = True  # Default to auto-login enabled
         
         # Load configuration
         self.load_config()
@@ -240,8 +256,8 @@ class GarminChatApp:
         # Check if credentials are configured
         if not self.xai_api_key or not self.garmin_email or not self.garmin_password:
             self.root.after(100, self.prompt_for_credentials)
-        else:
-            # Auto-connect if credentials are configured
+        elif self.auto_login:
+            # Auto-connect if credentials are configured and auto-login is enabled
             self.root.after(500, self.auto_connect)
         
     def load_config(self):
@@ -253,12 +269,14 @@ class GarminChatApp:
                     self.xai_api_key = config.get('xai_api_key', '')
                     self.garmin_email = config.get('garmin_email', '')
                     self.garmin_password = config.get('garmin_password', '')
+                    self.auto_login = config.get('auto_login', True)  # Default to enabled
                     logger.info("Configuration loaded")
         except Exception as e:
             logger.error(f"Error loading config: {e}")
             self.xai_api_key = None
             self.garmin_email = None
             self.garmin_password = None
+            self.auto_login = True
             
     def save_config(self):
         """Save configuration to file"""
@@ -266,7 +284,8 @@ class GarminChatApp:
             config = {
                 'xai_api_key': self.xai_api_key,
                 'garmin_email': self.garmin_email,
-                'garmin_password': self.garmin_password
+                'garmin_password': self.garmin_password,
+                'auto_login': self.auto_login
             }
             with open(self.config_file, 'w') as f:
                 json.dump(config, f, indent=2)
@@ -574,7 +593,8 @@ class GarminChatApp:
         current_config = {
             'xai_api_key': self.xai_api_key or '',
             'garmin_email': self.garmin_email or '',
-            'garmin_password': self.garmin_password or ''
+            'garmin_password': self.garmin_password or '',
+            'auto_login': self.auto_login
         }
         
         dialog = SettingsDialog(self.root, current_config)
@@ -584,6 +604,7 @@ class GarminChatApp:
             self.xai_api_key = dialog.result['xai_api_key']
             self.garmin_email = dialog.result['garmin_email']
             self.garmin_password = dialog.result['garmin_password']
+            self.auto_login = dialog.result['auto_login']
             self.save_config()
             
             # If already authenticated, reinitialize clients
@@ -819,8 +840,6 @@ def main():
     print("🏃‍♂️ Garmin Chat - Desktop Application")
     print("="*60)
     print("\nStarting application...")
-    print("\nAll credentials are configured in the app settings.")
-    print("No .env file needed!")
     print("="*60 + "\n")
     
     root = tk.Tk()
