@@ -8,8 +8,6 @@ Garmin Chat transforms your fitness data from passive numbers into actionable in
 
 ![Garmin Chat Desktop](https://github.com/rod-trent/JunkDrawer/blob/main/Garmin%20Chat%20Desktop/GarminChatDesktop.jpg)
 
-
-
 ## ✨ Key Features
 
 ### **💬 Natural Language Interface**
@@ -58,7 +56,6 @@ Garmin Chat transforms your fitness data from passive numbers into actionable in
 ### **💾 Advanced Chat Management**
 - **📝 Save Chat** - Save conversations for later review
 - **📂 Chat History Viewer** - Browse, load, and delete past chats
-- **⭐ Favorite Chats** - Mark important conversations
 - **🔍 Search** - Full-text search across all saved chats
 - **💾 Saved Prompts** - Reuse your favorite questions
 
@@ -221,7 +218,6 @@ Click the **⚙️ Settings** button in the top-right corner
 - **💾 Prompts** - Manage saved prompts for quick reuse
 - **📝 Save** - Save current conversation
 - **📂 History** - View and load previous chats
-- **⭐ Favorite** - Mark current chat as favorite
 - **📄 Export** - Export conversation as PDF/Word/Text
 
 **Smart Features:**
@@ -257,7 +253,6 @@ Click the **⚙️ Settings** button in the top-right corner
 - **Save conversations** for later review
 - **Search across all chats** to find past discussions
 - **Load previous chats** to continue conversations
-- **Mark favorites** for quick access
 - **Export to documents** for sharing or archiving
 
 ### **Dark Mode:**
@@ -377,7 +372,7 @@ pyinstaller --onefile --windowed --name "GarminChat" GarminChatDesktop.py
 ### **Change Window Size:**
 Edit `GarminChatDesktop.py` line ~223:
 ```python
-self.root.geometry("1000x850")  # width x height
+self.root.geometry("1200x950")  # width x height (larger for better chat viewing)
 ```
 
 ### **Theme Preferences:**
@@ -486,7 +481,6 @@ garmin-chat-bot/
 - 🔄 **Follow-up Questions** - Context-aware quick actions
 - 📂 **Chat History Viewer** - Browse and load past conversations
 - 🔍 **Full-Text Search** - Search across all saved chats
-- ⭐ **Favorite Chats** - Mark important conversations
 - 💾 **Saved Prompts** - Reuse favorite questions
 - 📄 **Export Reports** - PDF, Word, and Text format exports
 - 🎯 **Larger Icons** - Better visibility with tooltips
