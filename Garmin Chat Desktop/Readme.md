@@ -6,7 +6,7 @@ A standalone desktop application for querying your Garmin Connect data using nat
 
 Garmin Chat transforms your fitness data from passive numbers into actionable insights through natural conversation. Instead of navigating through multiple screens in Garmin Connect, simply ask questions like "How did I sleep last night?" or "What was my last workout?" and get instant, AI-powered responses.
 
-![Garmin Chat Desktop](https://github.com/rod-trent/JunkDrawer/blob/main/Garmin%20Chat%20Desktop/GarminChatDesktop.jpg)
+[Garmin Chat Desktop](https://github.com/rod-trent/JunkDrawer/blob/main/Garmin%20Chat%20Desktop/GarminChatDesktop.jpg)
 
 
 
