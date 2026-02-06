@@ -387,6 +387,34 @@ class GarminDataHandler:
         if not self._authenticated or self.client is None:
             raise RuntimeError("Not authenticated. Call authenticate() first.")
     
+    def _ensure_display_name(self):
+        """
+        Ensure display_name is set for API calls that require it.
+        This is a workaround for the garminconnect library's display_name issue.
+        """
+        if not hasattr(self.client, 'display_name') or self.client.display_name is None:
+            logger.debug("Display name not set, attempting to load it...")
+            
+            # Method 1: Try get_full_name()
+            try:
+                self.client.get_full_name()
+                if self.client.display_name:
+                    logger.debug(f"Display name loaded: {self.client.display_name}")
+                    return
+            except Exception as e:
+                logger.debug(f"get_full_name() failed: {e}")
+            
+            # Method 2: Use email as fallback
+            try:
+                self.client.display_name = self.email.split('@')[0]
+                logger.debug(f"Using fallback display name from email: {self.client.display_name}")
+                return
+            except Exception as e:
+                logger.debug(f"Email fallback failed: {e}")
+            
+            # If still None, log warning
+            logger.debug("Could not set display_name, some API calls may fail")
+    
     def get_user_summary(self) -> Dict:
         """
         Get user profile summary.
@@ -610,6 +638,7 @@ class GarminDataHandler:
             Dictionary containing Body Battery data with charged/drained values
         """
         self._ensure_authenticated()
+        self._ensure_display_name()  # Ensure display_name is set
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
@@ -645,6 +674,7 @@ class GarminDataHandler:
             Dictionary containing stress levels (0-100 scale)
         """
         self._ensure_authenticated()
+        self._ensure_display_name()  # Ensure display_name is set
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
@@ -680,6 +710,7 @@ class GarminDataHandler:
             Dictionary containing respiration rates
         """
         self._ensure_authenticated()
+        self._ensure_display_name()  # Ensure display_name is set
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
@@ -711,6 +742,7 @@ class GarminDataHandler:
             Dictionary containing hydration data in milliliters
         """
         self._ensure_authenticated()
+        self._ensure_display_name()  # Ensure display_name is set
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
@@ -733,6 +765,7 @@ class GarminDataHandler:
             Dictionary containing floors climbed
         """
         self._ensure_authenticated()
+        self._ensure_display_name()  # Ensure display_name is set
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
@@ -761,6 +794,7 @@ class GarminDataHandler:
             Dictionary containing intensity minutes
         """
         self._ensure_authenticated()
+        self._ensure_display_name()  # Ensure display_name is set
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
@@ -791,6 +825,7 @@ class GarminDataHandler:
             Dictionary containing calorie data
         """
         self._ensure_authenticated()
+        self._ensure_display_name()  # Ensure display_name is set
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
