@@ -221,10 +221,10 @@ class GarminChatApp:
         """Initialize the application"""
         self.root = root
         self.root.title("Garmin Chat")
-        self.root.geometry("900x800")
+        self.root.geometry("1000x850")
         
         # Set minimum window size
-        self.root.minsize(700, 650)
+        self.root.minsize(800, 700)
         
         # Configuration file path
         self.config_dir = Path.home() / ".garmin_chat"
@@ -237,6 +237,21 @@ class GarminChatApp:
         # Chat history for current session
         self.current_chat_history = []
         
+        # Conversation context memory (last 10 messages for AI context)
+        self.conversation_context = []
+        self.max_context_messages = 10
+        
+        # User preferences learned from conversations
+        self.user_preferences = {
+            'favorite_activities': [],
+            'goals': [],
+            'interests': [],
+            'last_queries': []
+        }
+        
+        # Load conversation history
+        self.load_conversation_history()
+        
         # Application state
         self.garmin_handler = None
         self.xai_client = None
@@ -246,6 +261,7 @@ class GarminChatApp:
         self.garmin_email = None
         self.garmin_password = None
         self.auto_login = True  # Default to auto-login enabled
+        self.dark_mode = False  # Start in light mode
         
         # Load configuration
         self.load_config()
@@ -319,23 +335,107 @@ class GarminChatApp:
         self.connect_to_garmin()
         
     def setup_styles(self):
-        """Configure ttk styles for modern look"""
+        """Configure ttk styles for modern Fluent Design look"""
+        # Modern Fluent Design color scheme
+        self.colors = {
+            'bg': '#F3F3F3',            # Light gray background
+            'card_bg': '#FFFFFF',        # White cards
+            'accent': '#0078D4',         # Windows 11 blue
+            'accent_hover': '#106EBE',   # Darker blue on hover
+            'accent_light': '#E6F2FA',   # Light blue background
+            'text': '#1F1F1F',           # Almost black text
+            'text_secondary': '#605E5C', # Gray text
+            'border': '#EDEBE9',         # Light border
+            'success': '#107C10',        # Green
+            'warning': '#D83B01',        # Red/Orange
+            'shadow': '#00000010',       # Subtle shadow
+        }
+        
+        # Configure root window
+        self.root.configure(bg=self.colors['bg'])
+        
+        # Modern TTK styles
         style = ttk.Style()
         style.theme_use('clam')
         
-        # Configure colors
-        style.configure('TFrame', background='#f0f0f0')
-        style.configure('Header.TLabel', 
-                       font=('Segoe UI', 16, 'bold'),
-                       background='#f0f0f0',
-                       foreground='#2c3e50')
+        # Base frame style
+        style.configure('TFrame',
+                       background=self.colors['bg'])
+        
+        # Card frame style (elevated white cards)
+        style.configure('Card.TFrame',
+                       background=self.colors['card_bg'],
+                       relief='flat',
+                       borderwidth=1)
+        
+        # Modern button styles
+        style.configure('Modern.TButton',
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text'],
+                       bordercolor=self.colors['border'],
+                       borderwidth=1,
+                       relief='flat',
+                       padding=(12, 6),
+                       font=('Segoe UI', 11))  # Larger font for emojis
+        style.map('Modern.TButton',
+                 background=[('active', self.colors['accent_light'] if self.dark_mode else self.colors['border']), 
+                           ('pressed', self.colors['accent_light'] if self.dark_mode else self.colors['border'])],
+                 foreground=[('active', self.colors['accent'] if self.dark_mode else self.colors['text']),
+                           ('pressed', self.colors['accent'] if self.dark_mode else self.colors['text'])])
+        
+        # Accent button (primary action)
+        style.configure('Accent.TButton',
+                       background=self.colors['accent'],
+                       foreground='white',
+                       borderwidth=0,
+                       relief='flat',
+                       padding=(16, 8),
+                       font=('Segoe UI', 10, 'bold'))
+        style.map('Accent.TButton',
+                 background=[('active', self.colors['accent_hover']), 
+                           ('pressed', self.colors['accent_hover'])],
+                 foreground=[('active', 'white'), ('pressed', 'white')])
+        
+        # Label styles
+        style.configure('Title.TLabel',
+                       background=self.colors['bg'],
+                       foreground=self.colors['text'],
+                       font=('Segoe UI', 18, 'bold'))
+        
+        style.configure('Heading.TLabel',
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text'],
+                       font=('Segoe UI', 11, 'bold'))
+        
+        style.configure('TLabel',
+                       background=self.colors['bg'],
+                       foreground=self.colors['text'],
+                       font=('Segoe UI', 10))
+        
         style.configure('Status.TLabel',
-                       font=('Segoe UI', 9),
-                       background='#f0f0f0',
-                       foreground='#7f8c8d')
-        style.configure('Primary.TButton',
-                       font=('Segoe UI', 10),
-                       padding=8)
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text_secondary'],
+                       font=('Segoe UI', 9))
+        
+        # Entry style
+        style.configure('Modern.TEntry',
+                       fieldbackground=self.colors['card_bg'],
+                       foreground=self.colors['text'],
+                       bordercolor=self.colors['border'],
+                       borderwidth=1,
+                       font=('Segoe UI', 10))
+        
+        # LabelFrame style (card with title)
+        style.configure('Card.TLabelframe',
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text'],
+                       bordercolor=self.colors['border'],
+                       borderwidth=1,
+                       relief='flat')
+        style.configure('Card.TLabelframe.Label',
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text'],
+                       font=('Segoe UI', 10, 'bold'))
         
     def center_window(self):
         """Center the window on screen"""
@@ -349,170 +449,274 @@ class GarminChatApp:
     def create_widgets(self):
         """Create all UI widgets"""
         
-        # Main container
-        main_frame = ttk.Frame(self.root, padding="10")
+        # Main container with modern background
+        main_frame = ttk.Frame(self.root, padding="20")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
         # Configure grid weights
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         main_frame.columnconfigure(0, weight=1)
-        main_frame.rowconfigure(3, weight=1)  # Chat display gets the extra space
+        main_frame.rowconfigure(5, weight=1)  # Chat display gets the extra space (now at row 5)
         
-        # Header
-        header_frame = ttk.Frame(main_frame)
-        header_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
-        header_frame.columnconfigure(0, weight=1)
+        # Row 0: Header Card
+        header_card = ttk.Frame(main_frame, style='Card.TFrame', padding="20")
+        header_card.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
+        header_card.columnconfigure(0, weight=1)
         
-        title_label = ttk.Label(header_frame, 
+        title_label = ttk.Label(header_card, 
                                text="🏃‍♂️ Garmin Chat",
-                               style='Header.TLabel')
+                               style='Title.TLabel')
         title_label.grid(row=0, column=0, sticky=tk.W)
         
-        subtitle_label = ttk.Label(header_frame,
-                                  text="Ask questions about your Garmin fitness data",
-                                  style='Status.TLabel')
-        subtitle_label.grid(row=1, column=0, sticky=tk.W)
+        subtitle_label = ttk.Label(header_card,
+                                  text="AI-powered insights for your fitness data",
+                                  foreground=self.colors['text_secondary'],
+                                  background=self.colors['card_bg'],
+                                  font=('Segoe UI', 10))
+        subtitle_label.grid(row=1, column=0, sticky=tk.W, pady=(5, 0))
         
-        # Settings button (top right)
-        settings_btn = ttk.Button(header_frame,
-                                 text="⚙️ Settings",
+        # Right side buttons - larger icons
+        button_container = ttk.Frame(header_card, style='Card.TFrame')
+        button_container.grid(row=0, column=1, rowspan=2, padx=(10, 0))
+        
+        search_btn = ttk.Button(button_container,
+                               text="🔍",
+                               command=self.open_search,
+                               style='Modern.TButton',
+                               width=4)
+        search_btn.grid(row=0, column=0, padx=3)
+        self.create_tooltip(search_btn, "Search chat history")
+        
+        theme_btn = ttk.Button(button_container,
+                              text="🌙",
+                              command=self.toggle_theme,
+                              style='Modern.TButton',
+                              width=4)
+        theme_btn.grid(row=0, column=1, padx=3)
+        self.create_tooltip(theme_btn, "Toggle dark mode")
+        
+        settings_btn = ttk.Button(button_container,
+                                 text="⚙️",
                                  command=self.open_settings,
-                                 width=12)
-        settings_btn.grid(row=0, column=1, rowspan=2, padx=(10, 0))
+                                 style='Modern.TButton',
+                                 width=4)
+        settings_btn.grid(row=0, column=2, padx=3)
+        self.create_tooltip(settings_btn, "Settings")
         
-        # Control buttons frame
-        control_frame = ttk.Frame(main_frame)
-        control_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        # Row 1: Control buttons card
+        control_card = ttk.Frame(main_frame, style='Card.TFrame', padding="15")
+        control_card.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
         
-        self.connect_btn = ttk.Button(control_frame,
+        self.connect_btn = ttk.Button(control_card,
                                      text="🔐 Connect to Garmin",
                                      command=self.connect_to_garmin,
-                                     style='Primary.TButton')
-        self.connect_btn.grid(row=0, column=0, padx=(0, 5))
+                                     style='Accent.TButton')
+        self.connect_btn.grid(row=0, column=0, padx=(0, 8))
         
-        self.refresh_btn = ttk.Button(control_frame,
-                                     text="🔄 Refresh Data",
+        self.refresh_btn = ttk.Button(control_card,
+                                     text="🔄 Refresh",
                                      command=self.refresh_data,
+                                     style='Modern.TButton',
                                      state=tk.DISABLED)
-        self.refresh_btn.grid(row=0, column=1, padx=5)
+        self.refresh_btn.grid(row=0, column=1, padx=4)
+        self.create_tooltip(self.refresh_btn, "Refresh Garmin data")
         
-        self.reset_btn = ttk.Button(control_frame,
-                                   text="🗑️ Reset Chat",
+        self.reset_btn = ttk.Button(control_card,
+                                   text="🗑️ Reset",
                                    command=self.reset_chat,
+                                   style='Modern.TButton',
                                    state=tk.DISABLED)
-        self.reset_btn.grid(row=0, column=2, padx=5)
+        self.reset_btn.grid(row=0, column=2, padx=4)
+        self.create_tooltip(self.reset_btn, "Clear chat history")
         
-        self.save_prompts_btn = ttk.Button(control_frame,
+        self.save_prompts_btn = ttk.Button(control_card,
                                           text="💾 Prompts",
-                                          command=self.open_saved_prompts)
-        self.save_prompts_btn.grid(row=0, column=3, padx=5)
+                                          command=self.open_saved_prompts,
+                                          style='Modern.TButton')
+        self.save_prompts_btn.grid(row=0, column=3, padx=4)
+        self.create_tooltip(self.save_prompts_btn, "Manage saved prompts")
         
-        self.save_chat_btn = ttk.Button(control_frame,
-                                       text="📝 Save Chat",
+        self.save_chat_btn = ttk.Button(control_card,
+                                       text="📝 Save",
                                        command=self.save_chat_history,
+                                       style='Modern.TButton',
                                        state=tk.DISABLED)
-        self.save_chat_btn.grid(row=0, column=4, padx=5)
+        self.save_chat_btn.grid(row=0, column=4, padx=4)
+        self.create_tooltip(self.save_chat_btn, "Save this conversation")
         
-        self.view_chats_btn = ttk.Button(control_frame,
-                                        text="📂 View Chats",
-                                        command=self.open_chat_history_viewer)
-        self.view_chats_btn.grid(row=0, column=5, padx=(5, 0))
+        self.view_chats_btn = ttk.Button(control_card,
+                                        text="📂 History",
+                                        command=self.open_chat_history_viewer,
+                                        style='Modern.TButton')
+        self.view_chats_btn.grid(row=0, column=5, padx=(4, 0))
+        self.create_tooltip(self.view_chats_btn, "View saved chats")
+        
+        self.favorite_btn = ttk.Button(control_card,
+                                      text="⭐",
+                                      command=self.toggle_favorite_chat,
+                                      style='Modern.TButton',
+                                      width=4,
+                                      state=tk.DISABLED)
+        self.favorite_btn.grid(row=0, column=6, padx=(4, 0))
+        self.create_tooltip(self.favorite_btn, "Mark as favorite")
+        
+        self.export_btn = ttk.Button(control_card,
+                                     text="📄",
+                                     command=self.export_conversation_report,
+                                     style='Modern.TButton',
+                                     width=4,
+                                     state=tk.DISABLED)
+        self.export_btn.grid(row=0, column=7, padx=(4, 0))
+        self.create_tooltip(self.export_btn, "Export report")
         
         # Status label
-        self.status_label = ttk.Label(control_frame,
-                                     text="Not connected",
+        self.status_label = ttk.Label(control_card,
+                                     text="●  Not connected",
                                      style='Status.TLabel')
-        self.status_label.grid(row=1, column=0, columnspan=6, sticky=tk.W, pady=(5, 0))
+        self.status_label.grid(row=1, column=0, columnspan=8, sticky=tk.W, pady=(10, 0))
         
-        # MFA frame (initially hidden)
-        self.mfa_frame = ttk.LabelFrame(main_frame, text="Multi-Factor Authentication", padding="10")
-        self.mfa_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        # Row 2: Smart suggestions area (initially hidden)
+        self.suggestions_frame = ttk.LabelFrame(main_frame,
+                                               text="💡 Smart Suggestions",
+                                               style='Card.TLabelframe',
+                                               padding="15")
+        self.suggestions_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
+        self.suggestions_frame.grid_remove()  # Hide initially
+        self.suggestions_frame.columnconfigure(0, weight=1)
+        
+        self.suggestions_label = ttk.Label(self.suggestions_frame,
+                                          text="Analyzing your data...",
+                                          background=self.colors['card_bg'],
+                                          foreground=self.colors['text_secondary'],
+                                          font=('Segoe UI', 9),
+                                          wraplength=800)
+        self.suggestions_label.grid(row=0, column=0, sticky=tk.W)
+        
+        # Row 3: Follow-up buttons container (dynamically populated)
+        self.followup_frame = ttk.Frame(main_frame, style='Card.TFrame', padding="10")
+        self.followup_frame.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
+        self.followup_frame.grid_remove()  # Hide initially
+        
+        # Row 4: MFA card (initially hidden)
+        self.mfa_frame = ttk.LabelFrame(main_frame, 
+                                       text="🔐 Multi-Factor Authentication", 
+                                       style='Card.TLabelframe',
+                                       padding="20")
+        self.mfa_frame.grid(row=4, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
         self.mfa_frame.grid_remove()  # Hide initially
         self.mfa_frame.columnconfigure(2, weight=1)
         
-        ttk.Label(self.mfa_frame, text="Enter 6-digit code:", font=('Segoe UI', 10)).grid(row=0, column=0, padx=(5, 10), pady=5)
+        ttk.Label(self.mfa_frame, 
+                 text="Enter 6-digit code:", 
+                 background=self.colors['card_bg'],
+                 foreground=self.colors['text'],
+                 font=('Segoe UI', 10)).grid(row=0, column=0, padx=(0, 15), pady=5)
         
-        self.mfa_entry = ttk.Entry(self.mfa_frame, width=20, font=('Segoe UI', 11))
-        self.mfa_entry.grid(row=0, column=1, padx=(0, 10), pady=5)
+        self.mfa_entry = ttk.Entry(self.mfa_frame, 
+                                  width=15, 
+                                  font=('Segoe UI', 12),
+                                  style='Modern.TEntry')
+        self.mfa_entry.grid(row=0, column=1, padx=(0, 15), pady=5)
         self.mfa_entry.bind('<Return>', lambda e: self.submit_mfa())
         
         self.mfa_btn = ttk.Button(self.mfa_frame,
-                                 text="🔑 Submit MFA Code",
+                                 text="Submit Code",
                                  command=self.submit_mfa,
-                                 style='Primary.TButton')
+                                 style='Accent.TButton')
         self.mfa_btn.grid(row=0, column=2, sticky=tk.W, pady=5)
         
-        # Chat display frame
-        chat_frame = ttk.Frame(main_frame)
-        chat_frame.grid(row=3, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
-        chat_frame.columnconfigure(0, weight=1)
-        chat_frame.rowconfigure(0, weight=1)
+        # Row 5: Chat display card (gets extra space)
+        chat_card = ttk.Frame(main_frame, style='Card.TFrame', padding="0")
+        chat_card.grid(row=5, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 15))
+        chat_card.columnconfigure(0, weight=1)
+        chat_card.rowconfigure(0, weight=1)
         
-        # Chat history (scrolled text)
-        self.chat_display = scrolledtext.ScrolledText(chat_frame,
+        # Chat history (scrolled text) with modern styling
+        self.chat_display = scrolledtext.ScrolledText(chat_card,
                                                       wrap=tk.WORD,
                                                       font=('Segoe UI', 10),
-                                                      bg='#ffffff',
+                                                      bg=self.colors['card_bg'],
                                                       relief=tk.FLAT,
-                                                      borderwidth=1,
-                                                      padx=10,
-                                                      pady=10)
+                                                      borderwidth=0,
+                                                      padx=20,
+                                                      pady=15)
         self.chat_display.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         self.chat_display.config(state=tk.DISABLED)
         
-        # Configure text tags for styling
-        self.chat_display.tag_configure('user', foreground='#2980b9', font=('Segoe UI', 10, 'bold'))
-        self.chat_display.tag_configure('assistant', foreground='#27ae60', font=('Segoe UI', 10, 'bold'))
-        self.chat_display.tag_configure('system', foreground='#e74c3c', font=('Segoe UI', 9, 'italic'))
-        self.chat_display.tag_configure('timestamp', foreground='#95a5a6', font=('Segoe UI', 8))
-        self.chat_display.tag_configure('bold', font=('Segoe UI', 10, 'bold'))
-        self.chat_display.tag_configure('header', font=('Segoe UI', 11, 'bold'), foreground='#34495e')
-        self.chat_display.tag_configure('table', font=('Courier New', 9), foreground='#2c3e50', spacing1=2, spacing3=2)
+        # Configure text tags with modern colors
+        self.chat_display.tag_configure('user', 
+                                       foreground=self.colors['accent'], 
+                                       font=('Segoe UI', 10, 'bold'))
+        self.chat_display.tag_configure('assistant', 
+                                       foreground=self.colors['success'], 
+                                       font=('Segoe UI', 10, 'bold'))
+        self.chat_display.tag_configure('system', 
+                                       foreground=self.colors['text_secondary'], 
+                                       font=('Segoe UI', 9, 'italic'))
+        self.chat_display.tag_configure('timestamp', 
+                                       foreground=self.colors['text_secondary'], 
+                                       font=('Segoe UI', 8))
+        self.chat_display.tag_configure('bold', 
+                                       font=('Segoe UI', 10, 'bold'))
+        self.chat_display.tag_configure('header', 
+                                       font=('Segoe UI', 11, 'bold'), 
+                                       foreground=self.colors['text'])
+        self.chat_display.tag_configure('table', 
+                                       font=('Courier New', 9), 
+                                       foreground=self.colors['text'], 
+                                       spacing1=2, 
+                                       spacing3=2)
         
-        # Input frame
-        input_frame = ttk.Frame(main_frame)
-        input_frame.grid(row=4, column=0, sticky=(tk.W, tk.E))
-        input_frame.columnconfigure(0, weight=1)
+        # Row 6: Input card
+        input_card = ttk.Frame(main_frame, style='Card.TFrame', padding="15")
+        input_card.grid(row=6, column=0, sticky=(tk.W, tk.E))
+        input_card.columnconfigure(0, weight=1)
         
-        # Message input (multi-line Text widget)
-        input_container = ttk.Frame(input_frame)
-        input_container.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=(0, 5))
-        input_container.columnconfigure(0, weight=1)
-        
-        self.message_entry = tk.Text(input_container, 
+        # Message input (multi-line Text widget) with modern styling
+        self.message_entry = tk.Text(input_card, 
                                      height=3,
-                                     width=1,
                                      font=('Segoe UI', 10),
                                      wrap=tk.WORD,
                                      relief=tk.FLAT,
                                      borderwidth=1,
-                                     bg='white')
-        self.message_entry.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=1, pady=1)
+                                     highlightthickness=1,
+                                     highlightbackground=self.colors['border'],
+                                     highlightcolor=self.colors['accent'],
+                                     bg=self.colors['card_bg'],
+                                     fg=self.colors['text'],
+                                     insertbackground=self.colors['accent'])
+        self.message_entry.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=(0, 10))
         
-        # Scrollbar for input
-        input_scrollbar = ttk.Scrollbar(input_container, orient=tk.VERTICAL, command=self.message_entry.yview)
-        input_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
-        self.message_entry.config(yscrollcommand=input_scrollbar.set)
+        # Send button with modern accent style
+        self.send_btn = ttk.Button(input_card,
+                                   text="Send →",
+                                   command=self.send_message,
+                                   state=tk.DISABLED,
+                                   style='Accent.TButton')
+        self.send_btn.grid(row=0, column=1)
+        
+        # Helper text
+        helper_text = ttk.Label(input_card,
+                               text="Ctrl+Enter to send  •  Enter for new line",
+                               foreground=self.colors['text_secondary'],
+                               background=self.colors['card_bg'],
+                               font=('Segoe UI', 8))
+        helper_text.grid(row=1, column=0, columnspan=2, sticky=tk.W, pady=(8, 0))
         
         # Bind Ctrl+Enter to send (Enter alone creates new line)
         self.message_entry.bind('<Control-Return>', lambda e: self.send_message())
         self.message_entry.bind('<Control-Key-Return>', lambda e: self.send_message())
         self.message_entry.config(state=tk.DISABLED)
         
-        self.send_btn = ttk.Button(input_frame,
-                                   text="Send\n(Ctrl+Enter)",
-                                   command=self.send_message,
-                                   state=tk.DISABLED,
-                                   style='Primary.TButton',
-                                   width=12)
-        self.send_btn.grid(row=0, column=1)
-        
-        # Example questions frame
-        examples_frame = ttk.LabelFrame(main_frame, text="Example Questions", padding="15")
-        examples_frame.grid(row=5, column=0, sticky=(tk.W, tk.E), pady=(10, 0))
-        examples_frame.columnconfigure(0, weight=1)
-        examples_frame.columnconfigure(1, weight=1)
+        # Row 7: Example questions card  
+        examples_card = ttk.LabelFrame(main_frame, 
+                                      text="Quick Questions", 
+                                      style='Card.TLabelframe',
+                                      padding="15")
+        examples_card.grid(row=7, column=0, sticky=(tk.W, tk.E), pady=(15, 0))
+        examples_card.columnconfigure(0, weight=1)
+        examples_card.columnconfigure(1, weight=1)
         
         examples = [
             "How many steps did I take today?",
@@ -522,10 +726,11 @@ class GarminChatApp:
         ]
         
         for i, example in enumerate(examples):
-            btn = ttk.Button(examples_frame,
+            btn = ttk.Button(examples_card,
                            text=example,
+                           style='Modern.TButton',
                            command=lambda q=example: self.use_example(q))
-            btn.grid(row=i//2, column=i%2, padx=8, pady=6, sticky=(tk.W, tk.E))
+            btn.grid(row=i//2, column=i%2, padx=6, pady=6, sticky=(tk.W, tk.E))
         
     def add_message(self, sender, message, tag='user'):
         """Add a message to the chat display"""
@@ -774,12 +979,17 @@ class GarminChatApp:
         self.refresh_btn.config(state=tk.NORMAL)
         self.reset_btn.config(state=tk.NORMAL)
         self.save_chat_btn.config(state=tk.NORMAL)
+        self.favorite_btn.config(state=tk.NORMAL)
+        self.export_btn.config(state=tk.NORMAL)
         self.connect_btn.config(state=tk.DISABLED)
         self.message_entry.focus()
         
         self.add_message("System",
                         "Connected! You can now ask questions about your Garmin data.",
                         'system')
+        
+        # Show smart suggestions after a delay
+        self.root.after(2000, self.show_smart_suggestions)
         
     def send_message(self):
         """Send a message to the chatbot"""
@@ -816,20 +1026,72 @@ class GarminChatApp:
             # Determine what data to fetch
             query_lower = message.lower()
             
+            # Detect if user wants more activities or specific time periods
+            activity_limit = 5  # Default
+            
+            # Check for requests for more activities
+            if any(phrase in query_lower for phrase in [
+                "show me more", "more activities", "all activities", "all my activities",
+                "show all", "past month", "past week", "last month", "last week",
+                "this month", "this week", "last 10", "last 20", "recent activities"
+            ]):
+                activity_limit = 20  # Fetch more for these queries
+                logger.info(f"Detected request for more activities, fetching {activity_limit}")
+            
+            # Check for specific number requests
+            import re
+            number_match = re.search(r'(?:last|past|recent)\s+(\d+)', query_lower)
+            if number_match:
+                requested_count = int(number_match.group(1))
+                activity_limit = min(requested_count, 50)  # Cap at 50
+                logger.info(f"User requested {requested_count} activities, fetching {activity_limit}")
+            
+            # Fetch appropriate data
             if any(word in query_lower for word in ["activity", "activities", "workout", "run", "walk", "bike", "exercise"]):
-                garmin_context = self.garmin_handler.format_data_for_context("activities")
+                garmin_context = self.garmin_handler.format_data_for_context("activities", activity_limit=activity_limit)
             elif any(word in query_lower for word in ["sleep", "rest", "bed"]):
                 garmin_context = self.garmin_handler.format_data_for_context("sleep")
             elif any(word in query_lower for word in ["step", "walk", "distance", "calorie"]):
                 garmin_context = self.garmin_handler.format_data_for_context("summary")
             else:
-                garmin_context = self.garmin_handler.format_data_for_context("all")
+                garmin_context = self.garmin_handler.format_data_for_context("all", activity_limit=activity_limit)
+            
+            # Add conversation context for memory
+            context_summary = ""
+            if self.conversation_context:
+                recent_convs = self.conversation_context[-5:]
+                context_summary = "\n\nPrevious conversation context:\n"
+                for conv in recent_convs:
+                    sender = conv.get('sender', 'User')
+                    msg = conv.get('message', '')[:100]  # First 100 chars
+                    context_summary += f"{sender}: {msg}...\n"
+            
+            enhanced_context = garmin_context + context_summary
             
             # Get AI response
-            response = self.xai_client.chat(message, garmin_context)
+            response = self.xai_client.chat(message, enhanced_context)
             
             # Add response to display
             self.root.after(0, lambda: self.add_message("Garmin Chat", response, 'assistant'))
+            
+            # Show follow-up suggestions
+            self.root.after(0, lambda: self.show_followup_buttons(response))
+            
+            # Update conversation context
+            self.conversation_context.append({
+                'sender': 'You',
+                'message': message,
+                'timestamp': datetime.now().isoformat()
+            })
+            self.conversation_context.append({
+                'sender': 'Garmin Chat',
+                'message': response,
+                'timestamp': datetime.now().isoformat()
+            })
+            
+            # Keep context manageable
+            if len(self.conversation_context) > self.max_context_messages:
+                self.conversation_context = self.conversation_context[-self.max_context_messages:]
             
         except Exception as e:
             error_msg = f"Sorry, I encountered an error: {str(e)}"
@@ -957,6 +1219,389 @@ class GarminChatApp:
     def open_chat_history_viewer(self):
         """Open dialog to view saved chat histories"""
         ChatHistoryViewer(self.root, self)
+    
+    def load_conversation_history(self):
+        """Load recent conversation context for AI memory"""
+        try:
+            # Load last 5 chat files for context
+            chat_files = sorted(self.chat_history_dir.glob("chat_*.json"),
+                              key=lambda f: f.stat().st_mtime,
+                              reverse=True)[:5]
+            
+            for file in chat_files:
+                with open(file, 'r') as f:
+                    data = json.load(f)
+                    messages = data.get('messages', [])
+                    # Add to context (last message from each chat)
+                    if messages:
+                        self.conversation_context.extend(messages[-3:])  # Last 3 from each
+            
+            # Keep only most recent messages
+            self.conversation_context = self.conversation_context[-self.max_context_messages:]
+        except Exception as e:
+            logger.error(f"Error loading conversation history: {e}")
+    
+    def toggle_theme(self):
+        """Toggle between light and dark mode"""
+        # Check current theme
+        if not hasattr(self, 'dark_mode'):
+            self.dark_mode = False
+        
+        self.dark_mode = not self.dark_mode
+        
+        if self.dark_mode:
+            # Dark mode colors
+            self.colors = {
+                'bg': '#202020',
+                'card_bg': '#2D2D30',
+                'accent': '#60A5FA',
+                'accent_hover': '#3B82F6',
+                'accent_light': '#1E3A5F',
+                'text': '#E5E5E5',
+                'text_secondary': '#A0A0A0',
+                'border': '#3E3E42',
+                'success': '#10B981',
+                'warning': '#F59E0B',
+                'shadow': '#00000040',
+            }
+        else:
+            # Light mode colors (original)
+            self.colors = {
+                'bg': '#F3F3F3',
+                'card_bg': '#FFFFFF',
+                'accent': '#0078D4',
+                'accent_hover': '#106EBE',
+                'accent_light': '#E6F2FA',
+                'text': '#1F1F1F',
+                'text_secondary': '#605E5C',
+                'border': '#EDEBE9',
+                'success': '#107C10',
+                'warning': '#D83B01',
+                'shadow': '#00000010',
+            }
+        
+        # Apply new theme immediately
+        self.apply_theme()
+    
+    def apply_theme(self):
+        """Apply current theme colors to all UI elements"""
+        # Update root background
+        self.root.configure(bg=self.colors['bg'])
+        
+        # Re-configure ttk styles with new colors
+        style = ttk.Style()
+        
+        # Base frame style
+        style.configure('TFrame',
+                       background=self.colors['bg'])
+        
+        # Card frame style
+        style.configure('Card.TFrame',
+                       background=self.colors['card_bg'],
+                       relief='flat',
+                       borderwidth=1)
+        
+        # Label styles
+        style.configure('Title.TLabel',
+                       background=self.colors['bg'],
+                       foreground=self.colors['text'],
+                       font=('Segoe UI', 18, 'bold'))
+        
+        style.configure('Heading.TLabel',
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text'],
+                       font=('Segoe UI', 11, 'bold'))
+        
+        style.configure('TLabel',
+                       background=self.colors['bg'],
+                       foreground=self.colors['text'],
+                       font=('Segoe UI', 10))
+        
+        style.configure('Status.TLabel',
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text_secondary'],
+                       font=('Segoe UI', 9))
+        
+        # Button styles
+        style.configure('Modern.TButton',
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text'],
+                       bordercolor=self.colors['border'],
+                       borderwidth=1,
+                       relief='flat',
+                       padding=(12, 6),
+                       font=('Segoe UI', 11))
+        style.map('Modern.TButton',
+                 background=[('active', self.colors['accent_light'] if self.dark_mode else self.colors['border']), 
+                           ('pressed', self.colors['accent_light'] if self.dark_mode else self.colors['border'])],
+                 foreground=[('active', self.colors['accent'] if self.dark_mode else self.colors['text']),
+                           ('pressed', self.colors['accent'] if self.dark_mode else self.colors['text'])])
+        
+        style.configure('Accent.TButton',
+                       background=self.colors['accent'],
+                       foreground='white',
+                       borderwidth=0,
+                       relief='flat',
+                       padding=(16, 8),
+                       font=('Segoe UI', 10, 'bold'))
+        style.map('Accent.TButton',
+                 background=[('active', self.colors['accent_hover']), 
+                           ('pressed', self.colors['accent_hover'])],
+                 foreground=[('active', 'white'), ('pressed', 'white')])
+        
+        # LabelFrame style
+        style.configure('Card.TLabelframe',
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text'],
+                       bordercolor=self.colors['border'],
+                       borderwidth=1,
+                       relief='flat')
+        style.configure('Card.TLabelframe.Label',
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text'],
+                       font=('Segoe UI', 10, 'bold'))
+        
+        # Update chat display
+        self.chat_display.config(bg=self.colors['card_bg'], fg=self.colors['text'])
+        
+        # Update chat display tags
+        self.chat_display.tag_configure('user', foreground=self.colors['accent'])
+        self.chat_display.tag_configure('assistant', foreground=self.colors['success'])
+        self.chat_display.tag_configure('system', foreground=self.colors['text_secondary'])
+        self.chat_display.tag_configure('timestamp', foreground=self.colors['text_secondary'])
+        self.chat_display.tag_configure('header', foreground=self.colors['text'])
+        self.chat_display.tag_configure('table', foreground=self.colors['text'])
+        
+        # Update message entry
+        self.message_entry.config(
+            bg=self.colors['card_bg'],
+            fg=self.colors['text'],
+            insertbackground=self.colors['accent'],
+            highlightbackground=self.colors['border'],
+            highlightcolor=self.colors['accent']
+        )
+        
+        # Update MFA entry if it exists
+        try:
+            self.mfa_entry.config(
+                fieldbackground=self.colors['card_bg'],
+                foreground=self.colors['text']
+            )
+        except:
+            pass
+        
+        # Update suggestions label
+        try:
+            self.suggestions_label.config(
+                background=self.colors['card_bg'],
+                foreground=self.colors['text_secondary']
+            )
+        except:
+            pass
+        
+        # Update all frames and labels recursively
+        self._update_widget_colors(self.root)
+    
+    def _update_widget_colors(self, widget):
+        """Recursively update widget colors"""
+        try:
+            widget_type = widget.winfo_class()
+            
+            # Update Frame backgrounds
+            if widget_type in ('TFrame', 'Frame'):
+                try:
+                    widget.configure(background=self.colors['bg'])
+                except:
+                    pass
+            
+            # Update Label colors
+            elif widget_type in ('TLabel', 'Label'):
+                try:
+                    widget.configure(
+                        background=self.colors['bg'],
+                        foreground=self.colors['text']
+                    )
+                except:
+                    pass
+            
+            # Update specific styled labels
+            if hasattr(widget, 'cget'):
+                try:
+                    # Check if it's a card background element
+                    if 'Card' in str(widget.winfo_parent()):
+                        widget.configure(background=self.colors['card_bg'])
+                except:
+                    pass
+            
+            # Recursively update children
+            for child in widget.winfo_children():
+                self._update_widget_colors(child)
+        
+        except:
+            pass
+    
+    def open_search(self):
+        """Open search dialog for chat history"""
+        SearchDialog(self.root, self)
+    
+    def toggle_favorite_chat(self):
+        """Mark current chat as favorite"""
+        if not self.current_chat_history:
+            return
+        
+        # Save as favorite
+        try:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = self.chat_history_dir / f"favorite_{timestamp}.json"
+            
+            with open(filename, 'w') as f:
+                json.dump({
+                    'saved_at': datetime.now().isoformat(),
+                    'favorite': True,
+                    'messages': self.current_chat_history
+                }, f, indent=2)
+            
+            messagebox.showinfo("Favorite Saved", 
+                              "Chat marked as favorite! ⭐",
+                              parent=self.root)
+            logger.info(f"Saved favorite chat: {filename}")
+        except Exception as e:
+            logger.error(f"Error saving favorite: {e}")
+    
+    def show_smart_suggestions(self):
+        """Generate and display smart suggestions based on user data"""
+        if not self.authenticated:
+            return
+        
+        # Show suggestions frame
+        self.suggestions_frame.grid()
+        
+        # Generate suggestions (this would analyze actual data)
+        suggestions = []
+        
+        # Check when they last asked about certain topics
+        recent_topics = [msg.get('message', '').lower() for msg in self.current_chat_history[-10:]]
+        
+        if not any('sleep' in topic for topic in recent_topics):
+            suggestions.append("You haven't checked your sleep data recently")
+        
+        if not any('steps' in topic or 'walking' in topic for topic in recent_topics):
+            suggestions.append("How about reviewing your step count?")
+        
+        if not any('heart' in topic for topic in recent_topics):
+            suggestions.append("Check your heart rate trends")
+        
+        if suggestions:
+            suggestion_text = "💡 " + " • ".join(suggestions[:2])
+            self.suggestions_label.config(text=suggestion_text)
+        else:
+            self.suggestions_frame.grid_remove()
+    
+    def show_followup_buttons(self, response_text):
+        """Show context-aware follow-up buttons after AI response"""
+        # Clear existing buttons
+        for widget in self.followup_frame.winfo_children():
+            widget.destroy()
+        
+        # Generate follow-up questions based on response
+        followups = []
+        
+        response_lower = response_text.lower()
+        
+        if 'steps' in response_lower or 'walking' in response_lower:
+            followups = [
+                "Compare to last week",
+                "Show me a weekly trend",
+                "What's my daily average?"
+            ]
+        elif 'sleep' in response_lower:
+            followups = [
+                "How does this compare to my goal?",
+                "Show sleep quality trends",
+                "What affects my sleep?"
+            ]
+        elif 'workout' in response_lower or 'activity' in response_lower:
+            followups = [
+                "Show workout details",
+                "Compare to previous workouts",
+                "What's my weekly total?"
+            ]
+        elif 'heart' in response_lower:
+            followups = [
+                "Show resting heart rate trend",
+                "Compare to healthy range",
+                "What's my max heart rate?"
+            ]
+        else:
+            followups = [
+                "Tell me more",
+                "Show details",
+                "Any recommendations?"
+            ]
+        
+        if followups:
+            self.followup_frame.grid()
+            
+            ttk.Label(self.followup_frame,
+                     text="Quick follow-ups:",
+                     background=self.colors['card_bg'],
+                     foreground=self.colors['text_secondary'],
+                     font=('Segoe UI', 9)).grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
+            
+            for i, question in enumerate(followups[:3]):
+                btn = ttk.Button(self.followup_frame,
+                               text=question,
+                               style='Modern.TButton',
+                               command=lambda q=question: self.use_example(q))
+                btn.grid(row=0, column=i+1, padx=5)
+        else:
+            self.followup_frame.grid_remove()
+    
+    def export_conversation_report(self):
+        """Export current conversation as a formatted document"""
+        ExportReportDialog(self.root, self)
+    
+    def create_tooltip(self, widget, text):
+        """Create a tooltip for a widget"""
+        tooltip = ToolTip(widget, text)
+
+
+class ToolTip:
+    """Simple tooltip class"""
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tooltip_window = None
+        self.widget.bind('<Enter>', self.show_tooltip)
+        self.widget.bind('<Leave>', self.hide_tooltip)
+    
+    def show_tooltip(self, event=None):
+        """Display tooltip"""
+        if self.tooltip_window or not self.text:
+            return
+        
+        x = self.widget.winfo_rootx() + 20
+        y = self.widget.winfo_rooty() + self.widget.winfo_height() + 5
+        
+        self.tooltip_window = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(True)
+        tw.wm_geometry(f"+{x}+{y}")
+        
+        label = tk.Label(tw, text=self.text, 
+                        background="#2D2D30",
+                        foreground="#E5E5E5",
+                        relief=tk.SOLID,
+                        borderwidth=1,
+                        font=('Segoe UI', 9),
+                        padx=8,
+                        pady=4)
+        label.pack()
+    
+    def hide_tooltip(self, event=None):
+        """Hide tooltip"""
+        if self.tooltip_window:
+            self.tooltip_window.destroy()
+            self.tooltip_window = None
 
 
 class SavedPromptsDialog(tk.Toplevel):
@@ -1088,6 +1733,302 @@ class SavedPromptsDialog(tk.Toplevel):
             self.load_prompts()
 
 
+
+
+
+
+class SearchDialog(tk.Toplevel):
+    """Dialog for searching chat history"""
+    
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.title("Search Chat History")
+        self.geometry("700x500")
+        self.app = app
+        
+        self.transient(parent)
+        self.grab_set()
+        
+        main_frame = ttk.Frame(self, padding="20")
+        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        main_frame.columnconfigure(0, weight=1)
+        main_frame.rowconfigure(2, weight=1)
+        
+        # Title
+        ttk.Label(main_frame, text="🔍 Search Chat History", 
+                 font=('Segoe UI', 14, 'bold')).grid(row=0, column=0, sticky=tk.W, pady=(0, 15))
+        
+        # Search box
+        search_frame = ttk.Frame(main_frame)
+        search_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
+        search_frame.columnconfigure(0, weight=1)
+        
+        self.search_entry = ttk.Entry(search_frame, font=('Segoe UI', 10))
+        self.search_entry.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=(0, 10))
+        self.search_entry.bind('<Return>', lambda e: self.perform_search())
+        
+        ttk.Button(search_frame, text="Search", 
+                  command=self.perform_search).grid(row=0, column=1)
+        
+        # Results
+        results_frame = ttk.Frame(main_frame)
+        results_frame.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        results_frame.columnconfigure(0, weight=1)
+        results_frame.rowconfigure(0, weight=1)
+        
+        self.results_text = scrolledtext.ScrolledText(results_frame,
+                                                      wrap=tk.WORD,
+                                                      font=('Segoe UI', 9),
+                                                      state=tk.DISABLED)
+        self.results_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        # Close button
+        ttk.Button(main_frame, text="Close", 
+                  command=self.destroy).grid(row=3, column=0, pady=(15, 0))
+    
+    def perform_search(self):
+        """Search through all saved chats"""
+        query = self.search_entry.get().strip().lower()
+        if not query:
+            return
+        
+        self.results_text.config(state=tk.NORMAL)
+        self.results_text.delete(1.0, tk.END)
+        
+        try:
+            chat_files = sorted(self.app.chat_history_dir.glob("chat_*.json"),
+                              key=lambda f: f.stat().st_mtime,
+                              reverse=True)
+            
+            results_found = 0
+            for file in chat_files:
+                with open(file, 'r') as f:
+                    data = json.load(f)
+                    messages = data.get('messages', [])
+                    
+                    for msg in messages:
+                        text = msg.get('message', '').lower()
+                        if query in text:
+                            results_found += 1
+                            sender = msg.get('sender', 'Unknown')
+                            timestamp = msg.get('timestamp', '')
+                            
+                            self.results_text.insert(tk.END, f"\n{sender} ({timestamp[:10]}):\n", 'bold')
+                            self.results_text.insert(tk.END, f"{msg.get('message', '')}...\n\n")
+                            
+                            if results_found >= 20:  # Limit results
+                                break
+                
+                if results_found >= 20:
+                    break
+            
+            if results_found == 0:
+                self.results_text.insert(tk.END, f"No results found for '{query}'")
+            else:
+                self.results_text.insert(tk.END, f"\n--- {results_found} results found ---")
+        
+        except Exception as e:
+            self.results_text.insert(tk.END, f"Error searching: {e}")
+        
+        self.results_text.config(state=tk.DISABLED)
+
+
+class ExportReportDialog(tk.Toplevel):
+    """Dialog for exporting conversation reports"""
+    
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.title("Export Report")
+        self.geometry("500x400")
+        self.app = app
+        
+        self.transient(parent)
+        self.grab_set()
+        
+        main_frame = ttk.Frame(self, padding="20")
+        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        # Title
+        ttk.Label(main_frame, text="📄 Export Report", 
+                 font=('Segoe UI', 14, 'bold')).grid(row=0, column=0, sticky=tk.W, pady=(0, 20))
+        
+        # Export options
+        ttk.Label(main_frame, text="Choose export format:", 
+                 font=('Segoe UI', 10)).grid(row=1, column=0, sticky=tk.W, pady=(0, 10))
+        
+        self.export_format = tk.StringVar(value="pdf")
+        
+        ttk.Radiobutton(main_frame, text="PDF Document", 
+                       variable=self.export_format, value="pdf").grid(row=2, column=0, sticky=tk.W, pady=3)
+        ttk.Radiobutton(main_frame, text="Word Document (.docx)", 
+                       variable=self.export_format, value="docx").grid(row=3, column=0, sticky=tk.W, pady=3)
+        ttk.Radiobutton(main_frame, text="Text File (.txt)", 
+                       variable=self.export_format, value="txt").grid(row=4, column=0, sticky=tk.W, pady=3)
+        
+        # Include options
+        ttk.Label(main_frame, text="\nInclude:", 
+                 font=('Segoe UI', 10, 'bold')).grid(row=5, column=0, sticky=tk.W, pady=(15, 10))
+        
+        self.include_timestamp = tk.BooleanVar(value=True)
+        self.include_system = tk.BooleanVar(value=False)
+        
+        ttk.Checkbutton(main_frame, text="Timestamps", 
+                       variable=self.include_timestamp).grid(row=6, column=0, sticky=tk.W, pady=3)
+        ttk.Checkbutton(main_frame, text="System messages", 
+                       variable=self.include_system).grid(row=7, column=0, sticky=tk.W, pady=3)
+        
+        # Buttons
+        button_frame = ttk.Frame(main_frame)
+        button_frame.grid(row=8, column=0, pady=(20, 0))
+        
+        ttk.Button(button_frame, text="Export", 
+                  command=self.export_report).grid(row=0, column=0, padx=5)
+        ttk.Button(button_frame, text="Cancel", 
+                  command=self.destroy).grid(row=0, column=1, padx=5)
+    
+    def export_report(self):
+        """Export the conversation in selected format"""
+        if not self.app.current_chat_history:
+            messagebox.showwarning("No Data", "No conversation to export!", parent=self)
+            return
+        
+        format_type = self.export_format.get()
+        
+        try:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            
+            if format_type == "txt":
+                filename = self.app.chat_history_dir / f"report_{timestamp}.txt"
+                self._export_txt(filename)
+            elif format_type == "pdf":
+                filename = self.app.chat_history_dir / f"report_{timestamp}.pdf"
+                self._export_pdf(filename)
+            elif format_type == "docx":
+                filename = self.app.chat_history_dir / f"report_{timestamp}.docx"
+                self._export_docx(filename)
+            
+            messagebox.showinfo("Export Complete", 
+                              f"Report exported successfully!\n\n{filename}",
+                              parent=self)
+            self.destroy()
+        
+        except Exception as e:
+            messagebox.showerror("Export Error", f"Failed to export: {e}", parent=self)
+    
+    def _export_txt(self, filename):
+        """Export as plain text"""
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write("GARMIN CHAT CONVERSATION REPORT\n")
+            f.write("=" * 60 + "\n\n")
+            
+            for msg in self.app.current_chat_history:
+                if not self.include_system.get() and msg.get('type') == 'system':
+                    continue
+                
+                sender = msg.get('sender', 'Unknown')
+                text = msg.get('message', '')
+                
+                if self.include_timestamp.get():
+                    timestamp = msg.get('timestamp', '')
+                    f.write(f"[{timestamp}] {sender}:\n")
+                else:
+                    f.write(f"{sender}:\n")
+                
+                f.write(f"{text}\n\n")
+                f.write("-" * 60 + "\n\n")
+    
+    def _export_pdf(self, filename):
+        """Export as PDF"""
+        try:
+            from reportlab.lib.pagesizes import letter
+            from reportlab.lib.styles import getSampleStyleSheet
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+            from reportlab.lib.units import inch
+            
+            doc = SimpleDocTemplate(str(filename), pagesize=letter)
+            story = []
+            styles = getSampleStyleSheet()
+            
+            # Title
+            title = Paragraph("Garmin Chat Conversation Report", styles['Title'])
+            story.append(title)
+            story.append(Spacer(1, 0.3*inch))
+            
+            # Messages
+            for msg in self.app.current_chat_history:
+                if not self.include_system.get() and msg.get('type') == 'system':
+                    continue
+                
+                sender = msg.get('sender', 'Unknown')
+                text = msg.get('message', '')
+                
+                if self.include_timestamp.get():
+                    timestamp = msg.get('timestamp', '')
+                    header = f"<b>[{timestamp}] {sender}:</b>"
+                else:
+                    header = f"<b>{sender}:</b>"
+                
+                story.append(Paragraph(header, styles['Normal']))
+                story.append(Paragraph(text, styles['Normal']))
+                story.append(Spacer(1, 0.2*inch))
+            
+            doc.build(story)
+        
+        except ImportError:
+            # Fallback to text if reportlab not installed
+            messagebox.showwarning("PDF Export", 
+                                 "PDF export requires 'reportlab' package.\nExporting as text instead.",
+                                 parent=self)
+            txt_filename = str(filename).replace('.pdf', '.txt')
+            self._export_txt(Path(txt_filename))
+    
+    def _export_docx(self, filename):
+        """Export as Word document"""
+        try:
+            from docx import Document
+            from docx.shared import Inches, Pt
+            from docx.enum.text import WD_ALIGN_PARAGRAPH
+            
+            doc = Document()
+            
+            # Title
+            title = doc.add_heading('Garmin Chat Conversation Report', 0)
+            title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            
+            doc.add_paragraph()
+            
+            # Messages
+            for msg in self.app.current_chat_history:
+                if not self.include_system.get() and msg.get('type') == 'system':
+                    continue
+                
+                sender = msg.get('sender', 'Unknown')
+                text = msg.get('message', '')
+                
+                if self.include_timestamp.get():
+                    timestamp = msg.get('timestamp', '')
+                    p = doc.add_paragraph()
+                    p.add_run(f"[{timestamp}] {sender}:").bold = True
+                else:
+                    p = doc.add_paragraph()
+                    p.add_run(f"{sender}:").bold = True
+                
+                doc.add_paragraph(text)
+                doc.add_paragraph("_" * 60)
+            
+            doc.save(str(filename))
+        
+        except ImportError:
+            # Fallback to text if python-docx not installed
+            messagebox.showwarning("Word Export", 
+                                 "Word export requires 'python-docx' package.\nExporting as text instead.",
+                                 parent=self)
+            txt_filename = str(filename).replace('.docx', '.txt')
+            self._export_txt(Path(txt_filename))
 
 
 class ChatHistoryViewer(tk.Toplevel):
