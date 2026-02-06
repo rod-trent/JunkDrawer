@@ -629,14 +629,7 @@ class GarminChatApp:
         self.view_chats_btn.grid(row=0, column=5, padx=(4, 0))
         self.create_tooltip(self.view_chats_btn, "View saved chats")
         
-        self.favorite_btn = ttk.Button(control_card,
-                                      text="⭐",
-                                      command=self.toggle_favorite_chat,
-                                      style='Modern.TButton',
-                                      width=4,
-                                      state=tk.DISABLED)
-        self.favorite_btn.grid(row=0, column=6, padx=(4, 0))
-        self.create_tooltip(self.favorite_btn, "Mark as favorite")
+        # Favorite button removed - feature was non-functional
         
         self.export_btn = ttk.Button(control_card,
                                      text="📄",
@@ -644,14 +637,14 @@ class GarminChatApp:
                                      style='Modern.TButton',
                                      width=4,
                                      state=tk.DISABLED)
-        self.export_btn.grid(row=0, column=7, padx=(4, 0))
+        self.export_btn.grid(row=0, column=6, padx=(4, 0))
         self.create_tooltip(self.export_btn, "Export report")
         
         # Status label
         self.status_label = ttk.Label(control_card,
                                      text="●  Not connected",
                                      style='Status.TLabel')
-        self.status_label.grid(row=1, column=0, columnspan=8, sticky=tk.W, pady=(10, 0))
+        self.status_label.grid(row=1, column=0, columnspan=7, sticky=tk.W, pady=(10, 0))
         
         # Smart Suggestions and Follow-up Questions removed from main grid
         # They were causing the chat display to shrink when shown
@@ -1040,7 +1033,7 @@ class GarminChatApp:
         self.refresh_btn.config(state=tk.NORMAL)
         self.reset_btn.config(state=tk.NORMAL)
         self.save_chat_btn.config(state=tk.NORMAL)
-        self.favorite_btn.config(state=tk.NORMAL)
+        # favorite_btn removed
         self.export_btn.config(state=tk.NORMAL)
         self.connect_btn.config(state=tk.DISABLED)
         self.message_entry.focus()
@@ -1565,29 +1558,7 @@ class GarminChatApp:
         """Open search dialog for chat history"""
         SearchDialog(self.root, self)
     
-    def toggle_favorite_chat(self):
-        """Mark current chat as favorite"""
-        if not self.current_chat_history:
-            return
-        
-        # Save as favorite
-        try:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = self.chat_history_dir / f"favorite_{timestamp}.json"
-            
-            with open(filename, 'w') as f:
-                json.dump({
-                    'saved_at': datetime.now().isoformat(),
-                    'favorite': True,
-                    'messages': self.current_chat_history
-                }, f, indent=2)
-            
-            messagebox.showinfo("Favorite Saved", 
-                              "Chat marked as favorite! ⭐",
-                              parent=self.root)
-            logger.info(f"Saved favorite chat: {filename}")
-        except Exception as e:
-            logger.error(f"Error saving favorite: {e}")
+    # toggle_favorite_chat method removed - feature was non-functional
     
     def show_smart_suggestions(self):
         """Generate and display smart suggestions based on user data"""
