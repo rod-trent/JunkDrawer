@@ -5,47 +5,9 @@ A standalone desktop application for querying your Garmin Connect data using nat
 ## 🎯 What is Garmin Chat?
 
 Garmin Chat transforms your fitness data from passive numbers into actionable insights through natural conversation. Instead of navigating through multiple screens in Garmin Connect, simply ask questions like "How did I sleep last night?" or "What was my last workout?" and get instant, AI-powered responses.
-[image | https://github.com/rod-trent/JunkDrawer/blob/main/Garmin%20Chat%20Desktop/GarminChatDesktop.jpg]
 
-# Famous Landmarks Around the World
+(https://res.cloudinary.com/jerrick/image/upload/d_642250b563292b35f27461a7.png,f_jpg,fl_progressive,q_auto,w_1024/64b8d997c9e9b5001d6f542a.jpg)
 
-A visual tour of iconic sites.
-
----
-
-## Slide 1: Iconic Landmarks Collage
-
-![A collage of famous landmarks including the Eiffel Tower, Taj Mahal, and more](https://i.ytimg.com/vi/D2-BTpb-TvY/maxresdefault.jpg)
-
----
-
-## Slide 2: Top Must-Visit Monuments
-
-![Collage featuring the Sydney Opera House, Great Wall of China, Statue of Liberty, and others](https://res.cloudinary.com/jerrick/image/upload/d_642250b563292b35f27461a7.png,f_jpg,fl_progressive,q_auto,w_1024/64b8d997c9e9b5001d6f542a.jpg)
-
----
-
-## Slide 3: The Great Wall of China
-
-![The majestic Great Wall winding through green hills](https://www.scti.co.nz/-/media/project/scti/nz/images/social-media-thumbnails/famous-landmarks-thumb-1200x630.jpg?rev=3c46b2cef3ca4fcea06541c621b45dd1)
-
----
-
-## Slide 4: Louvre Museum Pyramid at Night
-
-![The glass pyramid of the Louvre illuminated against a twilight sky](https://i0.wp.com/theboutiqueadventurer.com/wp-content/uploads/2020/11/Louvre-Museum-at-Night-Paris.jpg?resize=1200%2C800&ssl=1)
-
----
-
-## Slide 5: London Eye at Dusk
-
-![The London Eye ferris wheel lit up in vibrant colors over the Thames River](https://a.storyblok.com/f/266035/1080X1080/28b0f7fdab/londoneye_image.jpg/m/3840x2560/filters:quality(70))
-
----
-
-# End of Slideshow
-
-Thanks for viewing!
 
 ## ✨ Key Features
 
