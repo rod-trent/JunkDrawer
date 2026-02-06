@@ -845,6 +845,103 @@ class GarminDataHandler:
             logger.debug(f"Calorie data not available: {e}")
             return {}
     
+    def get_nutrition_summary(self, date: Optional[str] = None) -> Dict:
+        """
+        Get detailed nutrition summary including macros and food logging.
+        This is Garmin's newer nutrition feature.
+        
+        Args:
+            date: Date in YYYY-MM-DD format (defaults to today)
+            
+        Returns:
+            Dictionary containing nutrition data (calories, protein, carbs, fat, etc.)
+        """
+        self._ensure_authenticated()
+        self._ensure_display_name()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        
+        nutrition_data = {}
+        
+        # Try Method 1: Dedicated nutrition API endpoint
+        try:
+            # Some Garmin devices support a nutrition summary endpoint
+            data = self.client.get_nutrition_summary(date)
+            if data:
+                nutrition_data.update({
+                    'date': date,
+                    'calories_consumed': data.get('totalCalories', data.get('consumedCalories', 0)),
+                    'protein_g': data.get('totalProtein', 0),
+                    'carbs_g': data.get('totalCarbs', 0),
+                    'fat_g': data.get('totalFat', 0),
+                    'fiber_g': data.get('totalFiber', 0),
+                    'sugar_g': data.get('totalSugar', 0),
+                    'sodium_mg': data.get('totalSodium', 0),
+                    'water_ml': data.get('totalWater', 0)
+                })
+                logger.debug("Nutrition data loaded from get_nutrition_summary")
+                return nutrition_data
+        except AttributeError:
+            logger.debug("get_nutrition_summary method not available")
+        except Exception as e:
+            logger.debug(f"get_nutrition_summary failed: {e}")
+        
+        # Try Method 2: Daily summary which sometimes includes nutrition
+        try:
+            summary = self.client.get_user_summary(date)
+            if summary and 'consumedCalories' in summary:
+                nutrition_data.update({
+                    'date': date,
+                    'calories_consumed': summary.get('consumedCalories', 0),
+                    'calories_goal': summary.get('netCalorieGoal', 0)
+                })
+                logger.debug("Basic nutrition data from user summary")
+        except Exception as e:
+            logger.debug(f"User summary nutrition failed: {e}")
+        
+        # Try Method 3: Stats endpoint
+        try:
+            stats = self.client.get_stats(date)
+            if stats:
+                if 'consumedCalories' in stats:
+                    nutrition_data['calories_consumed'] = stats.get('consumedCalories', 0)
+                if 'netCalorieGoal' in stats:
+                    nutrition_data['calories_goal'] = stats.get('netCalorieGoal', 0)
+                logger.debug("Nutrition data from stats endpoint")
+        except Exception as e:
+            logger.debug(f"Stats endpoint nutrition failed: {e}")
+        
+        return nutrition_data if nutrition_data else {}
+    
+    def get_food_log(self, date: Optional[str] = None) -> List[Dict]:
+        """
+        Get detailed food log entries for a specific date.
+        This retrieves individual meals/snacks logged in Garmin.
+        
+        Args:
+            date: Date in YYYY-MM-DD format (defaults to today)
+            
+        Returns:
+            List of food entries with nutrition details
+        """
+        self._ensure_authenticated()
+        self._ensure_display_name()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        
+        try:
+            # Try to get food log - this may be a newer API endpoint
+            food_log = self.client.get_food_log(date)
+            if food_log and isinstance(food_log, list):
+                return food_log
+            return []
+        except AttributeError:
+            logger.debug("get_food_log method not available in this version")
+            return []
+        except Exception as e:
+            logger.debug(f"Food log not available: {e}")
+            return []
+    
     def get_spo2_data(self, date: Optional[str] = None) -> Dict:
         """
         Get blood oxygen (SpO2/Pulse Ox) data.
@@ -1086,6 +1183,7 @@ class GarminDataHandler:
         
         # Calories/Nutrition data
         if data_type in ["calories", "nutrition", "comprehensive", "all"]:
+            # Get basic calorie data
             cal_data = self.get_calories_data(today)
             if cal_data and cal_data.get('total_burned'):
                 context_parts.append("=== Calories ===")
@@ -1095,6 +1193,34 @@ class GarminDataHandler:
                 if cal_data.get('consumed'):
                     context_parts.append(f"Consumed: {cal_data.get('consumed', 'N/A')} kcal")
                     context_parts.append(f"Net: {cal_data.get('net', 'N/A')} kcal")
+                context_parts.append("")
+            
+            # Get detailed nutrition data if available
+            nutrition_data = self.get_nutrition_summary(today)
+            if nutrition_data and nutrition_data.get('calories_consumed'):
+                context_parts.append("=== Nutrition Details ===")
+                context_parts.append(f"Calories Consumed: {nutrition_data.get('calories_consumed', 0)} kcal")
+                if nutrition_data.get('protein_g'):
+                    context_parts.append(f"Protein: {nutrition_data.get('protein_g', 0)}g")
+                if nutrition_data.get('carbs_g'):
+                    context_parts.append(f"Carbs: {nutrition_data.get('carbs_g', 0)}g")
+                if nutrition_data.get('fat_g'):
+                    context_parts.append(f"Fat: {nutrition_data.get('fat_g', 0)}g")
+                if nutrition_data.get('fiber_g'):
+                    context_parts.append(f"Fiber: {nutrition_data.get('fiber_g', 0)}g")
+                if nutrition_data.get('sugar_g'):
+                    context_parts.append(f"Sugar: {nutrition_data.get('sugar_g', 0)}g")
+                context_parts.append("")
+            
+            # Get food log if available
+            food_log = self.get_food_log(today)
+            if food_log:
+                context_parts.append("=== Food Log ===")
+                context_parts.append(f"Number of meals logged: {len(food_log)}")
+                for i, meal in enumerate(food_log[:5], 1):  # Show up to 5 meals
+                    meal_name = meal.get('name', meal.get('foodName', 'Unknown'))
+                    meal_calories = meal.get('calories', 0)
+                    context_parts.append(f"{i}. {meal_name} - {meal_calories} kcal")
                 context_parts.append("")
         
         # Floors data

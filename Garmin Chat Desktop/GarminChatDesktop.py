@@ -1188,7 +1188,7 @@ class GarminChatApp:
                     garmin_context = self.garmin_handler.format_data_for_context("respiration")
                 elif any(word in query_lower for word in ["hydration", "water", "drink", "fluid"]):
                     garmin_context = self.garmin_handler.format_data_for_context("hydration")
-                elif any(word in query_lower for word in ["nutrition", "food", "eat", "meal", "diet"]):
+                elif any(word in query_lower for word in ["nutrition", "food", "eat", "meal", "diet", "protein", "carbs", "fat", "macros", "calories consumed", "food log", "logged"]):
                     garmin_context = self.garmin_handler.format_data_for_context("nutrition")
                 elif any(word in query_lower for word in ["floor", "climb", "stairs", "elevation"]):
                     garmin_context = self.garmin_handler.format_data_for_context("floors")
