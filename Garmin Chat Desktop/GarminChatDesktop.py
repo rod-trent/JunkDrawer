@@ -1026,35 +1026,91 @@ class GarminChatApp:
             # Determine what data to fetch
             query_lower = message.lower()
             
-            # Detect if user wants more activities or specific time periods
+            # Detect if user wants activities by date range or by count
             activity_limit = 5  # Default
+            use_date_range = False
             
-            # Check for requests for more activities
-            if any(phrase in query_lower for phrase in [
-                "show me more", "more activities", "all activities", "all my activities",
-                "show all", "past month", "past week", "last month", "last week",
-                "this month", "this week", "last 10", "last 20", "recent activities"
-            ]):
-                activity_limit = 20  # Fetch more for these queries
-                logger.info(f"Detected request for more activities, fetching {activity_limit}")
-            
-            # Check for specific number requests
+            # Check for date range requests (last X days/weeks/months)
             import re
-            number_match = re.search(r'(?:last|past|recent)\s+(\d+)', query_lower)
-            if number_match:
-                requested_count = int(number_match.group(1))
-                activity_limit = min(requested_count, 50)  # Cap at 50
-                logger.info(f"User requested {requested_count} activities, fetching {activity_limit}")
+            from datetime import datetime, timedelta
             
-            # Fetch appropriate data
-            if any(word in query_lower for word in ["activity", "activities", "workout", "run", "walk", "bike", "exercise"]):
-                garmin_context = self.garmin_handler.format_data_for_context("activities", activity_limit=activity_limit)
-            elif any(word in query_lower for word in ["sleep", "rest", "bed"]):
-                garmin_context = self.garmin_handler.format_data_for_context("sleep")
-            elif any(word in query_lower for word in ["step", "walk", "distance", "calorie"]):
-                garmin_context = self.garmin_handler.format_data_for_context("summary")
-            else:
-                garmin_context = self.garmin_handler.format_data_for_context("all", activity_limit=activity_limit)
+            # Match "last/past X days/weeks/months"
+            time_period_match = re.search(r'(?:last|past)\s+(\d+)\s+(day|week|month)s?', query_lower)
+            if time_period_match:
+                number = int(time_period_match.group(1))
+                unit = time_period_match.group(2)
+                
+                # Calculate date range
+                end_date = datetime.now()
+                if unit == "day":
+                    start_date = end_date - timedelta(days=number)
+                elif unit == "week":
+                    start_date = end_date - timedelta(weeks=number)
+                elif unit == "month":
+                    start_date = end_date - timedelta(days=number * 30)  # Approximate
+                
+                logger.info(f"Detected date range query: last {number} {unit}(s)")
+                logger.info(f"Date range: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
+                
+                # Fetch activities by date range
+                try:
+                    activities = self.garmin_handler.get_activities_by_date(
+                        start_date.strftime("%Y-%m-%d"),
+                        end_date.strftime("%Y-%m-%d")
+                    )
+                    
+                    if activities:
+                        # Format activities for context
+                        context_parts = [f"=== Activities from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')} ({len(activities)} activities) ==="]
+                        for i, activity in enumerate(activities, 1):
+                            act_name = activity.get("activityName", "Unknown")
+                            act_type = activity.get("activityType", {}).get("typeKey", "Unknown")
+                            distance = activity.get("distance", 0) / 1000 if activity.get("distance") else 0
+                            duration = activity.get("duration", 0) / 60 if activity.get("duration") else 0
+                            calories = activity.get("calories", "N/A")
+                            start_time = activity.get("startTimeLocal", "N/A")
+                            
+                            context_parts.append(f"{i}. {act_name} ({act_type})")
+                            context_parts.append(f"   Date: {start_time}")
+                            context_parts.append(f"   Distance: {distance:.2f} km")
+                            context_parts.append(f"   Duration: {duration:.1f} minutes")
+                            context_parts.append(f"   Calories: {calories}")
+                            context_parts.append("")
+                        
+                        garmin_context = "\n".join(context_parts)
+                        use_date_range = True
+                        logger.info(f"Fetched {len(activities)} activities for date range")
+                except Exception as e:
+                    logger.error(f"Error fetching activities by date: {e}")
+                    # Fall back to regular method
+                    use_date_range = False
+            
+            # If not using date range, detect count-based requests
+            if not use_date_range:
+                # Check for requests for more activities
+                if any(phrase in query_lower for phrase in [
+                    "show me more", "more activities", "all activities", "all my activities",
+                    "show all", "recent activities"
+                ]):
+                    activity_limit = 30  # Fetch more for these queries
+                    logger.info(f"Detected request for more activities, fetching {activity_limit}")
+                
+                # Check for specific number requests
+                number_match = re.search(r'(?:last|past|recent)\s+(\d+)', query_lower)
+                if number_match:
+                    requested_count = int(number_match.group(1))
+                    activity_limit = min(requested_count, 50)  # Cap at 50
+                    logger.info(f"User requested {requested_count} activities, fetching {activity_limit}")
+                
+                # Fetch appropriate data using regular method
+                if any(word in query_lower for word in ["activity", "activities", "workout", "run", "walk", "bike", "exercise"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("activities", activity_limit=activity_limit)
+                elif any(word in query_lower for word in ["sleep", "rest", "bed"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("sleep")
+                elif any(word in query_lower for word in ["step", "walk", "distance", "calorie"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("summary")
+                else:
+                    garmin_context = self.garmin_handler.format_data_for_context("all", activity_limit=activity_limit)
             
             # Add conversation context for memory
             context_summary = ""
