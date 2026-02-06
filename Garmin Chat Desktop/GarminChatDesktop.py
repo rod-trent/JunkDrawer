@@ -412,13 +412,18 @@ class GarminChatApp:
                                        text="📝 Save Chat",
                                        command=self.save_chat_history,
                                        state=tk.DISABLED)
-        self.save_chat_btn.grid(row=0, column=4, padx=(5, 0))
+        self.save_chat_btn.grid(row=0, column=4, padx=5)
+        
+        self.view_chats_btn = ttk.Button(control_frame,
+                                        text="📂 View Chats",
+                                        command=self.open_chat_history_viewer)
+        self.view_chats_btn.grid(row=0, column=5, padx=(5, 0))
         
         # Status label
         self.status_label = ttk.Label(control_frame,
                                      text="Not connected",
                                      style='Status.TLabel')
-        self.status_label.grid(row=1, column=0, columnspan=5, sticky=tk.W, pady=(5, 0))
+        self.status_label.grid(row=1, column=0, columnspan=6, sticky=tk.W, pady=(5, 0))
         
         # MFA frame (initially hidden)
         self.mfa_frame = ttk.LabelFrame(main_frame, text="Multi-Factor Authentication", padding="10")
@@ -948,6 +953,10 @@ class GarminChatApp:
         except Exception as e:
             logger.error(f"Error saving chat history: {e}")
             messagebox.showerror("Save Error", f"Failed to save chat history: {e}", parent=self.root)
+    
+    def open_chat_history_viewer(self):
+        """Open dialog to view saved chat histories"""
+        ChatHistoryViewer(self.root, self)
 
 
 class SavedPromptsDialog(tk.Toplevel):
@@ -1079,6 +1088,269 @@ class SavedPromptsDialog(tk.Toplevel):
             self.load_prompts()
 
 
+
+
+class ChatHistoryViewer(tk.Toplevel):
+    """Dialog for viewing saved chat histories"""
+    
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.title("Chat History")
+        self.geometry("900x650")
+        self.app = app
+        
+        # Make modal
+        self.transient(parent)
+        self.grab_set()
+        
+        # Main container with two columns
+        main_frame = ttk.Frame(self, padding="20")
+        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        main_frame.columnconfigure(1, weight=1)
+        main_frame.rowconfigure(1, weight=1)
+        
+        # Title
+        title = ttk.Label(main_frame, text="Saved Chat History", font=('Segoe UI', 14, 'bold'))
+        title.grid(row=0, column=0, columnspan=2, sticky=tk.W, pady=(0, 15))
+        
+        # Left panel - Chat list
+        left_frame = ttk.LabelFrame(main_frame, text="Saved Chats", padding="10")
+        left_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
+        left_frame.columnconfigure(0, weight=1)
+        left_frame.rowconfigure(0, weight=1)
+        
+        # Listbox with scrollbar
+        list_frame = ttk.Frame(left_frame)
+        list_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        list_frame.columnconfigure(0, weight=1)
+        list_frame.rowconfigure(0, weight=1)
+        
+        self.chat_listbox = tk.Listbox(list_frame, font=('Segoe UI', 9), width=30)
+        self.chat_listbox.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.chat_listbox.bind('<<ListboxSelect>>', self.on_chat_select)
+        
+        scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self.chat_listbox.yview)
+        scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        self.chat_listbox.config(yscrollcommand=scrollbar.set)
+        
+        # Right panel - Chat viewer
+        right_frame = ttk.LabelFrame(main_frame, text="Chat Content", padding="10")
+        right_frame.grid(row=1, column=1, sticky=(tk.W, tk.E, tk.N, tk.S))
+        right_frame.columnconfigure(0, weight=1)
+        right_frame.rowconfigure(1, weight=1)
+        
+        # Chat info
+        self.info_label = ttk.Label(right_frame, text="Select a chat to view", font=('Segoe UI', 9))
+        self.info_label.grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+        
+        # Chat content display
+        self.chat_display = scrolledtext.ScrolledText(right_frame,
+                                                      wrap=tk.WORD,
+                                                      font=('Segoe UI', 9),
+                                                      state=tk.DISABLED,
+                                                      bg='#f8f9fa',
+                                                      padx=10,
+                                                      pady=10)
+        self.chat_display.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        # Configure text tags
+        self.chat_display.tag_configure('user', foreground='#2980b9', font=('Segoe UI', 9, 'bold'))
+        self.chat_display.tag_configure('assistant', foreground='#27ae60', font=('Segoe UI', 9, 'bold'))
+        self.chat_display.tag_configure('system', foreground='#e74c3c', font=('Segoe UI', 9, 'italic'))
+        self.chat_display.tag_configure('timestamp', foreground='#95a5a6', font=('Segoe UI', 8))
+        
+        # Buttons
+        button_frame = ttk.Frame(main_frame)
+        button_frame.grid(row=2, column=0, columnspan=2, pady=(15, 0))
+        
+        ttk.Button(button_frame, text="🔄 Load Into Chat", command=self.load_into_current).grid(row=0, column=0, padx=5)
+        ttk.Button(button_frame, text="🗑️ Delete", command=self.delete_chat).grid(row=0, column=1, padx=5)
+        ttk.Button(button_frame, text="📁 Open Folder", command=self.open_folder).grid(row=0, column=2, padx=5)
+        ttk.Button(button_frame, text="Close", command=self.destroy).grid(row=0, column=3, padx=5)
+        
+        # Load chats
+        self.load_chat_list()
+    
+    def load_chat_list(self):
+        """Load list of saved chat files"""
+        self.chat_listbox.delete(0, tk.END)
+        self.chat_files = []
+        
+        try:
+            # Get all chat JSON files, sorted newest first
+            files = sorted(self.app.chat_history_dir.glob("chat_*.json"),
+                          key=lambda f: f.stat().st_mtime,
+                          reverse=True)
+            
+            for file in files:
+                self.chat_files.append(file)
+                
+                # Format: chat_YYYYMMDD_HHMMSS.json
+                try:
+                    filename = file.stem
+                    timestamp = filename.replace('chat_', '')
+                    date_part = timestamp[:8]  # YYYYMMDD
+                    time_part = timestamp[9:]  # HHMMSS
+                    
+                    display = f"{date_part[:4]}-{date_part[4:6]}-{date_part[6:8]} {time_part[:2]}:{time_part[2:4]}:{time_part[4:6]}"
+                except:
+                    display = file.name
+                
+                self.chat_listbox.insert(tk.END, display)
+            
+            if not files:
+                self.info_label.config(text="No saved chats found")
+        
+        except Exception as e:
+            logger.error(f"Error loading chat list: {e}")
+            self.info_label.config(text="Error loading chat list")
+    
+    def on_chat_select(self, event):
+        """Display selected chat"""
+        selection = self.chat_listbox.curselection()
+        if not selection:
+            return
+        
+        index = selection[0]
+        file = self.chat_files[index]
+        
+        try:
+            with open(file, 'r') as f:
+                data = json.load(f)
+            
+            # Update info
+            saved_at = data.get('saved_at', '')
+            messages = data.get('messages', [])
+            
+            try:
+                dt = datetime.fromisoformat(saved_at)
+                date_str = dt.strftime("%B %d, %Y at %I:%M %p")
+            except:
+                date_str = saved_at
+            
+            self.info_label.config(text=f"Saved: {date_str} | {len(messages)} messages")
+            
+            # Display messages
+            self.chat_display.config(state=tk.NORMAL)
+            self.chat_display.delete(1.0, tk.END)
+            
+            for msg in messages:
+                timestamp = msg.get('timestamp', '')
+                sender = msg.get('sender', 'Unknown')
+                text = msg.get('message', '')
+                msg_type = msg.get('type', 'user')
+                
+                # Format timestamp
+                try:
+                    ts = datetime.fromisoformat(timestamp)
+                    ts_str = ts.strftime("%H:%M")
+                except:
+                    ts_str = timestamp[:5] if timestamp else ""
+                
+                self.chat_display.insert(tk.END, f"[{ts_str}] ", 'timestamp')
+                self.chat_display.insert(tk.END, f"{sender}: ", msg_type)
+                self.chat_display.insert(tk.END, f"{text}\n\n")
+            
+            self.chat_display.config(state=tk.DISABLED)
+            self.chat_display.see(1.0)
+        
+        except Exception as e:
+            logger.error(f"Error loading chat: {e}")
+            messagebox.showerror("Error", f"Failed to load chat: {e}", parent=self)
+    
+    def load_into_current(self):
+        """Load selected chat into current conversation"""
+        selection = self.chat_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No Selection", "Please select a chat to load", parent=self)
+            return
+        
+        index = selection[0]
+        file = self.chat_files[index]
+        
+        if messagebox.askyesno("Load Chat",
+                              "This will replace your current conversation.\n\n"
+                              "Load this chat into the main window?",
+                              parent=self):
+            try:
+                with open(file, 'r') as f:
+                    data = json.load(f)
+                
+                # Clear current chat
+                self.app.chat_display.config(state=tk.NORMAL)
+                self.app.chat_display.delete(1.0, tk.END)
+                self.app.chat_display.config(state=tk.DISABLED)
+                
+                # Load messages
+                messages = data.get('messages', [])
+                self.app.current_chat_history = messages.copy()
+                
+                # Display in main window
+                for msg in messages:
+                    sender = msg.get('sender', 'Unknown')
+                    text = msg.get('message', '')
+                    msg_type = msg.get('type', 'user')
+                    
+                    self.app.add_message(sender, text, msg_type)
+                
+                messagebox.showinfo("Chat Loaded", f"Loaded {len(messages)} messages", parent=self)
+                self.destroy()
+            
+            except Exception as e:
+                logger.error(f"Error loading chat: {e}")
+                messagebox.showerror("Error", f"Failed to load chat: {e}", parent=self)
+    
+    def delete_chat(self):
+        """Delete selected chat file"""
+        selection = self.chat_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No Selection", "Please select a chat to delete", parent=self)
+            return
+        
+        index = selection[0]
+        file = self.chat_files[index]
+        
+        if messagebox.askyesno("Delete Chat",
+                              f"Permanently delete this chat?\n\n{file.name}",
+                              parent=self):
+            try:
+                file.unlink()
+                
+                # Clear display
+                self.chat_display.config(state=tk.NORMAL)
+                self.chat_display.delete(1.0, tk.END)
+                self.chat_display.config(state=tk.DISABLED)
+                self.info_label.config(text="Select a chat to view")
+                
+                # Reload list
+                self.load_chat_list()
+                
+                logger.info(f"Deleted chat: {file.name}")
+            
+            except Exception as e:
+                logger.error(f"Error deleting chat: {e}")
+                messagebox.showerror("Error", f"Failed to delete chat: {e}", parent=self)
+    
+    def open_folder(self):
+        """Open chat history folder in file explorer"""
+        import subprocess
+        import sys
+        
+        try:
+            path = str(self.app.chat_history_dir)
+            
+            if sys.platform == 'win32':
+                subprocess.run(['explorer', path])
+            elif sys.platform == 'darwin':
+                subprocess.run(['open', path])
+            else:
+                subprocess.run(['xdg-open', path])
+        
+        except Exception as e:
+            logger.error(f"Error opening folder: {e}")
+            messagebox.showerror("Error", f"Failed to open folder: {e}", parent=self)
 
 
 def main():
