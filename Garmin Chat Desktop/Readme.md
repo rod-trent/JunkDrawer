@@ -11,8 +11,9 @@ Garmin Chat transforms your fitness data from passive numbers into actionable in
 ### **💬 Natural Language Interface**
 - Ask questions in plain English about your fitness data
 - Multi-line input field for complex queries
-- Rich markdown formatting in responses (bold text, headers, bullet points)
+- Rich markdown formatting in responses (bold text, headers, bullet points, tables)
 - Conversation history with timestamps
+- Context-aware AI remembers previous conversations
 
 ### **🔐 Secure Credential Management**
 - All credentials stored securely in the app (no .env files needed)
@@ -27,12 +28,21 @@ Garmin Chat transforms your fitness data from passive numbers into actionable in
 - Automatic token refresh when expired
 - Graceful fallback to MFA when needed
 
-### **🎨 Modern Desktop Interface**
-- Clean, professional Tkinter-based UI
+### **🎨 Modern Fluent Design Interface**
+- Windows 11-inspired Fluent Design aesthetic
+- **🌙 Dark Mode** - Toggle between light and dark themes instantly
+- Card-based layout with elevated components
 - Color-coded messages (You, Garmin Chat, System)
+- Larger, clearer icon buttons with tooltips
 - Real-time status indicators
-- Example question buttons for quick queries
 - Responsive layout with proper spacing
+
+### **🧠 AI Intelligence & Context**
+- **Chat Context Memory** - AI remembers conversations across sessions
+- **💡 Smart Suggestions** - Proactive insights based on your activity patterns
+- **🔄 Follow-up Questions** - Context-aware quick action buttons after responses
+- "What did we discuss yesterday?" type questions supported
+- Learns your preferences and interests over time
 
 ### **📊 Comprehensive Garmin Data Access**
 - Recent activities (runs, cycling, strength training, etc.)
@@ -40,6 +50,20 @@ Garmin Chat transforms your fitness data from passive numbers into actionable in
 - Daily summaries (steps, calories, heart rate)
 - Heart rate statistics
 - All data types supported by Garmin Connect
+
+### **💾 Advanced Chat Management**
+- **📝 Save Chat** - Save conversations for later review
+- **📂 Chat History Viewer** - Browse, load, and delete past chats
+- **⭐ Favorite Chats** - Mark important conversations
+- **🔍 Search** - Full-text search across all saved chats
+- **💾 Saved Prompts** - Reuse your favorite questions
+
+### **📄 Export & Reporting**
+- Export conversations to **PDF**, **Word (.docx)**, or **Text (.txt)**
+- Professional formatting with customizable options
+- Include/exclude timestamps and system messages
+- Perfect for sharing with coaches or doctors
+- Export workout recommendations and plans
 
 ### **🔄 Session Management**
 - MFA support with auto-detection
@@ -59,6 +83,14 @@ Garmin Chat transforms your fitness data from passive numbers into actionable in
 | Credential storage | .env file | Secure in-app |
 | Auto-login | ❌ No | ✅ Yes |
 | Token persistence | ❌ No | ✅ Yes (30 days) |
+| Dark mode | ❌ No | ✅ Yes |
+| Chat history | ❌ No | ✅ Yes |
+| Saved prompts | ❌ No | ✅ Yes |
+| Export reports | ❌ No | ✅ Yes (PDF/Word/Text) |
+| Search chats | ❌ No | ✅ Yes |
+| Context memory | ❌ No | ✅ Yes |
+| Smart suggestions | ❌ No | ✅ Yes |
+| Follow-up questions | ❌ No | ✅ Yes |
 | Port conflicts | Possible | Never |
 | Distribution | Share code | Package as .exe |
 
@@ -68,6 +100,10 @@ Garmin Chat transforms your fitness data from passive numbers into actionable in
 - **Tkinter** (usually included with Python)
 - An **xAI API key** from [console.x.ai](https://console.x.ai/) (free tier available)
 - A **Garmin Connect account** with MFA enabled (recommended for security)
+
+**Optional (for full export features):**
+- **reportlab** - PDF export support (auto-installed, fallback to text if missing)
+- **python-docx** - Word document export (auto-installed, fallback to text if missing)
 
 ## 🚀 Quick Start (Windows)
 
@@ -161,23 +197,39 @@ Click the **⚙️ Settings** button in the top-right corner
 
 ### **Storage Locations:**
 - **App settings**: `~/.garmin_chat/config.json` (Windows: `C:\Users\YourName\.garmin_chat\`)
+- **Chat history**: `~/.garmin_chat/chat_history/` (saved conversations)
+- **Saved prompts**: `~/.garmin_chat/saved_prompts.json` (reusable questions)
 - **Garmin tokens**: `~/.garmin_tokens/` (OAuth1 and OAuth2 tokens)
 
 ## 🎮 Using the App
 
 ### **Main Interface:**
 
-**Control Buttons:**
-- **🔐 Connect to Garmin** - Authenticate with Garmin Connect
-- **🔄 Refresh Data** - Sync latest data from Garmin
-- **🗑️ Reset Chat** - Clear conversation history
+**Header Buttons:**
+- **🔍 Search** - Full-text search across all saved chats
+- **🌙 Dark Mode** - Toggle between light and dark themes
 - **⚙️ Settings** - Configure credentials and preferences
+
+**Control Panel:**
+- **🔐 Connect to Garmin** - Authenticate with Garmin Connect
+- **🔄 Refresh** - Sync latest data from Garmin
+- **🗑️ Reset** - Clear conversation history
+- **💾 Prompts** - Manage saved prompts for quick reuse
+- **📝 Save** - Save current conversation
+- **📂 History** - View and load previous chats
+- **⭐ Favorite** - Mark current chat as favorite
+- **📄 Export** - Export conversation as PDF/Word/Text
+
+**Smart Features:**
+- **💡 Smart Suggestions** - AI-generated suggestions based on your data patterns
+- **🔄 Follow-up Questions** - Quick action buttons after responses (context-aware)
 
 **Message Input:**
 - Multi-line text field (3 rows)
 - Press **Enter** for new line
 - Press **Ctrl+Enter** to send message
 - Word wrap enabled
+- Auto-focus after connecting
 
 **Example Questions:**
 - "How many steps did I take today?"
@@ -193,7 +245,22 @@ Click the **⚙️ Settings** button in the top-right corner
 - **Bold text** - Important information highlighted
 - **Headers** - Organized sections
 - **Bullet points** - Easy-to-read lists
+- **Tables** - Clean data presentation
 - **Timestamps** - All messages time-stamped
+- **Color coding** - User (blue), Assistant (green), System (gray)
+
+### **Chat Management:**
+- **Save conversations** for later review
+- **Search across all chats** to find past discussions
+- **Load previous chats** to continue conversations
+- **Mark favorites** for quick access
+- **Export to documents** for sharing or archiving
+
+### **Dark Mode:**
+- Click 🌙 in header to toggle
+- Applies instantly to entire interface
+- Optimized contrast for readability
+- Button hover states adjusted for visibility
 
 ## 🔐 Authentication Flow
 
@@ -304,17 +371,35 @@ pyinstaller --onefile --windowed --name "GarminChat" GarminChatDesktop.py
 ## 🎨 Customization
 
 ### **Change Window Size:**
-Edit `GarminChatDesktop.py` line ~323:
+Edit `GarminChatDesktop.py` line ~223:
 ```python
-self.root.geometry("900x800")  # width x height
+self.root.geometry("1000x850")  # width x height
 ```
 
+### **Theme Preferences:**
+- Click 🌙 button to toggle dark mode
+- Changes apply instantly
+- Preference saved for next session (coming soon)
+
 ### **Change Colors:**
-Edit `setup_styles()` method to customize:
-- Button colors
-- Text colors
-- Background colors
-- Font sizes
+Edit `setup_styles()` method in `colors` dictionary:
+```python
+self.colors = {
+    'bg': '#F3F3F3',        # Background
+    'card_bg': '#FFFFFF',   # Card background
+    'accent': '#0078D4',    # Accent color
+    'text': '#1F1F1F',      # Text color
+    # ... more colors
+}
+```
+
+### **Button Styles:**
+Modify button padding, fonts, and sizes in `setup_styles()`:
+```python
+style.configure('Modern.TButton',
+               padding=(12, 6),  # horizontal, vertical
+               font=('Segoe UI', 11))
+```
 
 ### **Add More Examples:**
 Edit `create_widgets()` method, `examples` list:
@@ -376,17 +461,36 @@ garmin-chat-bot/
 - Check Garmin Connect web login works
 - Verify MFA code is current
 
-## 📝 Known Limitations
+## 📝 Known Limitations & Notes
 
 - **No offline mode**: Requires internet for Garmin and xAI
 - **Token expiration**: Need MFA every ~30 days
 - **Rate limits**: Garmin may throttle frequent requests
 - **Data latency**: Garmin data updates every 15-30 minutes
 - **MFA required**: Cannot disable MFA requirement from Garmin
+- **Export libraries**: PDF/Word export requires additional packages (auto-fallback to text)
+- **Context memory**: Limited to last 10 messages across sessions
+- **Search scope**: Searches saved chats only (not current session until saved)
 
 ## 🆕 Version History
 
-### **v2.0 - Major Update (Current)**
+### **v3.0 - Major AI & UX Update (Current)**
+- 🎨 **Fluent Design UI** - Windows 11-inspired modern interface
+- 🌙 **Dark Mode** - Full dark theme with instant toggle
+- 🧠 **Chat Context Memory** - AI remembers across sessions
+- 💡 **Smart Suggestions** - Proactive AI insights
+- 🔄 **Follow-up Questions** - Context-aware quick actions
+- 📂 **Chat History Viewer** - Browse and load past conversations
+- 🔍 **Full-Text Search** - Search across all saved chats
+- ⭐ **Favorite Chats** - Mark important conversations
+- 💾 **Saved Prompts** - Reuse favorite questions
+- 📄 **Export Reports** - PDF, Word, and Text format exports
+- 🎯 **Larger Icons** - Better visibility with tooltips
+- 🖱️ **Improved Hover States** - Better contrast in dark mode
+- 📊 **Table Rendering** - Clean markdown table display
+- 🗂️ **Better Layout** - Fixed grid system, no overlaps
+
+### **v2.0 - Desktop Enhancement**
 - ✨ In-app credential management (no .env files)
 - 🔐 Persistent MFA token storage
 - 🚀 Auto-login on startup (configurable)
