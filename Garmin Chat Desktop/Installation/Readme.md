@@ -218,10 +218,8 @@ GarminChat/
 
 ## 📚 Documentation
 
-- **[User Guide](README-Desktop.md)** - Complete feature documentation
-- **[Build Instructions](BUILD-INSTRUCTIONS.md)** - How to compile from source
-- **[API Limits Guide](GARMIN-API-LIMITS.md)** - Understanding Garmin API
-- **[Blog Post](garmin-chat-blog-post.md)** - Deep dive into features
+- **[API Limits Guide](https://github.com/rod-trent/JunkDrawer/blob/main/Garmin%20Chat%20Desktop/GarminAPILimits.md)** - Understanding Garmin API
+- **[Blog Post](https://rodtrent.substack.com/p/transform-your-fitness-data-into)** - Deep dive into features
 
 ---
 
