@@ -278,10 +278,10 @@ class GarminChatApp:
         """Initialize the application"""
         self.root = root
         self.root.title("Garmin Chat")
-        self.root.geometry("1000x850")
+        self.root.geometry("1200x950")  # Increased from 1000x850 for larger chat area
         
         # Set minimum window size
-        self.root.minsize(800, 700)
+        self.root.minsize(900, 800)  # Increased minimum size too
         
         # Configuration file path
         self.config_dir = Path.home() / ".garmin_chat"
@@ -349,6 +349,7 @@ class GarminChatApp:
                     self.garmin_email = config.get('garmin_email', '')
                     self.garmin_password = config.get('garmin_password', '')
                     self.auto_login = config.get('auto_login', True)  # Default to enabled
+                    self.dark_mode = config.get('dark_mode', False)  # Load theme preference
                     logger.info("Configuration loaded")
         except Exception as e:
             logger.error(f"Error loading config: {e}")
@@ -356,6 +357,7 @@ class GarminChatApp:
             self.garmin_email = None
             self.garmin_password = None
             self.auto_login = True
+            self.dark_mode = False  # Default to light mode on error
             
     def save_config(self):
         """Save configuration to file"""
@@ -364,7 +366,8 @@ class GarminChatApp:
                 'xai_api_key': self.xai_api_key,
                 'garmin_email': self.garmin_email,
                 'garmin_password': self.garmin_password,
-                'auto_login': self.auto_login
+                'auto_login': self.auto_login,
+                'dark_mode': self.dark_mode  # Save theme preference
             }
             with open(self.config_file, 'w') as f:
                 json.dump(config, f, indent=2)
@@ -393,20 +396,37 @@ class GarminChatApp:
         
     def setup_styles(self):
         """Configure ttk styles for modern Fluent Design look"""
-        # Modern Fluent Design color scheme
-        self.colors = {
-            'bg': '#F3F3F3',            # Light gray background
-            'card_bg': '#FFFFFF',        # White cards
-            'accent': '#0078D4',         # Windows 11 blue
-            'accent_hover': '#106EBE',   # Darker blue on hover
-            'accent_light': '#E6F2FA',   # Light blue background
-            'text': '#1F1F1F',           # Almost black text
-            'text_secondary': '#605E5C', # Gray text
-            'border': '#EDEBE9',         # Light border
-            'success': '#107C10',        # Green
-            'warning': '#D83B01',        # Red/Orange
-            'shadow': '#00000010',       # Subtle shadow
-        }
+        # Apply colors based on saved dark_mode preference
+        if self.dark_mode:
+            # Dark mode colors
+            self.colors = {
+                'bg': '#202020',
+                'card_bg': '#2D2D30',
+                'accent': '#60A5FA',
+                'accent_hover': '#3B82F6',
+                'accent_light': '#1E3A5F',
+                'text': '#E5E5E5',
+                'text_secondary': '#A0A0A0',
+                'border': '#3E3E42',
+                'success': '#10B981',
+                'warning': '#F59E0B',
+                'shadow': '#00000040',
+            }
+        else:
+            # Light mode colors (default)
+            self.colors = {
+                'bg': '#F3F3F3',            # Light gray background
+                'card_bg': '#FFFFFF',        # White cards
+                'accent': '#0078D4',         # Windows 11 blue
+                'accent_hover': '#106EBE',   # Darker blue on hover
+                'accent_light': '#E6F2FA',   # Light blue background
+                'text': '#1F1F1F',           # Almost black text
+                'text_secondary': '#605E5C', # Gray text
+                'border': '#EDEBE9',         # Light border
+                'success': '#107C10',        # Green
+                'warning': '#D83B01',        # Red/Orange
+                'shadow': '#00000010',       # Subtle shadow
+            }
         
         # Configure root window
         self.root.configure(bg=self.colors['bg'])
@@ -514,7 +534,7 @@ class GarminChatApp:
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         main_frame.columnconfigure(0, weight=1)
-        main_frame.rowconfigure(5, weight=1)  # Chat display gets the extra space (now at row 5)
+        main_frame.rowconfigure(3, weight=1)  # Chat display gets the extra space (now at row 3)
         
         # Row 0: Header Card
         header_card = ttk.Frame(main_frame, style='Card.TFrame', padding="20")
@@ -633,34 +653,17 @@ class GarminChatApp:
                                      style='Status.TLabel')
         self.status_label.grid(row=1, column=0, columnspan=8, sticky=tk.W, pady=(10, 0))
         
-        # Row 2: Smart suggestions area (initially hidden)
-        self.suggestions_frame = ttk.LabelFrame(main_frame,
-                                               text="💡 Smart Suggestions",
-                                               style='Card.TLabelframe',
-                                               padding="15")
-        self.suggestions_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
-        self.suggestions_frame.grid_remove()  # Hide initially
-        self.suggestions_frame.columnconfigure(0, weight=1)
+        # Smart Suggestions and Follow-up Questions removed from main grid
+        # They were causing the chat display to shrink when shown
+        # These features can be re-enabled later with a better UI approach (popup/sidebar)
         
-        self.suggestions_label = ttk.Label(self.suggestions_frame,
-                                          text="Analyzing your data...",
-                                          background=self.colors['card_bg'],
-                                          foreground=self.colors['text_secondary'],
-                                          font=('Segoe UI', 9),
-                                          wraplength=800)
-        self.suggestions_label.grid(row=0, column=0, sticky=tk.W)
-        
-        # Row 3: Follow-up buttons container (dynamically populated)
-        self.followup_frame = ttk.Frame(main_frame, style='Card.TFrame', padding="10")
-        self.followup_frame.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
-        self.followup_frame.grid_remove()  # Hide initially
-        
-        # Row 4: MFA card (initially hidden)
+        # Row 2: MFA card (initially hidden) - moved up from row 4
+        # Row 2: MFA card (initially hidden) - moved up from row 4
         self.mfa_frame = ttk.LabelFrame(main_frame, 
                                        text="🔐 Multi-Factor Authentication", 
                                        style='Card.TLabelframe',
                                        padding="20")
-        self.mfa_frame.grid(row=4, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
+        self.mfa_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
         self.mfa_frame.grid_remove()  # Hide initially
         self.mfa_frame.columnconfigure(2, weight=1)
         
@@ -683,17 +686,18 @@ class GarminChatApp:
                                  style='Accent.TButton')
         self.mfa_btn.grid(row=0, column=2, sticky=tk.W, pady=5)
         
-        # Row 5: Chat display card (gets extra space)
+        # Row 3: Chat display card (gets extra space) - moved up from row 5
         chat_card = ttk.Frame(main_frame, style='Card.TFrame', padding="0")
-        chat_card.grid(row=5, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 15))
+        chat_card.grid(row=3, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 15))
         chat_card.columnconfigure(0, weight=1)
         chat_card.rowconfigure(0, weight=1)
         
         # Chat history (scrolled text) with modern styling
         self.chat_display = scrolledtext.ScrolledText(chat_card,
                                                       wrap=tk.WORD,
-                                                      font=('Segoe UI', 10),
+                                                      font=('Segoe UI', 11),  # Increased from 10 for better readability
                                                       bg=self.colors['card_bg'],
+                                                      fg=self.colors['text'],  # Set text color for dark mode
                                                       relief=tk.FLAT,
                                                       borderwidth=0,
                                                       padx=20,
@@ -725,9 +729,9 @@ class GarminChatApp:
                                        spacing1=2, 
                                        spacing3=2)
         
-        # Row 6: Input card
+        # Row 4: Input card (moved up from row 6)
         input_card = ttk.Frame(main_frame, style='Card.TFrame', padding="15")
-        input_card.grid(row=6, column=0, sticky=(tk.W, tk.E))
+        input_card.grid(row=4, column=0, sticky=(tk.W, tk.E))
         input_card.columnconfigure(0, weight=1)
         
         # Message input (multi-line Text widget) with modern styling
@@ -766,12 +770,12 @@ class GarminChatApp:
         self.message_entry.bind('<Control-Key-Return>', lambda e: self.send_message())
         self.message_entry.config(state=tk.DISABLED)
         
-        # Row 7: Example questions card  
+        # Row 5: Example questions card (moved up from row 7)
         examples_card = ttk.LabelFrame(main_frame, 
                                       text="Quick Questions", 
                                       style='Card.TLabelframe',
                                       padding="15")
-        examples_card.grid(row=7, column=0, sticky=(tk.W, tk.E), pady=(15, 0))
+        examples_card.grid(row=5, column=0, sticky=(tk.W, tk.E), pady=(15, 0))
         examples_card.columnconfigure(0, weight=1)
         examples_card.columnconfigure(1, weight=1)
         
@@ -1045,8 +1049,8 @@ class GarminChatApp:
                         "Connected! You can now ask questions about your Garmin data.",
                         'system')
         
-        # Show smart suggestions after a delay
-        self.root.after(2000, self.show_smart_suggestions)
+        # Smart suggestions disabled for better UX - they took up too much vertical space
+        # self.root.after(2000, self.show_smart_suggestions)
         
     def send_message(self):
         """Send a message to the chatbot"""
@@ -1187,8 +1191,8 @@ class GarminChatApp:
             # Add response to display
             self.root.after(0, lambda: self.add_message("Garmin Chat", response, 'assistant'))
             
-            # Show follow-up suggestions
-            self.root.after(0, lambda: self.show_followup_buttons(response))
+            # Follow-up suggestions disabled for better UX - they took up too much vertical space
+            # self.root.after(0, lambda: self.show_followup_buttons(response))
             
             # Update conversation context
             self.conversation_context.append({
@@ -1395,6 +1399,10 @@ class GarminChatApp:
         
         # Apply new theme immediately
         self.apply_theme()
+        
+        # Save theme preference
+        self.save_config()
+        logger.info(f"Theme toggled to {'dark' if self.dark_mode else 'light'} mode and saved")
     
     def apply_theme(self):
         """Apply current theme colors to all UI elements"""
