@@ -398,48 +398,129 @@ class GarminDataHandler:
         try:
             from datetime import date
             
-            # Ensure display name is loaded - try multiple times if needed
-            max_retries = 3
-            for attempt in range(max_retries):
-                try:
-                    if not hasattr(self.client, 'display_name') or self.client.display_name is None:
-                        self.client.get_full_name()
-                    
-                    # Verify we have a display name now
-                    if self.client.display_name:
-                        break
-                except Exception as e:
-                    if attempt == max_retries - 1:
-                        logger.error(f"Failed to load display name after {max_retries} attempts: {e}")
-                        return {}
-                    logger.warning(f"Attempt {attempt + 1} to load display name failed, retrying...")
+            # The display_name issue is a known quirk with garminconnect library
+            # Try multiple methods to populate it
             
+            # Method 1: Try get_full_name()
+            if not hasattr(self.client, 'display_name') or self.client.display_name is None:
+                try:
+                    self.client.get_full_name()
+                    if self.client.display_name:
+                        logger.info(f"✅ Display name loaded via get_full_name(): {self.client.display_name}")
+                except Exception as e:
+                    logger.debug(f"get_full_name() failed: {e}")
+            
+            # Method 2: Try loading from user stats if still None
             if not self.client.display_name:
-                logger.error("Display name is still None, cannot fetch user summary")
-                return {}
+                try:
+                    today = date.today().strftime("%Y-%m-%d")
+                    stats = self.client.get_stats(today)
+                    if stats and 'userName' in stats:
+                        self.client.display_name = stats['userName']
+                        logger.info(f"✅ Display name loaded from stats: {self.client.display_name}")
+                except Exception as e:
+                    logger.debug(f"Stats method failed: {e}")
+            
+            # Method 3: Use email as fallback display name
+            if not self.client.display_name:
+                try:
+                    self.client.display_name = self.email.split('@')[0]
+                    logger.info(f"⚠️ Using fallback display name from email: {self.client.display_name}")
+                except Exception as e:
+                    logger.debug(f"Email fallback failed: {e}")
+            
+            # If still None, log warning but try anyway (some endpoints might work)
+            if not self.client.display_name:
+                logger.warning("Display name is still None, attempting get_user_summary anyway...")
             
             today = date.today().strftime("%Y-%m-%d")
             return self.client.get_user_summary(today)
+            
         except Exception as e:
             logger.error(f"Error fetching user summary: {e}")
             return {}
     
-    def get_activities(self, limit: int = 10) -> List[Dict]:
+    def get_activities(self, limit: int = 10, start: int = 0) -> List[Dict]:
         """
-        Get recent activities.
+        Get recent activities with pagination support.
         
         Args:
-            limit: Number of activities to retrieve
+            limit: Number of activities to retrieve (max recommended: 100)
+            start: Starting index for pagination (0 = most recent)
             
         Returns:
             List of activity dictionaries
+            
+        Note:
+            - Garmin API can return up to 100 activities per request
+            - For more than 100, use multiple requests with different start values
+            - Activities are ordered newest to oldest
         """
         self._ensure_authenticated()
         try:
-            activities = self.client.get_activities(0, limit)
+            activities = self.client.get_activities(start, limit)
             return activities if activities else []
         except Exception as e:
             logger.error(f"Error fetching activities: {e}")
+            return []
+    
+    def get_activities_by_date(self, start_date: str, end_date: str) -> List[Dict]:
+        """
+        Get activities within a date range.
+        
+        Args:
+            start_date: Start date in YYYY-MM-DD format
+            end_date: End date in YYYY-MM-DD format
+            
+        Returns:
+            List of activity dictionaries within the date range
+            
+        Note:
+            This fetches activities in batches and filters by date.
+            May require multiple API calls for large date ranges.
+        """
+        self._ensure_authenticated()
+        try:
+            from datetime import datetime
+            start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+            end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+            
+            all_activities = []
+            batch_size = 50
+            current_start = 0
+            
+            # Keep fetching until we get activities outside our date range
+            while True:
+                activities = self.get_activities(limit=batch_size, start=current_start)
+                
+                if not activities:
+                    break
+                
+                for activity in activities:
+                    # Parse activity date
+                    start_time_str = activity.get("startTimeLocal", "")
+                    if start_time_str:
+                        activity_dt = datetime.strptime(start_time_str[:10], "%Y-%m-%d")
+                        
+                        # If activity is within range, add it
+                        if start_dt <= activity_dt <= end_dt:
+                            all_activities.append(activity)
+                        # If we've gone past the start date, we're done
+                        elif activity_dt < start_dt:
+                            return all_activities
+                
+                # Move to next batch
+                current_start += batch_size
+                
+                # Safety limit: don't fetch more than 500 activities
+                if current_start >= 500:
+                    logger.warning("Reached safety limit of 500 activities")
+                    break
+            
+            return all_activities
+            
+        except Exception as e:
+            logger.error(f"Error fetching activities by date: {e}")
             return []
     
     def get_steps_data(self, date: Optional[str] = None) -> Dict:
@@ -518,15 +599,20 @@ class GarminDataHandler:
             logger.error(f"Error fetching body composition: {e}")
             return {}
     
-    def format_data_for_context(self, data_type: str = "summary") -> str:
+    def format_data_for_context(self, data_type: str = "summary", activity_limit: int = 5) -> str:
         """
         Format Garmin data into a readable string for LLM context.
         
         Args:
-            data_type: Type of data to format ("summary", "activities", "steps", etc.)
+            data_type: Type of data to format ("summary", "activities", "steps", "sleep", "all")
+            activity_limit: Number of activities to include (default: 5, max recommended: 20)
             
         Returns:
             Formatted string containing the requested data
+            
+        Note:
+            - Increase activity_limit for queries about longer time periods
+            - Keep under 20 activities to avoid token limits in AI context
         """
         self._ensure_authenticated()
         
@@ -548,10 +634,10 @@ class GarminDataHandler:
                 context_parts.append("")
         
         if data_type == "activities" or data_type == "all":
-            # Get recent activities
-            activities = self.get_activities(5)
+            # Get recent activities with configurable limit
+            activities = self.get_activities(activity_limit)
             if activities:
-                context_parts.append("=== Recent Activities (Last 5) ===")
+                context_parts.append(f"=== Recent Activities (Last {len(activities)}) ===")
                 for i, activity in enumerate(activities, 1):
                     act_name = activity.get("activityName", "Unknown")
                     act_type = activity.get("activityType", {}).get("typeKey", "Unknown")
