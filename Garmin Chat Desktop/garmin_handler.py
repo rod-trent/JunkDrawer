@@ -668,34 +668,6 @@ class GarminDataHandler:
         except Exception as e:
             logger.debug(f"Stress data not available: {e}")
             return {}
-            
-        Returns:
-            Dictionary containing stress levels (0-100 scale)
-        """
-        self._ensure_authenticated()
-        if date is None:
-            date = datetime.now().strftime("%Y-%m-%d")
-        try:
-            # Try to get stress data
-            data = self.client.get_stress_data(date)
-            if data and isinstance(data, dict):
-                return {
-                    'date': date,
-                    'average': data.get('averageStressLevel', 0),
-                    'max': data.get('maxStressLevel', 0),
-                    'rest': data.get('restStressLevel', 0),
-                    'activity': data.get('activityStressLevel', 0),
-                    'low_duration': data.get('lowStressDuration', 0),
-                    'medium_duration': data.get('mediumStressDuration', 0),
-                    'high_duration': data.get('highStressDuration', 0)
-                }
-            return {}
-        except AttributeError:
-            logger.debug("Stress data API not available")
-            return {}
-        except Exception as e:
-            logger.debug(f"Stress data not available: {e}")
-            return {}
     
     def get_respiration_data(self, date: Optional[str] = None) -> Dict:
         """
