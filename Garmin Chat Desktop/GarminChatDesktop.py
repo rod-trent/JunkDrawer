@@ -3,6 +3,7 @@ Garmin Chat - Standalone Desktop Application
 A local desktop chatbot for querying Garmin Connect data.
 """
 
+import sys
 import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 import threading
@@ -280,6 +281,22 @@ class GarminChatApp:
         self.root.title("Garmin Chat")
         self.root.geometry("1200x950")  # Increased from 1000x850 for larger chat area
         
+        # Set window icon (works in both script and exe)
+        try:
+            # Get the correct base path for PyInstaller exe
+            if getattr(sys, 'frozen', False):
+                # Running as compiled executable
+                base_path = Path(sys._MEIPASS)
+            else:
+                # Running as script
+                base_path = Path(__file__).parent
+            
+            icon_path = base_path / "logo.ico"
+            if icon_path.exists():
+                self.root.iconbitmap(str(icon_path))
+        except Exception as e:
+            logger.debug(f"Could not load icon: {e}")
+        
         # Set minimum window size
         self.root.minsize(900, 800)  # Increased minimum size too
         
@@ -542,7 +559,7 @@ class GarminChatApp:
         header_card.columnconfigure(0, weight=1)
         
         title_label = ttk.Label(header_card, 
-                               text="🏃‍♂️ Garmin Chat",
+                               text="Garmin Chat",
                                style='Title.TLabel')
         title_label.grid(row=0, column=0, sticky=tk.W)
         
@@ -574,10 +591,9 @@ class GarminChatApp:
         self.create_tooltip(theme_btn, "Toggle dark mode")
         
         settings_btn = ttk.Button(button_container,
-                                 text="⚙️",
+                                 text="Settings",
                                  command=self.open_settings,
-                                 style='Modern.TButton',
-                                 width=4)
+                                 style='Modern.TButton')
         settings_btn.grid(row=0, column=2, padx=3)
         self.create_tooltip(settings_btn, "Settings")
         
@@ -592,7 +608,7 @@ class GarminChatApp:
         self.connect_btn.grid(row=0, column=0, padx=(0, 8))
         
         self.refresh_btn = ttk.Button(control_card,
-                                     text="🔄 Refresh",
+                                     text="Refresh",
                                      command=self.refresh_data,
                                      style='Modern.TButton',
                                      state=tk.DISABLED)
@@ -2198,7 +2214,7 @@ class ChatHistoryViewer(tk.Toplevel):
         button_frame = ttk.Frame(main_frame)
         button_frame.grid(row=2, column=0, columnspan=2, pady=(15, 0))
         
-        ttk.Button(button_frame, text="🔄 Load Into Chat", command=self.load_into_current).grid(row=0, column=0, padx=5)
+        ttk.Button(button_frame, text="Load Into Chat", command=self.load_into_current).grid(row=0, column=0, padx=5)
         ttk.Button(button_frame, text="🗑️ Delete", command=self.delete_chat).grid(row=0, column=1, padx=5)
         ttk.Button(button_frame, text="📁 Open Folder", command=self.open_folder).grid(row=0, column=2, padx=5)
         ttk.Button(button_frame, text="Close", command=self.destroy).grid(row=0, column=3, padx=5)
@@ -2389,7 +2405,7 @@ class ChatHistoryViewer(tk.Toplevel):
 def main():
     """Main entry point"""
     print("\n" + "="*60)
-    print("🏃‍♂️ Garmin Chat - Desktop Application")
+    print("Garmin Chat - Desktop Application")
     print("="*60)
     print("\nStarting application...")
     print("="*60 + "\n")
