@@ -613,18 +613,25 @@ class GarminDataHandler:
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
-            # Body Battery is part of daily stats
-            stats = self.client.get_stats(date)
-            return {
-                'date': date,
-                'charged': stats.get('bodyBatteryChargedValue', 0),
-                'drained': stats.get('bodyBatteryDrainedValue', 0),
-                'highest': stats.get('bodyBatteryHighestValue', 0),
-                'lowest': stats.get('bodyBatteryLowestValue', 0),
-                'current': stats.get('bodyBatteryMostRecentValue', 0)
-            }
+            # Try to get Body Battery data from available API
+            # Body Battery may not be available for all devices
+            data = self.client.get_body_battery(date)
+            if data:
+                return {
+                    'date': date,
+                    'charged': data.get('bodyBatteryChargedValue', 0),
+                    'drained': data.get('bodyBatteryDrainedValue', 0),
+                    'highest': data.get('bodyBatteryHighestValue', 0),
+                    'lowest': data.get('bodyBatteryLowestValue', 0),
+                    'current': data.get('bodyBatteryMostRecentValue', 0)
+                }
+            return {}
+        except AttributeError:
+            # Method doesn't exist in this version of garminconnect
+            logger.debug("Body Battery API not available")
+            return {}
         except Exception as e:
-            logger.error(f"Error fetching Body Battery: {e}")
+            logger.debug(f"Body Battery not available: {e}")
             return {}
     
     def get_stress_data(self, date: Optional[str] = None) -> Dict:
@@ -641,19 +648,53 @@ class GarminDataHandler:
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
-            stats = self.client.get_stats(date)
-            return {
-                'date': date,
-                'average': stats.get('averageStressLevel', 0),
-                'max': stats.get('maxStressLevel', 0),
-                'rest': stats.get('restStressLevel', 0),
-                'activity': stats.get('activityStressLevel', 0),
-                'low_duration': stats.get('lowStressDuration', 0),
-                'medium_duration': stats.get('mediumStressDuration', 0),
-                'high_duration': stats.get('highStressDuration', 0)
-            }
+            # Try to get stress data
+            data = self.client.get_stress_data(date)
+            if data and isinstance(data, dict):
+                return {
+                    'date': date,
+                    'average': data.get('averageStressLevel', 0),
+                    'max': data.get('maxStressLevel', 0),
+                    'rest': data.get('restStressLevel', 0),
+                    'activity': data.get('activityStressLevel', 0),
+                    'low_duration': data.get('lowStressDuration', 0),
+                    'medium_duration': data.get('mediumStressDuration', 0),
+                    'high_duration': data.get('highStressDuration', 0)
+                }
+            return {}
+        except AttributeError:
+            logger.debug("Stress data API not available")
+            return {}
         except Exception as e:
-            logger.error(f"Error fetching stress data: {e}")
+            logger.debug(f"Stress data not available: {e}")
+            return {}
+            
+        Returns:
+            Dictionary containing stress levels (0-100 scale)
+        """
+        self._ensure_authenticated()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        try:
+            # Try to get stress data
+            data = self.client.get_stress_data(date)
+            if data and isinstance(data, dict):
+                return {
+                    'date': date,
+                    'average': data.get('averageStressLevel', 0),
+                    'max': data.get('maxStressLevel', 0),
+                    'rest': data.get('restStressLevel', 0),
+                    'activity': data.get('activityStressLevel', 0),
+                    'low_duration': data.get('lowStressDuration', 0),
+                    'medium_duration': data.get('mediumStressDuration', 0),
+                    'high_duration': data.get('highStressDuration', 0)
+                }
+            return {}
+        except AttributeError:
+            logger.debug("Stress data API not available")
+            return {}
+        except Exception as e:
+            logger.debug(f"Stress data not available: {e}")
             return {}
     
     def get_respiration_data(self, date: Optional[str] = None) -> Dict:
@@ -670,16 +711,21 @@ class GarminDataHandler:
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
-            stats = self.client.get_stats(date)
-            return {
-                'date': date,
-                'waking_avg': stats.get('avgWakingRespirationValue', 0),
-                'sleeping_avg': stats.get('avgSleepRespirationValue', 0),
-                'highest': stats.get('highestRespirationValue', 0),
-                'lowest': stats.get('lowestRespirationValue', 0)
-            }
+            data = self.client.get_respiration_data(date)
+            if data:
+                return {
+                    'date': date,
+                    'waking_avg': data.get('avgWakingRespirationValue', 0),
+                    'sleeping_avg': data.get('avgSleepRespirationValue', 0),
+                    'highest': data.get('highestRespirationValue', 0),
+                    'lowest': data.get('lowestRespirationValue', 0)
+                }
+            return {}
+        except AttributeError:
+            logger.debug("Respiration API not available")
+            return {}
         except Exception as e:
-            logger.error(f"Error fetching respiration data: {e}")
+            logger.debug(f"Respiration data not available: {e}")
             return {}
     
     def get_hydration_data(self, date: Optional[str] = None) -> Dict:
@@ -696,9 +742,12 @@ class GarminDataHandler:
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
-            return self.client.get_hydration_data(date)
+            return self.client.get_hydration_data(date) or {}
+        except AttributeError:
+            logger.debug("Hydration API not available")
+            return {}
         except Exception as e:
-            logger.error(f"Error fetching hydration data: {e}")
+            logger.debug(f"Hydration data not available: {e}")
             return {}
     
     def get_floors_data(self, date: Optional[str] = None) -> Dict:
@@ -715,15 +764,18 @@ class GarminDataHandler:
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
-            stats = self.client.get_stats(date)
-            return {
-                'date': date,
-                'floors_ascended': stats.get('floorsAscended', 0),
-                'floors_descended': stats.get('floorsDescended', 0),
-                'floors_ascended_goal': stats.get('floorsAscendedGoal', 0)
-            }
+            # Floors are usually in the daily summary
+            steps_data = self.client.get_steps_data(date)
+            if steps_data:
+                return {
+                    'date': date,
+                    'floors_ascended': steps_data.get('floorsAscended', 0),
+                    'floors_descended': steps_data.get('floorsDescended', 0),
+                    'floors_ascended_goal': steps_data.get('floorsAscendedGoal', 0)
+                }
+            return {}
         except Exception as e:
-            logger.error(f"Error fetching floors data: {e}")
+            logger.debug(f"Floors data not available: {e}")
             return {}
     
     def get_intensity_minutes(self, date: Optional[str] = None) -> Dict:
@@ -740,17 +792,20 @@ class GarminDataHandler:
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
-            stats = self.client.get_stats(date)
-            return {
-                'date': date,
-                'moderate': stats.get('moderateIntensityMinutes', 0),
-                'vigorous': stats.get('vigorousIntensityMinutes', 0),
-                'weekly_moderate': stats.get('weeklyModerateIntensityMinutes', 0),
-                'weekly_vigorous': stats.get('weeklyVigorousIntensityMinutes', 0),
-                'weekly_goal': stats.get('intensityMinutesGoal', 150)
-            }
+            # Try to get from heart rate data which sometimes includes intensity
+            hr_data = self.client.get_heart_rates(date)
+            if hr_data and isinstance(hr_data, dict):
+                return {
+                    'date': date,
+                    'moderate': hr_data.get('moderateIntensityMinutes', 0),
+                    'vigorous': hr_data.get('vigorousIntensityMinutes', 0),
+                    'weekly_moderate': hr_data.get('weeklyModerateIntensityMinutes', 0),
+                    'weekly_vigorous': hr_data.get('weeklyVigorousIntensityMinutes', 0),
+                    'weekly_goal': hr_data.get('intensityMinutesGoal', 150)
+                }
+            return {}
         except Exception as e:
-            logger.error(f"Error fetching intensity minutes: {e}")
+            logger.debug(f"Intensity minutes not available: {e}")
             return {}
     
     def get_calories_data(self, date: Optional[str] = None) -> Dict:
@@ -767,17 +822,20 @@ class GarminDataHandler:
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
-            stats = self.client.get_stats(date)
-            return {
-                'date': date,
-                'total_burned': stats.get('totalKilocalories', 0),
-                'active_burned': stats.get('activeKilocalories', 0),
-                'bmr': stats.get('bmrKilocalories', 0),
-                'consumed': stats.get('consumedCalories', 0),
-                'net': stats.get('netCalorieGoal', 0)
-            }
+            # Get from user summary which has calorie data
+            summary = self.get_user_summary()
+            if summary:
+                return {
+                    'date': date,
+                    'total_burned': summary.get('totalKilocalories', 0),
+                    'active_burned': summary.get('activeKilocalories', 0),
+                    'bmr': summary.get('bmrKilocalories', 0),
+                    'consumed': summary.get('consumedCalories', 0),
+                    'net': summary.get('netCalorieGoal', 0)
+                }
+            return {}
         except Exception as e:
-            logger.error(f"Error fetching calories data: {e}")
+            logger.debug(f"Calorie data not available: {e}")
             return {}
     
     def get_spo2_data(self, date: Optional[str] = None) -> Dict:
@@ -794,9 +852,12 @@ class GarminDataHandler:
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
-            return self.client.get_spo2_data(date)
+            return self.client.get_spo2_data(date) or {}
+        except AttributeError:
+            logger.debug("SpO2 API not available")
+            return {}
         except Exception as e:
-            logger.error(f"Error fetching SpO2 data: {e}")
+            logger.debug(f"SpO2 data not available: {e}")
             return {}
     
     def get_max_metrics(self) -> Dict:
@@ -808,9 +869,12 @@ class GarminDataHandler:
         """
         self._ensure_authenticated()
         try:
-            return self.client.get_max_metrics()
+            return self.client.get_max_metrics() or {}
+        except AttributeError:
+            logger.debug("Max metrics API not available")
+            return {}
         except Exception as e:
-            logger.error(f"Error fetching max metrics: {e}")
+            logger.debug(f"Max metrics not available: {e}")
             return {}
     
     def get_training_status(self) -> Dict:
@@ -822,9 +886,12 @@ class GarminDataHandler:
         """
         self._ensure_authenticated()
         try:
-            return self.client.get_training_status()
+            return self.client.get_training_status() or {}
+        except AttributeError:
+            logger.debug("Training status API not available")
+            return {}
         except Exception as e:
-            logger.error(f"Error fetching training status: {e}")
+            logger.debug(f"Training status not available: {e}")
             return {}
     
     def get_training_readiness(self, date: Optional[str] = None) -> Dict:
@@ -841,9 +908,12 @@ class GarminDataHandler:
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
-            return self.client.get_training_readiness(date)
+            return self.client.get_training_readiness(date) or {}
+        except AttributeError:
+            logger.debug("Training readiness API not available")
+            return {}
         except Exception as e:
-            logger.error(f"Error fetching training readiness: {e}")
+            logger.debug(f"Training readiness not available: {e}")
             return {}
     
     def get_hrv_data(self, date: Optional[str] = None) -> Dict:
@@ -860,9 +930,12 @@ class GarminDataHandler:
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
-            return self.client.get_hrv_data(date)
+            return self.client.get_hrv_data(date) or {}
+        except AttributeError:
+            logger.debug("HRV API not available")
+            return {}
         except Exception as e:
-            logger.error(f"Error fetching HRV data: {e}")
+            logger.debug(f"HRV data not available: {e}")
             return {}
     
     def get_all_day_stress(self, date: Optional[str] = None) -> List[Dict]:
@@ -879,9 +952,12 @@ class GarminDataHandler:
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
         try:
-            return self.client.get_all_day_stress(date)
+            return self.client.get_all_day_stress(date) or []
+        except AttributeError:
+            logger.debug("All-day stress API not available")
+            return []
         except Exception as e:
-            logger.error(f"Error fetching all-day stress: {e}")
+            logger.debug(f"All-day stress not available: {e}")
             return []
 
     
