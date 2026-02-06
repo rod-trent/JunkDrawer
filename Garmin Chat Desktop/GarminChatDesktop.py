@@ -522,13 +522,6 @@ class GarminChatApp:
                            command=lambda q=example: self.use_example(q))
             btn.grid(row=i//2, column=i%2, padx=8, pady=6, sticky=(tk.W, tk.E))
         
-        # Date range button
-        date_range_btn = ttk.Button(examples_frame,
-                                   text="📅 Set Date Range (7/14/30 days)",
-                                   command=self.show_date_range_dialog,
-                                   style='Accent.TButton')
-        date_range_btn.grid(row=2, column=0, columnspan=2, padx=8, pady=(10, 6), sticky=(tk.W, tk.E))
-        
     def add_message(self, sender, message, tag='user'):
         """Add a message to the chat display"""
         self.chat_display.config(state=tk.NORMAL)
@@ -955,10 +948,6 @@ class GarminChatApp:
         except Exception as e:
             logger.error(f"Error saving chat history: {e}")
             messagebox.showerror("Save Error", f"Failed to save chat history: {e}", parent=self.root)
-    
-    def show_date_range_dialog(self):
-        """Show dialog to select date range for data queries"""
-        DateRangeDialog(self.root, self)
 
 
 class SavedPromptsDialog(tk.Toplevel):
@@ -1090,66 +1079,6 @@ class SavedPromptsDialog(tk.Toplevel):
             self.load_prompts()
 
 
-class DateRangeDialog(tk.Toplevel):
-    """Dialog for selecting date range for queries"""
-    
-    def __init__(self, parent, app):
-        super().__init__(parent)
-        self.title("Query Date Range")
-        self.geometry("400x250")
-        self.app = app
-        
-        # Make modal
-        self.transient(parent)
-        self.grab_set()
-        
-        main_frame = ttk.Frame(self, padding="20")
-        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-        
-        # Title
-        title = ttk.Label(main_frame, text="Select Date Range", font=('Segoe UI', 14, 'bold'))
-        title.grid(row=0, column=0, columnspan=2, sticky=tk.W, pady=(0, 20))
-        
-        # Days selection
-        ttk.Label(main_frame, text="Query data for the last:", font=('Segoe UI', 10)).grid(row=1, column=0, columnspan=2, sticky=tk.W, pady=5)
-        
-        self.days_var = tk.IntVar(value=7)
-        
-        ttk.Radiobutton(main_frame, text="7 days", variable=self.days_var, value=7).grid(row=2, column=0, sticky=tk.W, pady=3)
-        ttk.Radiobutton(main_frame, text="14 days", variable=self.days_var, value=14).grid(row=3, column=0, sticky=tk.W, pady=3)
-        ttk.Radiobutton(main_frame, text="30 days", variable=self.days_var, value=30).grid(row=4, column=0, sticky=tk.W, pady=3)
-        
-        # Info label
-        info = ttk.Label(main_frame, text="Your next question will query data\nfrom the selected time period.", 
-                        font=('Segoe UI', 9), foreground='#7f8c8d')
-        info.grid(row=5, column=0, columnspan=2, sticky=tk.W, pady=(15, 0))
-        
-        # Buttons
-        button_frame = ttk.Frame(main_frame)
-        button_frame.grid(row=6, column=0, columnspan=2, pady=(20, 0))
-        
-        ttk.Button(button_frame, text="Apply", command=self.apply_range).grid(row=0, column=0, padx=5)
-        ttk.Button(button_frame, text="Cancel", command=self.destroy).grid(row=0, column=1, padx=5)
-    
-    def apply_range(self):
-        """Apply selected date range"""
-        from datetime import timedelta
-        days = self.days_var.get()
-        end_date = datetime.now()
-        start_date = end_date - timedelta(days=days)
-        
-        # Add a system message to guide the user
-        self.app.add_message("System", 
-                           f"Date range set to last {days} days ({start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}). "
-                           f"Your next question will query data from this period.", 
-                           'system')
-        
-        # Store the date range for use in queries
-        self.app.date_range_days = days
-        
-        self.destroy()
 
 
 def main():
