@@ -1104,8 +1104,10 @@ class GarminChatApp:
             import re
             from datetime import datetime, timedelta
             
-            # Match "last/past X days/weeks/months"
+            # Match "last/past X days/weeks/months" OR "last/this month/week/year"
             time_period_match = re.search(r'(?:last|past)\s+(\d+)\s+(day|week|month)s?', query_lower)
+            simple_period_match = re.search(r'(?:last|past|this)\s+(month|week|year)', query_lower)
+            
             if time_period_match:
                 number = int(time_period_match.group(1))
                 unit = time_period_match.group(2)
@@ -1121,6 +1123,42 @@ class GarminChatApp:
                 
                 logger.info(f"Detected date range query: last {number} {unit}(s)")
                 logger.info(f"Date range: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
+                use_date_range = True
+                
+            elif simple_period_match:
+                # Handle "last month", "this week", etc.
+                period = simple_period_match.group(1)
+                prefix = simple_period_match.group(0).split()[0]  # "last", "this", or "past"
+                
+                end_date = datetime.now()
+                
+                if period == "month":
+                    if prefix == "this":
+                        # Current month: from 1st to today
+                        start_date = end_date.replace(day=1)
+                    else:
+                        # Last month: 30 days ago
+                        start_date = end_date - timedelta(days=30)
+                elif period == "week":
+                    if prefix == "this":
+                        # Current week: last 7 days
+                        start_date = end_date - timedelta(days=end_date.weekday())
+                    else:
+                        # Last week: 7 days ago
+                        start_date = end_date - timedelta(days=7)
+                elif period == "year":
+                    if prefix == "this":
+                        # Current year: from Jan 1 to today
+                        start_date = end_date.replace(month=1, day=1)
+                    else:
+                        # Last year: 365 days ago
+                        start_date = end_date - timedelta(days=365)
+                
+                logger.info(f"Detected simple period query: {prefix} {period}")
+                logger.info(f"Date range: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
+                use_date_range = True
+                
+            if use_date_range:
                 
                 # Fetch activities by date range
                 try:
