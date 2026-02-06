@@ -599,12 +599,301 @@ class GarminDataHandler:
             logger.error(f"Error fetching body composition: {e}")
             return {}
     
+    def get_body_battery(self, date: Optional[str] = None) -> Dict:
+        """
+        Get Body Battery data (energy levels throughout the day).
+        
+        Args:
+            date: Date in YYYY-MM-DD format (defaults to today)
+            
+        Returns:
+            Dictionary containing Body Battery data with charged/drained values
+        """
+        self._ensure_authenticated()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        try:
+            # Body Battery is part of daily stats
+            stats = self.client.get_stats(date)
+            return {
+                'date': date,
+                'charged': stats.get('bodyBatteryChargedValue', 0),
+                'drained': stats.get('bodyBatteryDrainedValue', 0),
+                'highest': stats.get('bodyBatteryHighestValue', 0),
+                'lowest': stats.get('bodyBatteryLowestValue', 0),
+                'current': stats.get('bodyBatteryMostRecentValue', 0)
+            }
+        except Exception as e:
+            logger.error(f"Error fetching Body Battery: {e}")
+            return {}
+    
+    def get_stress_data(self, date: Optional[str] = None) -> Dict:
+        """
+        Get stress level data for the day.
+        
+        Args:
+            date: Date in YYYY-MM-DD format (defaults to today)
+            
+        Returns:
+            Dictionary containing stress levels (0-100 scale)
+        """
+        self._ensure_authenticated()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        try:
+            stats = self.client.get_stats(date)
+            return {
+                'date': date,
+                'average': stats.get('averageStressLevel', 0),
+                'max': stats.get('maxStressLevel', 0),
+                'rest': stats.get('restStressLevel', 0),
+                'activity': stats.get('activityStressLevel', 0),
+                'low_duration': stats.get('lowStressDuration', 0),
+                'medium_duration': stats.get('mediumStressDuration', 0),
+                'high_duration': stats.get('highStressDuration', 0)
+            }
+        except Exception as e:
+            logger.error(f"Error fetching stress data: {e}")
+            return {}
+    
+    def get_respiration_data(self, date: Optional[str] = None) -> Dict:
+        """
+        Get respiration rate data (breaths per minute).
+        
+        Args:
+            date: Date in YYYY-MM-DD format (defaults to today)
+            
+        Returns:
+            Dictionary containing respiration rates
+        """
+        self._ensure_authenticated()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        try:
+            stats = self.client.get_stats(date)
+            return {
+                'date': date,
+                'waking_avg': stats.get('avgWakingRespirationValue', 0),
+                'sleeping_avg': stats.get('avgSleepRespirationValue', 0),
+                'highest': stats.get('highestRespirationValue', 0),
+                'lowest': stats.get('lowestRespirationValue', 0)
+            }
+        except Exception as e:
+            logger.error(f"Error fetching respiration data: {e}")
+            return {}
+    
+    def get_hydration_data(self, date: Optional[str] = None) -> Dict:
+        """
+        Get hydration/water intake data.
+        
+        Args:
+            date: Date in YYYY-MM-DD format (defaults to today)
+            
+        Returns:
+            Dictionary containing hydration data in milliliters
+        """
+        self._ensure_authenticated()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        try:
+            return self.client.get_hydration_data(date)
+        except Exception as e:
+            logger.error(f"Error fetching hydration data: {e}")
+            return {}
+    
+    def get_floors_data(self, date: Optional[str] = None) -> Dict:
+        """
+        Get floors climbed data.
+        
+        Args:
+            date: Date in YYYY-MM-DD format (defaults to today)
+            
+        Returns:
+            Dictionary containing floors climbed
+        """
+        self._ensure_authenticated()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        try:
+            stats = self.client.get_stats(date)
+            return {
+                'date': date,
+                'floors_ascended': stats.get('floorsAscended', 0),
+                'floors_descended': stats.get('floorsDescended', 0),
+                'floors_ascended_goal': stats.get('floorsAscendedGoal', 0)
+            }
+        except Exception as e:
+            logger.error(f"Error fetching floors data: {e}")
+            return {}
+    
+    def get_intensity_minutes(self, date: Optional[str] = None) -> Dict:
+        """
+        Get intensity minutes (moderate and vigorous activity).
+        
+        Args:
+            date: Date in YYYY-MM-DD format (defaults to today)
+            
+        Returns:
+            Dictionary containing intensity minutes
+        """
+        self._ensure_authenticated()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        try:
+            stats = self.client.get_stats(date)
+            return {
+                'date': date,
+                'moderate': stats.get('moderateIntensityMinutes', 0),
+                'vigorous': stats.get('vigorousIntensityMinutes', 0),
+                'weekly_moderate': stats.get('weeklyModerateIntensityMinutes', 0),
+                'weekly_vigorous': stats.get('weeklyVigorousIntensityMinutes', 0),
+                'weekly_goal': stats.get('intensityMinutesGoal', 150)
+            }
+        except Exception as e:
+            logger.error(f"Error fetching intensity minutes: {e}")
+            return {}
+    
+    def get_calories_data(self, date: Optional[str] = None) -> Dict:
+        """
+        Get calories data (consumed, burned, net).
+        
+        Args:
+            date: Date in YYYY-MM-DD format (defaults to today)
+            
+        Returns:
+            Dictionary containing calorie data
+        """
+        self._ensure_authenticated()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        try:
+            stats = self.client.get_stats(date)
+            return {
+                'date': date,
+                'total_burned': stats.get('totalKilocalories', 0),
+                'active_burned': stats.get('activeKilocalories', 0),
+                'bmr': stats.get('bmrKilocalories', 0),
+                'consumed': stats.get('consumedCalories', 0),
+                'net': stats.get('netCalorieGoal', 0)
+            }
+        except Exception as e:
+            logger.error(f"Error fetching calories data: {e}")
+            return {}
+    
+    def get_spo2_data(self, date: Optional[str] = None) -> Dict:
+        """
+        Get blood oxygen (SpO2/Pulse Ox) data.
+        
+        Args:
+            date: Date in YYYY-MM-DD format (defaults to today)
+            
+        Returns:
+            Dictionary containing SpO2 percentages
+        """
+        self._ensure_authenticated()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        try:
+            return self.client.get_spo2_data(date)
+        except Exception as e:
+            logger.error(f"Error fetching SpO2 data: {e}")
+            return {}
+    
+    def get_max_metrics(self) -> Dict:
+        """
+        Get max performance metrics (VO2 Max, lactate threshold, etc).
+        
+        Returns:
+            Dictionary containing max performance metrics
+        """
+        self._ensure_authenticated()
+        try:
+            return self.client.get_max_metrics()
+        except Exception as e:
+            logger.error(f"Error fetching max metrics: {e}")
+            return {}
+    
+    def get_training_status(self) -> Dict:
+        """
+        Get training status and recommendations.
+        
+        Returns:
+            Dictionary containing training load, status, and recommendations
+        """
+        self._ensure_authenticated()
+        try:
+            return self.client.get_training_status()
+        except Exception as e:
+            logger.error(f"Error fetching training status: {e}")
+            return {}
+    
+    def get_training_readiness(self, date: Optional[str] = None) -> Dict:
+        """
+        Get training readiness score (combines multiple metrics).
+        
+        Args:
+            date: Date in YYYY-MM-DD format (defaults to today)
+            
+        Returns:
+            Dictionary containing training readiness score and factors
+        """
+        self._ensure_authenticated()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        try:
+            return self.client.get_training_readiness(date)
+        except Exception as e:
+            logger.error(f"Error fetching training readiness: {e}")
+            return {}
+    
+    def get_hrv_data(self, date: Optional[str] = None) -> Dict:
+        """
+        Get Heart Rate Variability (HRV) data.
+        
+        Args:
+            date: Date in YYYY-MM-DD format (defaults to today)
+            
+        Returns:
+            Dictionary containing HRV metrics
+        """
+        self._ensure_authenticated()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        try:
+            return self.client.get_hrv_data(date)
+        except Exception as e:
+            logger.error(f"Error fetching HRV data: {e}")
+            return {}
+    
+    def get_all_day_stress(self, date: Optional[str] = None) -> List[Dict]:
+        """
+        Get all-day stress measurements (every few minutes).
+        
+        Args:
+            date: Date in YYYY-MM-DD format (defaults to today)
+            
+        Returns:
+            List of stress readings throughout the day
+        """
+        self._ensure_authenticated()
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        try:
+            return self.client.get_all_day_stress(date)
+        except Exception as e:
+            logger.error(f"Error fetching all-day stress: {e}")
+            return []
+
+    
     def format_data_for_context(self, data_type: str = "summary", activity_limit: int = 5) -> str:
         """
         Format Garmin data into a readable string for LLM context.
         
         Args:
-            data_type: Type of data to format ("summary", "activities", "steps", "sleep", "all")
+            data_type: Type of data to format
+                      Options: "summary", "activities", "steps", "sleep", "all",
+                               "body_battery", "stress", "nutrition", "floors", 
+                               "intensity", "spo2", "hrv", "training", "comprehensive"
             activity_limit: Number of activities to include (default: 5, max recommended: 20)
             
         Returns:
@@ -613,6 +902,7 @@ class GarminDataHandler:
         Note:
             - Increase activity_limit for queries about longer time periods
             - Keep under 20 activities to avoid token limits in AI context
+            - Use "comprehensive" for detailed health metrics (Body Battery, stress, HRV, etc.)
         """
         self._ensure_authenticated()
         
@@ -667,5 +957,133 @@ class GarminDataHandler:
                 context_parts.append(f"REM Sleep: {sleep_data.get('remSleepSeconds', 0) / 3600:.1f} hours")
                 context_parts.append(f"Awake Time: {sleep_data.get('awakeSleepSeconds', 0) / 3600:.1f} hours")
                 context_parts.append("")
+        
+        # Body Battery data
+        if data_type in ["body_battery", "comprehensive", "all"]:
+            bb_data = self.get_body_battery(today)
+            if bb_data and bb_data.get('current'):
+                context_parts.append("=== Body Battery ===")
+                context_parts.append(f"Current: {bb_data.get('current', 'N/A')}")
+                context_parts.append(f"Highest Today: {bb_data.get('highest', 'N/A')}")
+                context_parts.append(f"Lowest Today: {bb_data.get('lowest', 'N/A')}")
+                context_parts.append(f"Charged: +{bb_data.get('charged', 0)}")
+                context_parts.append(f"Drained: -{bb_data.get('drained', 0)}")
+                context_parts.append("")
+        
+        # Stress data
+        if data_type in ["stress", "comprehensive", "all"]:
+            stress_data = self.get_stress_data(today)
+            if stress_data and stress_data.get('average'):
+                context_parts.append("=== Stress Levels ===")
+                context_parts.append(f"Average: {stress_data.get('average', 'N/A')}/100")
+                context_parts.append(f"Max: {stress_data.get('max', 'N/A')}/100")
+                context_parts.append(f"Rest Stress: {stress_data.get('rest', 'N/A')}")
+                context_parts.append(f"Activity Stress: {stress_data.get('activity', 'N/A')}")
+                context_parts.append(f"Low Stress Duration: {stress_data.get('low_duration', 0) / 60:.0f} min")
+                context_parts.append(f"High Stress Duration: {stress_data.get('high_duration', 0) / 60:.0f} min")
+                context_parts.append("")
+        
+        # Respiration data
+        if data_type in ["respiration", "comprehensive"]:
+            resp_data = self.get_respiration_data(today)
+            if resp_data and resp_data.get('waking_avg'):
+                context_parts.append("=== Respiration ===")
+                context_parts.append(f"Waking Average: {resp_data.get('waking_avg', 'N/A')} breaths/min")
+                context_parts.append(f"Sleeping Average: {resp_data.get('sleeping_avg', 'N/A')} breaths/min")
+                context_parts.append("")
+        
+        # Hydration data
+        if data_type in ["hydration", "nutrition", "comprehensive"]:
+            hydration = self.get_hydration_data(today)
+            if hydration:
+                context_parts.append("=== Hydration ===")
+                total_ml = hydration.get('valueInML', 0)
+                context_parts.append(f"Water Intake: {total_ml} ml ({total_ml / 236.588:.1f} cups)")
+                context_parts.append("")
+        
+        # Calories/Nutrition data
+        if data_type in ["calories", "nutrition", "comprehensive", "all"]:
+            cal_data = self.get_calories_data(today)
+            if cal_data and cal_data.get('total_burned'):
+                context_parts.append("=== Calories ===")
+                context_parts.append(f"Total Burned: {cal_data.get('total_burned', 'N/A')} kcal")
+                context_parts.append(f"Active Burned: {cal_data.get('active_burned', 'N/A')} kcal")
+                context_parts.append(f"BMR: {cal_data.get('bmr', 'N/A')} kcal")
+                if cal_data.get('consumed'):
+                    context_parts.append(f"Consumed: {cal_data.get('consumed', 'N/A')} kcal")
+                    context_parts.append(f"Net: {cal_data.get('net', 'N/A')} kcal")
+                context_parts.append("")
+        
+        # Floors data
+        if data_type in ["floors", "comprehensive", "all"]:
+            floors_data = self.get_floors_data(today)
+            if floors_data and floors_data.get('floors_ascended'):
+                context_parts.append("=== Floors Climbed ===")
+                context_parts.append(f"Ascended: {floors_data.get('floors_ascended', 0)}")
+                context_parts.append(f"Descended: {floors_data.get('floors_descended', 0)}")
+                context_parts.append(f"Goal: {floors_data.get('floors_ascended_goal', 'N/A')}")
+                context_parts.append("")
+        
+        # Intensity Minutes
+        if data_type in ["intensity", "comprehensive", "all"]:
+            intensity = self.get_intensity_minutes(today)
+            if intensity:
+                context_parts.append("=== Intensity Minutes ===")
+                context_parts.append(f"Today Moderate: {intensity.get('moderate', 0)} min")
+                context_parts.append(f"Today Vigorous: {intensity.get('vigorous', 0)} min")
+                context_parts.append(f"Weekly Moderate: {intensity.get('weekly_moderate', 0)} min")
+                context_parts.append(f"Weekly Vigorous: {intensity.get('weekly_vigorous', 0)} min")
+                context_parts.append(f"Weekly Goal: {intensity.get('weekly_goal', 150)} min")
+                context_parts.append("")
+        
+        # SpO2 data
+        if data_type in ["spo2", "comprehensive"]:
+            spo2 = self.get_spo2_data(today)
+            if spo2:
+                context_parts.append("=== Blood Oxygen (SpO2) ===")
+                if 'latestSpO2Value' in spo2:
+                    context_parts.append(f"Latest: {spo2.get('latestSpO2Value', 'N/A')}%")
+                if 'lowestSpO2Value' in spo2:
+                    context_parts.append(f"Lowest: {spo2.get('lowestSpO2Value', 'N/A')}%")
+                if 'averageSpO2Value' in spo2:
+                    context_parts.append(f"Average: {spo2.get('averageSpO2Value', 'N/A')}%")
+                context_parts.append("")
+        
+        # HRV data
+        if data_type in ["hrv", "comprehensive"]:
+            hrv = self.get_hrv_data(today)
+            if hrv:
+                context_parts.append("=== Heart Rate Variability ===")
+                if 'lastNightAvg' in hrv:
+                    context_parts.append(f"Last Night Average: {hrv.get('lastNightAvg', 'N/A')} ms")
+                if 'weeklyAvg' in hrv:
+                    context_parts.append(f"Weekly Average: {hrv.get('weeklyAvg', 'N/A')} ms")
+                context_parts.append("")
+        
+        # Training metrics
+        if data_type in ["training", "comprehensive"]:
+            try:
+                max_metrics = self.get_max_metrics()
+                if max_metrics:
+                    context_parts.append("=== Performance Metrics ===")
+                    if 'vo2Max' in max_metrics:
+                        context_parts.append(f"VO2 Max: {max_metrics.get('vo2Max', 'N/A')}")
+                    if 'fitnessAge' in max_metrics:
+                        context_parts.append(f"Fitness Age: {max_metrics.get('fitnessAge', 'N/A')}")
+                    context_parts.append("")
+            except:
+                pass
+            
+            try:
+                training = self.get_training_status()
+                if training:
+                    context_parts.append("=== Training Status ===")
+                    if 'trainingLoad' in training:
+                        context_parts.append(f"Load: {training.get('trainingLoad', 'N/A')}")
+                    if 'loadFocus' in training:
+                        context_parts.append(f"Focus: {training.get('loadFocus', 'N/A')}")
+                    context_parts.append("")
+            except:
+                pass
         
         return "\n".join(context_parts) if context_parts else "No data available"

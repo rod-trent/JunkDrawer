@@ -1179,6 +1179,30 @@ class GarminChatApp:
                     garmin_context = self.garmin_handler.format_data_for_context("sleep")
                 elif any(word in query_lower for word in ["step", "walk", "distance", "calorie"]):
                     garmin_context = self.garmin_handler.format_data_for_context("summary")
+                # NEW: Detect requests for specific health metrics
+                elif any(word in query_lower for word in ["body battery", "energy"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("body_battery")
+                elif any(word in query_lower for word in ["stress", "stressed", "tension"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("stress")
+                elif any(word in query_lower for word in ["respiration", "breathing", "breath"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("respiration")
+                elif any(word in query_lower for word in ["hydration", "water", "drink", "fluid"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("hydration")
+                elif any(word in query_lower for word in ["nutrition", "food", "eat", "meal", "diet"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("nutrition")
+                elif any(word in query_lower for word in ["floor", "climb", "stairs", "elevation"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("floors")
+                elif any(word in query_lower for word in ["intensity", "vigorous", "moderate"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("intensity")
+                elif any(word in query_lower for word in ["spo2", "oxygen", "pulse ox"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("spo2")
+                elif any(word in query_lower for word in ["hrv", "heart rate variability", "variability"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("hrv")
+                elif any(word in query_lower for word in ["vo2", "fitness age", "training status", "training load"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("training")
+                # Comprehensive health overview
+                elif any(word in query_lower for word in ["health", "wellness", "overview", "summary"]):
+                    garmin_context = self.garmin_handler.format_data_for_context("comprehensive")
                 else:
                     garmin_context = self.garmin_handler.format_data_for_context("all", activity_limit=activity_limit)
             
