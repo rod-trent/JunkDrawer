@@ -1,3 +1,5 @@
+# THIS PROJECT HAS MOVED! YOU CAN FIND PELOTON 2 GARMIN SYNC IN ITS OWN REPO HERE: [Peloton 2 Garmin Sync App](https://github.com/rod-trent/Peloton2Garmin/)
+
 # Peloton to Garmin Sync
 
 A Windows desktop application that seamlessly syncs your Peloton workouts to Garmin Connect with full MFA (Multi-Factor Authentication) support.
