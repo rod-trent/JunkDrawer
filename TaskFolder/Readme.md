@@ -1,4 +1,4 @@
-# THIS PROJECT HAS MOVE TO ITS OWN REPO HERE: https://github.com/rod-trent/TaskFolder
+# THIS PROJECT HAS MOVED TO ITS OWN REPO HERE: https://github.com/rod-trent/TaskFolder
 
 # TaskFolder
 
