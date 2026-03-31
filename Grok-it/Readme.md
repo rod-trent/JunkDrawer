@@ -6,4 +6,4 @@
 
 ---
 
-This project now has it's own repo. For updates go here: https://github.com/rod-trent/Grok-It
+## This project now has it's own repo. For updates go here: https://github.com/rod-trent/Grok-It
