@@ -1,3 +1,5 @@
+## This project now has it's own repo. For updates go here: https://github.com/rod-trent/Grok-It
+
 # Grok-it: My New Default Way to Understand Anything I Read Online
 
 **GitHub:** https://github.com/rod-trent/JunkDrawer/tree/main/Grok-it  
@@ -6,4 +8,4 @@
 
 ---
 
-## This project now has it's own repo. For updates go here: https://github.com/rod-trent/Grok-It
+
