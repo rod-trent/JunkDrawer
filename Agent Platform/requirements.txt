@@ -1,9 +1,0 @@
-streamlit
-requests
-python-dotenv
-g4f
-openai
-watchdog
-threaded
-croniter
-psutil
