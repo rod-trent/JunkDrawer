@@ -4,7 +4,7 @@ openai==1.99.9             # Compatible with langchain-openai 1.1.0
 httpx==0.28.0
 httpcore==1.0.7
 PyPDF2==3.0.1
-pypdf==6.6.2
+pypdf==6.10.2
 markdown2==2.5.0
 anki==24.6
 genanki==0.13.1
@@ -13,10 +13,10 @@ networkx==3.3
 plotly==5.24.1
 pandas==2.2.3
 xai-sdk==1.4.0
-langchain-openai==1.1.0    # Use --no-deps if pip gripes
+langchain-openai==1.1.14    # Use --no-deps if pip gripes
 packaging==25.0            # Safe override for streamlit
 jiter==0.10.0
 pydantic==2.11.0
-requests==2.32.5  # For web search
+requests==2.33.0  # For web search
 beautifulsoup4==4.12.3  # For parsing search results
 google-api-python-client==2.111.0  # For official YouTube API
