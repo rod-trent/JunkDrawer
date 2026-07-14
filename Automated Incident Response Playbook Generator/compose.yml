@@ -1,0 +1,21 @@
+services:
+  playbook-generator:
+    image: irp:${APP_VERSION:-latest}
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8128:8501"
+    environment:
+      - GROK_API_KEY=${GROK_API_KEY}
+    container_name: irp
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    networks:
+      - <network>
+networks:
+  <network>:
+    external: true
